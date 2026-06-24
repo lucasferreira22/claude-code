@@ -69,6 +69,13 @@ enum Servico {
   OUTROS
 }
 
+// Categoria do cliente: separa recorrentes, pontuais e hospedagem na base.
+enum Categoria {
+  RECORRENTE
+  PONTUAL
+  HOSPEDAGEM
+}
+
 enum TipoContato {
   TELEFONE
   EMAIL
@@ -96,6 +103,7 @@ model Client {
   responsavelId String?
 
   status            ClientStatus @default(LEAD)
+  categoria         Categoria    @default(RECORRENTE)
   dataInicioContrato DateTime?
   dataFimContrato    DateTime?
 
@@ -114,6 +122,7 @@ model Client {
 
   @@index([tipoRelacao])
   @@index([status])
+  @@index([categoria])
   @@index([nicho])
   @@index([responsavelId])
   @@map("clients")

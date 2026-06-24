@@ -1,12 +1,20 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import type { ClientStatus, Prisma, TipoRelacao } from "@prisma/client";
+import type {
+  Categoria,
+  ClientStatus,
+  Prisma,
+  TipoRelacao,
+} from "@prisma/client";
 import {
   STATUS_BADGE,
   STATUS_LABELS,
   STATUS_ORDER,
   SERVICO_LABELS,
   TIPO_RELACAO_LABELS,
+  CATEGORIA_LABELS,
+  CATEGORIA_ORDER,
+  CATEGORIA_BADGE,
   formatCurrency,
 } from "@/lib/labels";
 
@@ -14,6 +22,7 @@ type SearchParams = {
   q?: string;
   tipo?: string;
   status?: string;
+  categoria?: string;
   nicho?: string;
   responsavel?: string;
 };
@@ -36,6 +45,12 @@ export default async function ClientesPage({
     STATUS_ORDER.includes(searchParams.status as ClientStatus)
   ) {
     where.status = searchParams.status as ClientStatus;
+  }
+  if (
+    searchParams.categoria &&
+    CATEGORIA_ORDER.includes(searchParams.categoria as Categoria)
+  ) {
+    where.categoria = searchParams.categoria as Categoria;
   }
   if (searchParams.nicho) {
     where.nicho = searchParams.nicho;
@@ -80,7 +95,7 @@ export default async function ClientesPage({
 
       <form
         method="GET"
-        className="card grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6"
+        className="card grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4"
       >
         <div className="lg:col-span-2">
           <label className="label">Buscar por nome</label>
@@ -107,6 +122,21 @@ export default async function ClientesPage({
             {STATUS_ORDER.map((s) => (
               <option key={s} value={s}>
                 {STATUS_LABELS[s]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="label">Categoria</label>
+          <select
+            name="categoria"
+            defaultValue={searchParams.categoria}
+            className="input"
+          >
+            <option value="">Todas</option>
+            {CATEGORIA_ORDER.map((c) => (
+              <option key={c} value={c}>
+                {CATEGORIA_LABELS[c]}
               </option>
             ))}
           </select>
@@ -140,7 +170,7 @@ export default async function ClientesPage({
             ))}
           </select>
         </div>
-        <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-6">
+        <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
           <button type="submit" className="btn-primary">
             Filtrar
           </button>
@@ -160,6 +190,7 @@ export default async function ClientesPage({
             <thead className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
               <tr>
                 <th className="px-4 py-3">Cliente</th>
+                <th className="px-4 py-3">Categoria</th>
                 <th className="px-4 py-3">Tipo</th>
                 <th className="px-4 py-3">Nicho</th>
                 <th className="px-4 py-3">Serviços</th>
@@ -183,6 +214,11 @@ export default async function ClientesPage({
                         via {c.partnerAgency.nome}
                       </div>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`badge ${CATEGORIA_BADGE[c.categoria]}`}>
+                      {CATEGORIA_LABELS[c.categoria]}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {TIPO_RELACAO_LABELS[c.tipoRelacao]}

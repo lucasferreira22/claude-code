@@ -9,6 +9,7 @@ export const IMPORT_FIELDS = [
   { key: "nomeAgencia", label: "Agência parceira (nome)", required: false },
   { key: "servicos", label: "Serviços (Meta/Google/Outros)", required: false },
   { key: "status", label: "Status", required: false },
+  { key: "categoria", label: "Categoria (Recorrente/Pontual/Hospedagem)", required: false },
   { key: "dataInicioContrato", label: "Data início do contrato", required: false },
   { key: "valorMensal", label: "Valor mensal", required: false },
   { key: "responsavelNome", label: "Responsável interno (nome)", required: false },

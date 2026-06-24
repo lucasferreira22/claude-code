@@ -61,6 +61,7 @@ export default async function EditarClientePage({
           partnerAgencyId: client.partnerAgencyId,
           responsavelId: client.responsavelId,
           status: client.status,
+          categoria: client.categoria,
           dataInicioContrato: toDateInput(client.dataInicioContrato),
           dataFimContrato: toDateInput(client.dataFimContrato),
           valorMensal: client.valorMensal ? String(client.valorMensal) : "",
