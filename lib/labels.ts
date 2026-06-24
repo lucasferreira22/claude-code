@@ -5,6 +5,7 @@ import type {
   TipoRelacao,
   TipoContato,
   Categoria,
+  PaymentStatus,
 } from "@prisma/client";
 
 export const STATUS_LABELS: Record<ClientStatus, string> = {
@@ -54,6 +55,19 @@ export const CATEGORIA_BADGE: Record<Categoria, string> = {
   HOSPEDAGEM: "bg-teal-100 text-teal-800",
 };
 
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  PENDENTE: "Pendente",
+  PAGO: "Pago",
+};
+
+export const PAYMENT_STATUS_BADGE: Record<PaymentStatus, string> = {
+  PENDENTE: "bg-amber-100 text-amber-800",
+  PAGO: "bg-green-100 text-green-800",
+};
+
+// Badge para cobrança em atraso (status derivado na UI, não armazenado).
+export const PAYMENT_ATRASADO_BADGE = "bg-red-100 text-red-800";
+
 export const SERVICO_LABELS: Record<Servico, string> = {
   META_ADS: "Meta Ads",
   GOOGLE_ADS: "Google Ads",
@@ -95,4 +109,47 @@ export function formatDateTime(value: Date | string | null | undefined): string 
     dateStyle: "short",
     timeStyle: "short",
   }).format(d);
+}
+
+const MESES = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+
+// Competência é a string "AAAA-MM" usada nas cobranças mensais.
+export function currentCompetencia(now: Date = new Date()): string {
+  const ano = now.getFullYear();
+  const mes = String(now.getMonth() + 1).padStart(2, "0");
+  return `${ano}-${mes}`;
+}
+
+export function formatCompetencia(competencia: string): string {
+  const [ano, mes] = competencia.split("-");
+  const idx = Number(mes) - 1;
+  if (idx < 0 || idx > 11) return competencia;
+  return `${MESES[idx]}/${ano}`;
+}
+
+// Lista de competências (mais recente primeiro) ao redor do mês atual.
+export function competenciaOptions(
+  back = 11,
+  forward = 1,
+  now: Date = new Date()
+): string[] {
+  const out: string[] = [];
+  for (let i = forward; i >= -back; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    out.push(currentCompetencia(d));
+  }
+  return out;
 }

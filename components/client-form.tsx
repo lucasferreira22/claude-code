@@ -27,6 +27,10 @@ export type ClientFormValues = {
   dataInicioContrato?: string | null;
   dataFimContrato?: string | null;
   valorMensal?: string | null;
+  custoMensal?: string | null;
+  diaVencimento?: string | null;
+  dataRenovacao?: string | null;
+  valorRenovacao?: string | null;
   observacoes?: string | null;
   servicos?: string[];
   contatos?: { tipo: string; valor: string }[];
@@ -231,6 +235,63 @@ export function ClientForm({
               inputMode="decimal"
               placeholder="0,00"
               defaultValue={values?.valorMensal ?? ""}
+              className="input"
+            />
+          </div>
+
+          <div>
+            <label className="label">Custo mensal (R$)</label>
+            <input
+              name="custoMensal"
+              inputMode="decimal"
+              placeholder="0,00"
+              defaultValue={values?.custoMensal ?? ""}
+              className="input"
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              Usado para calcular o lucro.
+            </p>
+          </div>
+
+          <div>
+            <label className="label">Dia de vencimento</label>
+            <input
+              name="diaVencimento"
+              type="number"
+              min={1}
+              max={31}
+              placeholder="ex: 30"
+              defaultValue={values?.diaVencimento ?? ""}
+              className="input"
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              Dia do mês do pagamento recorrente (1–31).
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Renovação de hospedagem / domínio
+            </h3>
+          </div>
+          <div>
+            <label className="label">Data da próxima renovação</label>
+            <input
+              type="date"
+              name="dataRenovacao"
+              defaultValue={values?.dataRenovacao ?? ""}
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="label">Valor da renovação (R$)</label>
+            <input
+              name="valorRenovacao"
+              inputMode="decimal"
+              placeholder="0,00"
+              defaultValue={values?.valorRenovacao ?? ""}
               className="input"
             />
           </div>

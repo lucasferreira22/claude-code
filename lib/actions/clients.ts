@@ -6,7 +6,14 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { clientSchema } from "@/lib/validation";
-import type { ClientStatus, Servico, TipoContato } from "@prisma/client";
+import { CATEGORIA_ORDER, STATUS_ORDER } from "@/lib/labels";
+import type {
+  Categoria,
+  ClientStatus,
+  Prisma,
+  Servico,
+  TipoContato,
+} from "@prisma/client";
 
 const CONTATO_TIPOS: TipoContato[] = ["WHATSAPP", "TELEFONE", "EMAIL"];
 
@@ -38,6 +45,10 @@ function parseClientForm(formData: FormData) {
     dataInicioContrato: String(formData.get("dataInicioContrato") ?? ""),
     dataFimContrato: String(formData.get("dataFimContrato") ?? ""),
     valorMensal: String(formData.get("valorMensal") ?? ""),
+    custoMensal: String(formData.get("custoMensal") ?? ""),
+    diaVencimento: String(formData.get("diaVencimento") ?? ""),
+    dataRenovacao: String(formData.get("dataRenovacao") ?? ""),
+    valorRenovacao: String(formData.get("valorRenovacao") ?? ""),
     observacoes: String(formData.get("observacoes") ?? ""),
     servicos,
     contatos,
@@ -79,6 +90,10 @@ export async function createClient(
       dataInicioContrato: data.dataInicioContrato ?? null,
       dataFimContrato: data.dataFimContrato ?? null,
       valorMensal: data.valorMensal ?? null,
+      custoMensal: data.custoMensal ?? null,
+      diaVencimento: data.diaVencimento ?? null,
+      dataRenovacao: data.dataRenovacao ?? null,
+      valorRenovacao: data.valorRenovacao ?? null,
       observacoes: data.observacoes,
       servicos: { create: data.servicos.map((servico) => ({ servico })) },
       contatos: { create: data.contatos },
@@ -143,6 +158,10 @@ export async function updateClient(
         dataInicioContrato: data.dataInicioContrato ?? null,
         dataFimContrato: data.dataFimContrato ?? null,
         valorMensal: data.valorMensal ?? null,
+        custoMensal: data.custoMensal ?? null,
+        diaVencimento: data.diaVencimento ?? null,
+        dataRenovacao: data.dataRenovacao ?? null,
+        valorRenovacao: data.valorRenovacao ?? null,
         observacoes: data.observacoes,
         servicos: { create: data.servicos.map((servico) => ({ servico })) },
         contatos: { create: data.contatos },
@@ -209,6 +228,65 @@ export async function deleteClient(id: string) {
   await prisma.client.delete({ where: { id } });
   revalidatePath("/clientes");
   redirect("/clientes");
+}
+
+export type BulkActionState = { error?: string; ok?: string } | undefined;
+
+// Exclui vários clientes de uma vez (resolve a necessidade de limpeza em massa).
+export async function bulkDeleteClients(
+  _prev: BulkActionState,
+  formData: FormData
+): Promise<BulkActionState> {
+  const session = await auth();
+  if (!session?.user) return { error: "Não autenticado" };
+
+  const ids = formData.getAll("ids").map(String).filter(Boolean);
+  if (ids.length === 0) return { error: "Nenhum cliente selecionado" };
+
+  const { count } = await prisma.client.deleteMany({
+    where: { id: { in: ids } },
+  });
+  revalidatePath("/clientes");
+  return { ok: `${count} cliente(s) excluído(s).` };
+}
+
+// Altera em lote um campo (categoria, status ou responsável) dos selecionados.
+export async function bulkUpdateClients(
+  _prev: BulkActionState,
+  formData: FormData
+): Promise<BulkActionState> {
+  const session = await auth();
+  if (!session?.user) return { error: "Não autenticado" };
+
+  const ids = formData.getAll("ids").map(String).filter(Boolean);
+  if (ids.length === 0) return { error: "Nenhum cliente selecionado" };
+
+  const campo = String(formData.get("campo") ?? "");
+  const valor = String(formData.get("valor") ?? "");
+  if (!valor) return { error: "Selecione um valor para aplicar" };
+
+  const data: Prisma.ClientUncheckedUpdateManyInput = {};
+  if (campo === "categoria") {
+    if (!CATEGORIA_ORDER.includes(valor as Categoria))
+      return { error: "Categoria inválida" };
+    data.categoria = valor as Categoria;
+  } else if (campo === "status") {
+    if (!STATUS_ORDER.includes(valor as ClientStatus))
+      return { error: "Status inválido" };
+    data.status = valor as ClientStatus;
+  } else if (campo === "responsavel") {
+    // valor "-" significa remover o responsável
+    data.responsavelId = valor === "-" ? null : valor;
+  } else {
+    return { error: "Campo inválido" };
+  }
+
+  const { count } = await prisma.client.updateMany({
+    where: { id: { in: ids } },
+    data,
+  });
+  revalidatePath("/clientes");
+  return { ok: `${count} cliente(s) atualizado(s).` };
 }
 
 export async function addNote(clientId: string, formData: FormData) {
