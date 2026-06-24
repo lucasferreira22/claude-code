@@ -1,0 +1,172 @@
+// CRM Focus Digital — modelo de dados (Fase 1)
+// Banco relacional PostgreSQL via Prisma.
+// Ganchos para o módulo financeiro futuro já previstos (ver Client.valorMensal).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Usuários (você + colaboradores). Fase 1: todos têm o mesmo nível de acesso.
+// ---------------------------------------------------------------------------
+model User {
+  id           String   @id @default(cuid())
+  nome         String
+  email        String   @unique
+  senhaHash    String
+  criadoEm     DateTime @default(now())
+
+  // Clientes pelos quais este usuário é responsável interno
+  clientesResponsavel Client[]              @relation("ResponsavelInterno")
+  // Notas/registros de histórico criados por este usuário
+  notas               ClientNote[]
+  mudancasStatus      ClientStatusHistory[]
+
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Agências parceiras (clientes B2B que terceirizam a gestão de tráfego)
+// ---------------------------------------------------------------------------
+model PartnerAgency {
+  id                 String   @id @default(cuid())
+  nome               String
+  contatoNome        String?
+  contatoEmail       String?
+  contatoTelefone    String?
+  modeloComissao     String? // texto livre (ex: "20% sobre o fee mensal")
+  percentualComissao Decimal? @db.Decimal(5, 2)
+  observacoes        String?
+  criadoEm           DateTime @default(now())
+  atualizadoEm       DateTime @updatedAt
+
+  clientes Client[]
+
+  @@map("partner_agencies")
+}
+
+enum TipoRelacao {
+  DIRETO
+  PARCERIA
+}
+
+enum ClientStatus {
+  LEAD
+  EM_NEGOCIACAO
+  ATIVO
+  PAUSADO
+  ENCERRADO
+}
+
+enum Servico {
+  META_ADS
+  GOOGLE_ADS
+  OUTROS
+}
+
+enum TipoContato {
+  TELEFONE
+  EMAIL
+  WHATSAPP
+}
+
+// ---------------------------------------------------------------------------
+// Clientes — núcleo do sistema
+// ---------------------------------------------------------------------------
+model Client {
+  id              String       @id @default(cuid())
+  nomeRazaoSocial String
+  cnpj            String?
+  nicho           String?
+  cidade          String?
+  estado          String?
+
+  tipoRelacao TipoRelacao
+  // Preenchido apenas quando tipoRelacao = PARCERIA
+  partnerAgency   PartnerAgency? @relation(fields: [partnerAgencyId], references: [id], onDelete: SetNull)
+  partnerAgencyId String?
+
+  // Responsável interno (colaborador da equipe)
+  responsavel   User?   @relation("ResponsavelInterno", fields: [responsavelId], references: [id], onDelete: SetNull)
+  responsavelId String?
+
+  status            ClientStatus @default(LEAD)
+  dataInicioContrato DateTime?
+  dataFimContrato    DateTime?
+
+  // Gancho financeiro (Fase 2): valor mensal do contrato
+  valorMensal Decimal? @db.Decimal(12, 2)
+
+  observacoes String?
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  servicos      ClientService[]
+  contatos      ClientContact[]
+  notas         ClientNote[]
+  statusHistory ClientStatusHistory[]
+
+  @@index([tipoRelacao])
+  @@index([status])
+  @@index([nicho])
+  @@index([responsavelId])
+  @@map("clients")
+}
+
+// Serviços contratados (N:N modelado como tabela de junção com enum)
+model ClientService {
+  id       String  @id @default(cuid())
+  client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId String
+  servico  Servico
+
+  @@unique([clientId, servico])
+  @@map("client_services")
+}
+
+// Contatos do cliente (telefone, e-mail, WhatsApp)
+model ClientContact {
+  id        String      @id @default(cuid())
+  client    Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  String
+  tipo      TipoContato
+  valor     String
+  principal Boolean     @default(false)
+
+  @@map("client_contacts")
+}
+
+// Linha do tempo de mudanças de status
+model ClientStatusHistory {
+  id             String        @id @default(cuid())
+  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId       String
+  statusAnterior ClientStatus?
+  statusNovo     ClientStatus
+  alteradoPor    User?         @relation(fields: [alteradoPorId], references: [id], onDelete: SetNull)
+  alteradoPorId  String?
+  dataMudanca    DateTime      @default(now())
+
+  @@index([clientId])
+  @@map("client_status_history")
+}
+
+// Diário de interações datadas com o cliente
+model ClientNote {
+  id        String   @id @default(cuid())
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  String
+  autor     User?    @relation(fields: [autorId], references: [id], onDelete: SetNull)
+  autorId   String?
+  conteudo  String
+  criadoEm  DateTime @default(now())
+
+  @@index([clientId])
+  @@map("client_notes")
+}
