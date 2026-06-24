@@ -82,6 +82,12 @@ enum TipoContato {
   WHATSAPP
 }
 
+// Situação da cobrança mensal de um cliente em uma competência (mês).
+enum PaymentStatus {
+  PENDENTE
+  PAGO
+}
+
 // ---------------------------------------------------------------------------
 // Clientes — núcleo do sistema
 // ---------------------------------------------------------------------------
@@ -107,8 +113,16 @@ model Client {
   dataInicioContrato DateTime?
   dataFimContrato    DateTime?
 
-  // Gancho financeiro (Fase 2): valor mensal do contrato
+  // Financeiro: valor mensal do contrato e custo mensal (para cálculo de lucro)
   valorMensal Decimal? @db.Decimal(12, 2)
+  custoMensal Decimal? @db.Decimal(12, 2)
+
+  // Cobrança recorrente: dia do mês em que o pagamento vence (1–31)
+  diaVencimento Int?
+
+  // Hospedagem/domínio: próxima renovação e valor (anual)
+  dataRenovacao  DateTime?
+  valorRenovacao Decimal? @db.Decimal(12, 2)
 
   observacoes String?
 
@@ -119,6 +133,7 @@ model Client {
   contatos      ClientContact[]
   notas         ClientNote[]
   statusHistory ClientStatusHistory[]
+  pagamentos    Payment[]
 
   @@index([tipoRelacao])
   @@index([status])
@@ -126,6 +141,23 @@ model Client {
   @@index([nicho])
   @@index([responsavelId])
   @@map("clients")
+}
+
+// Cobrança mensal de um cliente. Uma linha por cliente por competência (mês).
+model Payment {
+  id           String        @id @default(cuid())
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId     String
+  competencia  String        // "AAAA-MM" (ex: "2026-06")
+  valor        Decimal       @db.Decimal(12, 2)
+  status       PaymentStatus @default(PENDENTE)
+  pagoEm       DateTime?
+  criadoEm     DateTime      @default(now())
+  atualizadoEm DateTime      @updatedAt
+
+  @@unique([clientId, competencia])
+  @@index([competencia, status])
+  @@map("payments")
 }
 
 // Serviços contratados (N:N modelado como tabela de junção com enum)

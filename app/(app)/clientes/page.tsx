@@ -7,16 +7,12 @@ import type {
   TipoRelacao,
 } from "@prisma/client";
 import {
-  STATUS_BADGE,
   STATUS_LABELS,
   STATUS_ORDER,
-  SERVICO_LABELS,
-  TIPO_RELACAO_LABELS,
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
-  CATEGORIA_BADGE,
-  formatCurrency,
 } from "@/lib/labels";
+import { ClientBulkTable } from "@/components/client-bulk-table";
 
 type SearchParams = {
   q?: string;
@@ -185,68 +181,21 @@ export default async function ClientesPage({
           Nenhum cliente encontrado.
         </div>
       ) : (
-        <div className="card overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-              <tr>
-                <th className="px-4 py-3">Cliente</th>
-                <th className="px-4 py-3">Categoria</th>
-                <th className="px-4 py-3">Tipo</th>
-                <th className="px-4 py-3">Nicho</th>
-                <th className="px-4 py-3">Serviços</th>
-                <th className="px-4 py-3">Responsável</th>
-                <th className="px-4 py-3">Valor mensal</th>
-                <th className="px-4 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {clients.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/clientes/${c.id}`}
-                      className="font-medium text-brand-700 hover:underline"
-                    >
-                      {c.nomeRazaoSocial}
-                    </Link>
-                    {c.partnerAgency && (
-                      <div className="text-xs text-gray-400">
-                        via {c.partnerAgency.nome}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`badge ${CATEGORIA_BADGE[c.categoria]}`}>
-                      {CATEGORIA_LABELS[c.categoria]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {TIPO_RELACAO_LABELS[c.tipoRelacao]}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{c.nicho ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {c.servicos.length === 0
-                      ? "—"
-                      : c.servicos
-                          .map((s) => SERVICO_LABELS[s.servico])
-                          .join(", ")}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {c.responsavel?.nome ?? "—"}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {formatCurrency(c.valorMensal ? Number(c.valorMensal) : null)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`badge ${STATUS_BADGE[c.status]}`}>
-                      {STATUS_LABELS[c.status]}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ClientBulkTable
+          users={users}
+          clients={clients.map((c) => ({
+            id: c.id,
+            nomeRazaoSocial: c.nomeRazaoSocial,
+            categoria: c.categoria,
+            tipoRelacao: c.tipoRelacao,
+            nicho: c.nicho,
+            servicos: c.servicos.map((s) => s.servico),
+            responsavelNome: c.responsavel?.nome ?? null,
+            partnerAgencyNome: c.partnerAgency?.nome ?? null,
+            valorMensal: c.valorMensal ? Number(c.valorMensal) : null,
+            status: c.status,
+          }))}
+        />
       )}
     </div>
   );

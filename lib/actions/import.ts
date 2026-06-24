@@ -64,6 +64,12 @@ function parseDecimal(v: string | undefined): number | null {
   return Number.isNaN(num) ? null : num;
 }
 
+function parseDayOfMonth(v: string | undefined): number | null {
+  if (!v || v.trim() === "") return null;
+  const n = Number(v.trim().replace(/\D/g, ""));
+  return Number.isInteger(n) && n >= 1 && n <= 31 ? n : null;
+}
+
 function parseDate(v: string | undefined): Date | null {
   if (!v || v.trim() === "") return null;
   const t = v.trim();
@@ -149,6 +155,10 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
           categoria,
           dataInicioContrato: parseDate(row.dataInicioContrato),
           valorMensal: parseDecimal(row.valorMensal),
+          custoMensal: parseDecimal(row.custoMensal),
+          diaVencimento: parseDayOfMonth(row.diaVencimento),
+          dataRenovacao: parseDate(row.dataRenovacao),
+          valorRenovacao: parseDecimal(row.valorRenovacao),
           observacoes: row.observacoes?.trim() || null,
           servicos: { create: servicos.map((servico) => ({ servico })) },
           contatos: { create: contatos },

@@ -20,7 +20,7 @@ export default async function AppLayout({
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-6">
-            <Link href="/clientes" className="font-bold text-brand-700">
+            <Link href="/painel" className="font-bold text-brand-700">
               Focus Digital
             </Link>
             <Nav />

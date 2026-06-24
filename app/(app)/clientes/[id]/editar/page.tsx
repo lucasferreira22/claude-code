@@ -65,6 +65,13 @@ export default async function EditarClientePage({
           dataInicioContrato: toDateInput(client.dataInicioContrato),
           dataFimContrato: toDateInput(client.dataFimContrato),
           valorMensal: client.valorMensal ? String(client.valorMensal) : "",
+          custoMensal: client.custoMensal ? String(client.custoMensal) : "",
+          diaVencimento:
+            client.diaVencimento != null ? String(client.diaVencimento) : "",
+          dataRenovacao: toDateInput(client.dataRenovacao),
+          valorRenovacao: client.valorRenovacao
+            ? String(client.valorRenovacao)
+            : "",
           observacoes: client.observacoes,
           servicos: client.servicos.map((s) => s.servico),
           contatos: client.contatos.map((c) => ({ tipo: c.tipo, valor: c.valor })),

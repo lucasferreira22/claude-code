@@ -22,6 +22,16 @@ const optionalDecimal = z
     return Number.isNaN(n) ? undefined : n;
   });
 
+// Dia do mês (1–31); valores fora da faixa viram undefined.
+const optionalDayOfMonth = z
+  .string()
+  .optional()
+  .transform((v) => {
+    if (!v || v.trim() === "") return undefined;
+    const n = Number(v.trim());
+    return Number.isInteger(n) && n >= 1 && n <= 31 ? n : undefined;
+  });
+
 export const clientSchema = z.object({
   nomeRazaoSocial: z.string().trim().min(1, "Nome é obrigatório"),
   cnpj: optionalString,
@@ -40,6 +50,10 @@ export const clientSchema = z.object({
   dataInicioContrato: optionalDate,
   dataFimContrato: optionalDate,
   valorMensal: optionalDecimal,
+  custoMensal: optionalDecimal,
+  diaVencimento: optionalDayOfMonth,
+  dataRenovacao: optionalDate,
+  valorRenovacao: optionalDecimal,
   observacoes: optionalString,
   servicos: z.array(z.enum(["META_ADS", "GOOGLE_ADS", "OUTROS"])).default([]),
   contatos: z

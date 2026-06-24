@@ -129,6 +129,28 @@ export default async function ClienteDetailPage({
                 )}
               />
               <Field
+                label="Custo mensal"
+                value={formatCurrency(
+                  client.custoMensal ? Number(client.custoMensal) : null
+                )}
+              />
+              <Field
+                label="Dia de vencimento"
+                value={client.diaVencimento ? `Dia ${client.diaVencimento}` : null}
+              />
+              <Field
+                label="Renovação (hosp.)"
+                value={
+                  client.dataRenovacao
+                    ? `${formatDate(client.dataRenovacao)}${
+                        client.valorRenovacao
+                          ? ` · ${formatCurrency(Number(client.valorRenovacao))}`
+                          : ""
+                      }`
+                    : null
+                }
+              />
+              <Field
                 label="Serviços"
                 value={
                   client.servicos.length
