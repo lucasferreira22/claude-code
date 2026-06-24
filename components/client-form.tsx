@@ -9,6 +9,8 @@ import {
   STATUS_ORDER,
   SERVICO_LABELS,
   SERVICO_ORDER,
+  CATEGORIA_LABELS,
+  CATEGORIA_ORDER,
 } from "@/lib/labels";
 
 export type ClientFormValues = {
@@ -21,6 +23,7 @@ export type ClientFormValues = {
   partnerAgencyId?: string | null;
   responsavelId?: string | null;
   status?: string;
+  categoria?: string;
   dataInicioContrato?: string | null;
   dataFimContrato?: string | null;
   valorMensal?: string | null;
@@ -166,6 +169,21 @@ export function ClientForm({
               {STATUS_ORDER.map((s) => (
                 <option key={s} value={s}>
                   {STATUS_LABELS[s]}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label">Categoria *</label>
+            <select
+              name="categoria"
+              defaultValue={values?.categoria ?? "RECORRENTE"}
+              className="input"
+            >
+              {CATEGORIA_ORDER.map((c) => (
+                <option key={c} value={c}>
+                  {CATEGORIA_LABELS[c]}
                 </option>
               ))}
             </select>

@@ -31,6 +31,7 @@ function guessMapping(headers: string[]): Record<ImportFieldKey, string> {
     nomeAgencia: ["agencia", "parceiro", "parceira"],
     servicos: ["servico", "produto", "trafego"],
     status: ["status", "situacao", "andamento"],
+    categoria: ["categoria", "tipo de servico", "modelo"],
     dataInicioContrato: ["inicio", "data", "contrato"],
     valorMensal: ["valor", "mensal", "fee", "mensalidade"],
     responsavelNome: ["responsavel", "gestor", "atende"],

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import type {
+  Categoria,
   ClientStatus,
   Servico,
   TipoContato,
@@ -33,6 +34,13 @@ function parseStatus(v: string | undefined): ClientStatus {
   if (n.includes("negoc")) return "EM_NEGOCIACAO";
   if (n.includes("lead")) return "LEAD";
   return "LEAD";
+}
+
+function parseCategoria(v: string | undefined): Categoria {
+  const n = normalize(v);
+  if (n.includes("pontual") || n.includes("avulso")) return "PONTUAL";
+  if (n.includes("hosped")) return "HOSPEDAGEM";
+  return "RECORRENTE";
 }
 
 function parseServicos(v: string | undefined): Servico[] {
@@ -119,6 +127,7 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
         : null;
 
       const status = parseStatus(row.status);
+      const categoria = parseCategoria(row.categoria);
       const servicos = parseServicos(row.servicos);
 
       const contatos: { tipo: TipoContato; valor: string }[] = [];
@@ -137,6 +146,7 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
           partnerAgencyId,
           responsavelId,
           status,
+          categoria,
           dataInicioContrato: parseDate(row.dataInicioContrato),
           valorMensal: parseDecimal(row.valorMensal),
           observacoes: row.observacoes?.trim() || null,

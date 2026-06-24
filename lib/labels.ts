@@ -4,6 +4,7 @@ import type {
   Servico,
   TipoRelacao,
   TipoContato,
+  Categoria,
 } from "@prisma/client";
 
 export const STATUS_LABELS: Record<ClientStatus, string> = {
@@ -33,6 +34,24 @@ export const STATUS_BADGE: Record<ClientStatus, string> = {
 export const TIPO_RELACAO_LABELS: Record<TipoRelacao, string> = {
   DIRETO: "Cliente Direto",
   PARCERIA: "Cliente via Parceria",
+};
+
+export const CATEGORIA_LABELS: Record<Categoria, string> = {
+  RECORRENTE: "Recorrente",
+  PONTUAL: "Pontual",
+  HOSPEDAGEM: "Hospedagem",
+};
+
+export const CATEGORIA_ORDER: Categoria[] = [
+  "RECORRENTE",
+  "PONTUAL",
+  "HOSPEDAGEM",
+];
+
+export const CATEGORIA_BADGE: Record<Categoria, string> = {
+  RECORRENTE: "bg-blue-100 text-blue-800",
+  PONTUAL: "bg-purple-100 text-purple-800",
+  HOSPEDAGEM: "bg-teal-100 text-teal-800",
 };
 
 export const SERVICO_LABELS: Record<Servico, string> = {

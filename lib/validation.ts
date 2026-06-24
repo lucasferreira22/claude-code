@@ -34,6 +34,9 @@ export const clientSchema = z.object({
   partnerAgencyId: optionalString,
   responsavelId: optionalString,
   status: z.enum(["LEAD", "EM_NEGOCIACAO", "ATIVO", "PAUSADO", "ENCERRADO"]),
+  categoria: z
+    .enum(["RECORRENTE", "PONTUAL", "HOSPEDAGEM"])
+    .default("RECORRENTE"),
   dataInicioContrato: optionalDate,
   dataFimContrato: optionalDate,
   valorMensal: optionalDecimal,

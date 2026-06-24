@@ -11,6 +11,8 @@ import {
   SERVICO_LABELS,
   TIPO_CONTATO_LABELS,
   TIPO_RELACAO_LABELS,
+  CATEGORIA_LABELS,
+  CATEGORIA_BADGE,
   formatCurrency,
   formatDate,
   formatDateTime,
@@ -66,6 +68,9 @@ export default async function ClienteDetailPage({
             {client.nomeRazaoSocial}
             <span className={`badge ${STATUS_BADGE[client.status]}`}>
               {STATUS_LABELS[client.status]}
+            </span>
+            <span className={`badge ${CATEGORIA_BADGE[client.categoria]}`}>
+              {CATEGORIA_LABELS[client.categoria]}
             </span>
           </h1>
           <p className="text-sm text-gray-500">
