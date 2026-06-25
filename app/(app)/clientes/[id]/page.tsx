@@ -166,15 +166,17 @@ export default async function ClienteDetailPage({
                 value={client.diaVencimento ? `Dia ${client.diaVencimento}` : null}
               />
               <Field
-                label="Renovação (hosp.)"
+                label="Hospedagem"
                 value={
-                  client.dataRenovacao
-                    ? `${formatDate(client.dataRenovacao)}${
-                        client.valorRenovacao
-                          ? ` · ${formatCurrency(Number(client.valorRenovacao))}`
-                          : ""
-                      }`
-                    : null
+                  client.possuiHospedagem
+                    ? client.dataRenovacao
+                      ? `Sim · renova ${formatDate(client.dataRenovacao)}${
+                          client.valorRenovacao
+                            ? ` · ${formatCurrency(Number(client.valorRenovacao))}/ano`
+                            : ""
+                        }`
+                      : "Sim"
+                    : "Não"
                 }
               />
               <Field

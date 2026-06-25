@@ -162,6 +162,10 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
           valorMensal: parseDecimal(row.valorMensal),
           custoMensal: parseDecimal(row.custoMensal),
           diaVencimento: parseDayOfMonth(row.diaVencimento),
+          possuiHospedagem:
+            categoria === "HOSPEDAGEM" ||
+            parseDate(row.dataRenovacao) != null ||
+            parseDecimal(row.valorRenovacao) != null,
           dataRenovacao: parseDate(row.dataRenovacao),
           valorRenovacao: parseDecimal(row.valorRenovacao),
           observacoes: row.observacoes?.trim() || null,
