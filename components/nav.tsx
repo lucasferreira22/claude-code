@@ -8,6 +8,7 @@ const links = [
   { href: "/clientes", label: "Clientes" },
   { href: "/comercial", label: "Comercial" },
   { href: "/financeiro", label: "Financeiro" },
+  { href: "/servicos", label: "Serviços" },
   { href: "/agencias", label: "Agências Parceiras" },
   { href: "/importar", label: "Importar CSV" },
 ];

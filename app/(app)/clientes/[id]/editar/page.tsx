@@ -14,7 +14,7 @@ export default async function EditarClientePage({
 }: {
   params: { id: string };
 }) {
-  const [client, agencies, users] = await Promise.all([
+  const [client, agencies, users, services] = await Promise.all([
     prisma.client.findUnique({
       where: { id: params.id },
       include: { servicos: true, contatos: true },
@@ -26,6 +26,11 @@ export default async function EditarClientePage({
     prisma.user.findMany({
       select: { id: true, nome: true },
       orderBy: { nome: "asc" },
+    }),
+    prisma.service.findMany({
+      where: { ativo: true },
+      select: { id: true, nome: true },
+      orderBy: [{ ordem: "asc" }, { nome: "asc" }],
     }),
   ]);
 
@@ -49,6 +54,7 @@ export default async function EditarClientePage({
         action={action}
         agencies={agencies}
         users={users}
+        services={services}
         submitLabel="Salvar alterações"
         cancelHref={`/clientes/${client.id}`}
         values={{
@@ -74,7 +80,7 @@ export default async function EditarClientePage({
             ? String(client.valorRenovacao)
             : "",
           observacoes: client.observacoes,
-          servicos: client.servicos.map((s) => s.servico),
+          servicos: client.servicos.map((s) => s.serviceId),
           contatos: client.contatos.map((c) => ({ tipo: c.tipo, valor: c.valor })),
         }}
       />

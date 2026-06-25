@@ -7,8 +7,6 @@ import type { ActionState } from "@/lib/actions/clients";
 import {
   STATUS_LABELS,
   STATUS_ORDER,
-  SERVICO_LABELS,
-  SERVICO_ORDER,
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
 } from "@/lib/labels";
@@ -50,6 +48,7 @@ export function ClientForm({
   action,
   agencies,
   users,
+  services,
   values,
   submitLabel,
   cancelHref,
@@ -57,6 +56,7 @@ export function ClientForm({
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   agencies: { id: string; nome: string }[];
   users: { id: string; nome: string }[];
+  services: { id: string; nome: string }[];
   values?: ClientFormValues;
   submitLabel: string;
   cancelHref: string;
@@ -313,20 +313,29 @@ export function ClientForm({
 
         <div>
           <span className="label">Serviços contratados</span>
-          <div className="flex flex-wrap gap-4">
-            {SERVICO_ORDER.map((s) => (
-              <label key={s} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  name="servicos"
-                  value={s}
-                  defaultChecked={values?.servicos?.includes(s)}
-                  className="h-4 w-4 rounded border-gray-300"
-                />
-                {SERVICO_LABELS[s]}
-              </label>
-            ))}
-          </div>
+          {services.length === 0 ? (
+            <p className="text-sm text-amber-600">
+              Nenhum serviço cadastrado.{" "}
+              <Link href="/servicos" className="underline">
+                Cadastrar serviços
+              </Link>
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-4">
+              {services.map((s) => (
+                <label key={s.id} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="servicos"
+                    value={s.id}
+                    defaultChecked={values?.servicos?.includes(s.id)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  {s.nome}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

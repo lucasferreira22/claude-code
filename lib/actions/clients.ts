@@ -11,14 +11,14 @@ import type {
   Categoria,
   ClientStatus,
   Prisma,
-  Servico,
   TipoContato,
 } from "@prisma/client";
 
 const CONTATO_TIPOS: TipoContato[] = ["WHATSAPP", "TELEFONE", "EMAIL"];
 
 function parseClientForm(formData: FormData) {
-  const servicos = formData.getAll("servicos").map(String) as Servico[];
+  // IDs dos serviços selecionados (checkboxes alimentados pelo catálogo).
+  const servicos = formData.getAll("servicos").map(String);
 
   const contatos = CONTATO_TIPOS.map((tipo) => ({
     tipo,
@@ -97,7 +97,7 @@ export async function createClient(
       dataRenovacao: data.dataRenovacao ?? null,
       valorRenovacao: data.valorRenovacao ?? null,
       observacoes: data.observacoes,
-      servicos: { create: data.servicos.map((servico) => ({ servico })) },
+      servicos: { create: data.servicos.map((serviceId) => ({ serviceId })) },
       contatos: { create: data.contatos },
       statusHistory: {
         create: {
@@ -166,7 +166,7 @@ export async function updateClient(
         dataRenovacao: data.dataRenovacao ?? null,
         valorRenovacao: data.valorRenovacao ?? null,
         observacoes: data.observacoes,
-        servicos: { create: data.servicos.map((servico) => ({ servico })) },
+        servicos: { create: data.servicos.map((serviceId) => ({ serviceId })) },
         contatos: { create: data.contatos },
       },
     });

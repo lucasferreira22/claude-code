@@ -6,7 +6,6 @@ import { auth } from "@/auth";
 import type {
   Categoria,
   ClientStatus,
-  Servico,
   TipoContato,
   TipoRelacao,
 } from "@prisma/client";
@@ -43,22 +42,24 @@ function parseCategoria(v: string | undefined): Categoria {
   return "RECORRENTE";
 }
 
-function parseServicos(v: string | undefined): Servico[] {
+// Reconhece serviços no texto e devolve os NOMES canônicos do catálogo.
+// (Os nomes são resolvidos para IDs do catálogo em importClients.)
+function parseServicos(v: string | undefined): string[] {
   const n = normalize(v);
-  const out = new Set<Servico>();
+  const out = new Set<string>();
   if (n.includes("meta") || n.includes("facebook") || n.includes("insta"))
-    out.add("META_ADS");
-  if (n.includes("google")) out.add("GOOGLE_ADS");
-  if (n.includes("tiktok") || n.includes("tik tok")) out.add("TIKTOK_ADS");
+    out.add("Meta Ads");
+  if (n.includes("google")) out.add("Google Ads");
+  if (n.includes("tiktok") || n.includes("tik tok")) out.add("TikTok Ads");
   if (n.includes("social") || n.includes("midia social") || n.includes("smm"))
-    out.add("SOCIAL_MEDIA");
+    out.add("Social Media");
   if (n.includes("site") || n.includes("web") || n.includes("landing"))
-    out.add("CRIACAO_SITE");
+    out.add("Criação de Site");
   if (n.includes("ambos") || n.includes("todos")) {
-    out.add("META_ADS");
-    out.add("GOOGLE_ADS");
+    out.add("Meta Ads");
+    out.add("Google Ads");
   }
-  if (n.includes("outro")) out.add("OUTROS");
+  if (n.includes("outro")) out.add("Outros");
   return Array.from(out);
 }
 
@@ -107,6 +108,14 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
   const users = await prisma.user.findMany({ select: { id: true, nome: true } });
   const userByName = new Map(users.map((u) => [normalize(u.nome), u.id]));
 
+  // catálogo de serviços por nome normalizado (para resolver nome -> id)
+  const services = await prisma.service.findMany({
+    select: { id: true, nome: true },
+  });
+  const serviceIdByName = new Map(
+    services.map((s) => [normalize(s.nome), s.id])
+  );
+
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const linha = i + 2; // +2: cabeçalho + base 1
@@ -139,7 +148,10 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
 
       const status = parseStatus(row.status);
       const categoria = parseCategoria(row.categoria);
-      const servicos = parseServicos(row.servicos);
+      // nomes reconhecidos -> ids do catálogo (ignora os que não existem)
+      const serviceIds = parseServicos(row.servicos)
+        .map((nome) => serviceIdByName.get(normalize(nome)))
+        .filter((id): id is string => Boolean(id));
 
       const contatos: { tipo: TipoContato; valor: string }[] = [];
       if (row.contatoWhatsapp?.trim())
@@ -169,7 +181,7 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
           dataRenovacao: parseDate(row.dataRenovacao),
           valorRenovacao: parseDecimal(row.valorRenovacao),
           observacoes: row.observacoes?.trim() || null,
-          servicos: { create: servicos.map((servico) => ({ servico })) },
+          servicos: { create: serviceIds.map((serviceId) => ({ serviceId })) },
           contatos: { create: contatos },
           statusHistory: {
             create: {
