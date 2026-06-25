@@ -224,6 +224,35 @@ export async function updateClientStatus(clientId: string, formData: FormData) {
   revalidatePath("/clientes");
 }
 
+// Move o cliente para outro status (usado pelo Kanban). Registra no histórico.
+export async function setClientStatus(clientId: string, status: ClientStatus) {
+  const session = await auth();
+  if (!session?.user) return;
+  if (!STATUS_ORDER.includes(status)) return;
+
+  const existing = await prisma.client.findUnique({
+    where: { id: clientId },
+    select: { status: true },
+  });
+  if (!existing || existing.status === status) return;
+
+  await prisma.$transaction([
+    prisma.client.update({ where: { id: clientId }, data: { status } }),
+    prisma.clientStatusHistory.create({
+      data: {
+        clientId,
+        statusAnterior: existing.status,
+        statusNovo: status,
+        alteradoPorId: session.user.id,
+      },
+    }),
+  ]);
+
+  revalidatePath("/comercial");
+  revalidatePath("/clientes");
+  revalidatePath(`/clientes/${clientId}`);
+}
+
 export async function deleteClient(id: string) {
   const session = await auth();
   if (!session?.user) return;
