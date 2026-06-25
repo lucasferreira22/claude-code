@@ -36,11 +36,12 @@ export default async function ClientesPage({
   if (searchParams.tipo === "DIRETO" || searchParams.tipo === "PARCERIA") {
     where.tipoRelacao = searchParams.tipo as TipoRelacao;
   }
-  if (
-    searchParams.status &&
-    STATUS_ORDER.includes(searchParams.status as ClientStatus)
-  ) {
-    where.status = searchParams.status as ClientStatus;
+  // Status padrão = ATIVO quando a página abre sem filtro (status undefined).
+  // Selecionar "Todos" envia status="" (string vazia), o que remove o filtro.
+  const statusFiltro =
+    searchParams.status === undefined ? "ATIVO" : searchParams.status;
+  if (statusFiltro && STATUS_ORDER.includes(statusFiltro as ClientStatus)) {
+    where.status = statusFiltro as ClientStatus;
   }
   if (
     searchParams.categoria &&
@@ -113,7 +114,7 @@ export default async function ClientesPage({
         </div>
         <div>
           <label className="label">Status</label>
-          <select name="status" defaultValue={searchParams.status} className="input">
+          <select name="status" defaultValue={statusFiltro} className="input">
             <option value="">Todos</option>
             {STATUS_ORDER.map((s) => (
               <option key={s} value={s}>
