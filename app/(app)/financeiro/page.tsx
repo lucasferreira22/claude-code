@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { summarize, num, type FinanceClient } from "@/lib/finance";
+import {
+  summarize,
+  hospedagemMensal,
+  num,
+  type FinanceClient,
+} from "@/lib/finance";
 import {
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
@@ -30,14 +35,15 @@ export default async function FinanceiroPage() {
 
   const resumo = summarize(clients);
 
-  // Detalhamento por cliente (somente ativos com algum valor)
+  // Detalhamento por cliente (ativos com algum faturamento mensal).
+  // valor = mensalidade + hospedagem rateada (÷12).
   const ativos = clients
-    .filter((c) => c.status === "ATIVO" && (num(c.valorMensal) ?? 0) > 0)
     .map((c) => {
-      const valor = num(c.valorMensal) ?? 0;
+      const valor = (num(c.valorMensal) ?? 0) + hospedagemMensal(c);
       const custo = num(c.custoMensal) ?? 0;
       return { c, valor, custo, lucro: valor - custo };
-    });
+    })
+    .filter((r) => r.c.status === "ATIVO" && r.valor > 0);
 
   return (
     <div className="space-y-6">
@@ -52,10 +58,13 @@ export default async function FinanceiroPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="card p-5">
           <p className="text-xs uppercase tracking-wide text-gray-400">
-            Faturamento
+            Faturamento mensal
           </p>
           <p className="mt-1 text-2xl font-bold">
             {formatCurrency(resumo.faturamentoMensal)}
+          </p>
+          <p className="mt-1 text-xs text-gray-400">
+            Inclui hospedagem diluída (÷12)
           </p>
         </div>
         <div className="card p-5">

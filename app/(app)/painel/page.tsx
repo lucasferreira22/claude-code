@@ -95,7 +95,7 @@ export default async function PainelPage() {
         <Stat
           label="Faturamento mensal"
           value={formatCurrency(resumo.faturamentoMensal)}
-          hint="Clientes ativos"
+          hint="Ativos · inclui hospedagem ÷12"
         />
         <Stat
           label="Custo mensal"
