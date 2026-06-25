@@ -62,7 +62,7 @@ export default async function ClientesPage({
       include: {
         partnerAgency: { select: { nome: true } },
         responsavel: { select: { nome: true } },
-        servicos: true,
+        servicos: { include: { service: { select: { nome: true } } } },
       },
       orderBy: { nomeRazaoSocial: "asc" },
     }),
@@ -190,7 +190,7 @@ export default async function ClientesPage({
             categoria: c.categoria,
             tipoRelacao: c.tipoRelacao,
             nicho: c.nicho,
-            servicos: c.servicos.map((s) => s.servico),
+            servicos: c.servicos.map((s) => s.service.nome),
             responsavelNome: c.responsavel?.nome ?? null,
             partnerAgencyNome: c.partnerAgency?.nome ?? null,
             valorMensal: c.valorMensal ? Number(c.valorMensal) : null,

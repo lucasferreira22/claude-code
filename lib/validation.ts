@@ -56,18 +56,8 @@ export const clientSchema = z.object({
   dataRenovacao: optionalDate,
   valorRenovacao: optionalDecimal,
   observacoes: optionalString,
-  servicos: z
-    .array(
-      z.enum([
-        "META_ADS",
-        "GOOGLE_ADS",
-        "TIKTOK_ADS",
-        "SOCIAL_MEDIA",
-        "CRIACAO_SITE",
-        "OUTROS",
-      ])
-    )
-    .default([]),
+  // IDs dos serviços do catálogo (tabela services).
+  servicos: z.array(z.string()).default([]),
   contatos: z
     .array(
       z.object({

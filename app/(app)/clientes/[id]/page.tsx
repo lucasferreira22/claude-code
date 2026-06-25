@@ -9,7 +9,6 @@ import { StatusSelect } from "@/components/status-select";
 import {
   STATUS_BADGE,
   STATUS_LABELS,
-  SERVICO_LABELS,
   TIPO_CONTATO_LABELS,
   TIPO_RELACAO_LABELS,
   CATEGORIA_LABELS,
@@ -38,7 +37,7 @@ export default async function ClienteDetailPage({
     include: {
       partnerAgency: true,
       responsavel: { select: { nome: true } },
-      servicos: true,
+      servicos: { include: { service: true } },
       contatos: true,
       notas: {
         include: { autor: { select: { nome: true } } },
@@ -183,9 +182,7 @@ export default async function ClienteDetailPage({
                 label="Serviços"
                 value={
                   client.servicos.length
-                    ? client.servicos
-                        .map((s) => SERVICO_LABELS[s.servico])
-                        .join(", ")
+                    ? client.servicos.map((s) => s.service.nome).join(", ")
                     : "—"
                 }
               />

@@ -61,15 +61,6 @@ enum ClientStatus {
   ENCERRADO
 }
 
-enum Servico {
-  META_ADS
-  GOOGLE_ADS
-  TIKTOK_ADS
-  SOCIAL_MEDIA
-  CRIACAO_SITE
-  OUTROS
-}
-
 // Categoria do cliente: separa recorrentes, pontuais e hospedagem na base.
 enum Categoria {
   RECORRENTE
@@ -165,13 +156,28 @@ model Payment {
 
 // Serviços contratados (N:N modelado como tabela de junção com enum)
 model ClientService {
-  id       String  @id @default(cuid())
-  client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId String
-  servico  Servico
+  id        String  @id @default(cuid())
+  client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceId String
 
-  @@unique([clientId, servico])
+  @@unique([clientId, serviceId])
   @@map("client_services")
+}
+
+// Catálogo de serviços da agência (gerenciável pela tela /servicos).
+model Service {
+  id           String          @id @default(cuid())
+  nome         String          @unique
+  descricao    String?
+  ativo        Boolean         @default(true)
+  ordem        Int             @default(0)
+  criadoEm     DateTime        @default(now())
+  atualizadoEm DateTime        @updatedAt
+  clientes     ClientService[]
+
+  @@map("services")
 }
 
 // Contatos do cliente (telefone, e-mail, WhatsApp)

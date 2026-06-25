@@ -12,19 +12,13 @@ import {
   STATUS_BADGE,
   STATUS_LABELS,
   STATUS_ORDER,
-  SERVICO_LABELS,
   TIPO_RELACAO_LABELS,
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
   CATEGORIA_BADGE,
   formatCurrency,
 } from "@/lib/labels";
-import type {
-  Categoria,
-  ClientStatus,
-  Servico,
-  TipoRelacao,
-} from "@prisma/client";
+import type { Categoria, ClientStatus, TipoRelacao } from "@prisma/client";
 
 export type ClientRow = {
   id: string;
@@ -32,7 +26,7 @@ export type ClientRow = {
   categoria: Categoria;
   tipoRelacao: TipoRelacao;
   nicho: string | null;
-  servicos: Servico[];
+  servicos: string[];
   responsavelNome: string | null;
   partnerAgencyNome: string | null;
   valorMensal: number | null;
@@ -221,7 +215,7 @@ export function ClientBulkTable({
                 <td className="px-4 py-3 text-gray-600">
                   {c.servicos.length === 0
                     ? "—"
-                    : c.servicos.map((s) => SERVICO_LABELS[s]).join(", ")}
+                    : c.servicos.join(", ")}
                 </td>
                 <td className="px-4 py-3 text-gray-600">
                   {c.responsavelNome ?? "—"}

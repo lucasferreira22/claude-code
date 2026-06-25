@@ -4,7 +4,7 @@ import { createClient } from "@/lib/actions/clients";
 import { ClientForm } from "@/components/client-form";
 
 export default async function NovoClientePage() {
-  const [agencies, users] = await Promise.all([
+  const [agencies, users, services] = await Promise.all([
     prisma.partnerAgency.findMany({
       select: { id: true, nome: true },
       orderBy: { nome: "asc" },
@@ -12,6 +12,11 @@ export default async function NovoClientePage() {
     prisma.user.findMany({
       select: { id: true, nome: true },
       orderBy: { nome: "asc" },
+    }),
+    prisma.service.findMany({
+      where: { ativo: true },
+      select: { id: true, nome: true },
+      orderBy: [{ ordem: "asc" }, { nome: "asc" }],
     }),
   ]);
 
@@ -28,6 +33,7 @@ export default async function NovoClientePage() {
         action={createClient}
         agencies={agencies}
         users={users}
+        services={services}
         submitLabel="Cadastrar cliente"
         cancelHref="/clientes"
       />
