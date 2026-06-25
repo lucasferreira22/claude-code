@@ -15,7 +15,8 @@ import {
   competenciaOptions,
 } from "@/lib/labels";
 
-type SearchParams = { mes?: string };
+type FiltroCobranca = "atrasado" | "pago" | "pendente";
+type SearchParams = { mes?: string; filtro?: string };
 
 // Uma cobrança PENDENTE está atrasada se a competência já passou, ou se é o mês
 // corrente e o dia de vencimento do cliente já passou.
@@ -75,6 +76,39 @@ export default async function CobrancasPage({
       estaAtrasada(competencia, p.client.diaVencimento, hoje)
   ).length;
 
+  // Filtro da tabela (os cards do resumo continuam mostrando o total do mês).
+  const filtro: FiltroCobranca | null =
+    searchParams.filtro === "atrasado" ||
+    searchParams.filtro === "pago" ||
+    searchParams.filtro === "pendente"
+      ? searchParams.filtro
+      : null;
+
+  const visiveis = pagamentos.filter((p) => {
+    if (filtro === "pago") return p.status === "PAGO";
+    if (filtro === "pendente") return p.status === "PENDENTE";
+    if (filtro === "atrasado")
+      return (
+        p.status === "PENDENTE" &&
+        estaAtrasada(competencia, p.client.diaVencimento, hoje)
+      );
+    return true;
+  });
+
+  // Monta o link de um card mantendo a competência; clicar no filtro ativo limpa.
+  const hrefFiltro = (valor: FiltroCobranca | null) => {
+    const params = new URLSearchParams({ mes: competencia });
+    const proximo = filtro === valor ? null : valor;
+    if (proximo) params.set("filtro", proximo);
+    return `/financeiro/cobrancas?${params.toString()}`;
+  };
+
+  const FILTRO_LABELS: Record<FiltroCobranca, string> = {
+    atrasado: "em atraso",
+    pago: "pagas",
+    pendente: "pendentes",
+  };
+
   // Server action inline: gera as cobranças do mês selecionado.
   async function gerarAction() {
     "use server";
@@ -116,45 +150,87 @@ export default async function CobrancasPage({
         </div>
       </div>
 
-      {/* Resumo */}
+      {/* Resumo — cada card filtra a tabela ao ser clicado */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="card p-5">
+        <Link
+          href={hrefFiltro(null)}
+          className={`card p-5 transition hover:border-brand-300 ${
+            filtro === null ? "ring-2 ring-brand-500" : ""
+          }`}
+        >
           <p className="text-xs uppercase tracking-wide text-gray-400">
             A receber (total)
           </p>
           <p className="mt-1 text-xl font-bold">{formatCurrency(total)}</p>
-        </div>
-        <div className="card p-5">
+        </Link>
+        <Link
+          href={hrefFiltro("pago")}
+          className={`card p-5 transition hover:border-brand-300 ${
+            filtro === "pago" ? "ring-2 ring-green-500" : ""
+          }`}
+        >
           <p className="text-xs uppercase tracking-wide text-gray-400">
             Recebido
           </p>
           <p className="mt-1 text-xl font-bold text-green-700">
             {formatCurrency(recebido)}
           </p>
-        </div>
-        <div className="card p-5">
+        </Link>
+        <Link
+          href={hrefFiltro("pendente")}
+          className={`card p-5 transition hover:border-brand-300 ${
+            filtro === "pendente" ? "ring-2 ring-amber-500" : ""
+          }`}
+        >
           <p className="text-xs uppercase tracking-wide text-gray-400">
             Pendente
           </p>
           <p className="mt-1 text-xl font-bold text-amber-700">
             {formatCurrency(pendente)}
           </p>
-        </div>
-        <div className="card p-5">
+        </Link>
+        <Link
+          href={hrefFiltro("atrasado")}
+          className={`card p-5 transition hover:border-brand-300 ${
+            filtro === "atrasado" ? "ring-2 ring-red-500" : ""
+          }`}
+        >
           <p className="text-xs uppercase tracking-wide text-gray-400">
             Em atraso
           </p>
           <p className="mt-1 text-xl font-bold text-red-700">
             {atrasados} cliente(s)
           </p>
-        </div>
+        </Link>
       </div>
+
+      {filtro && (
+        <p className="text-sm text-gray-500">
+          Mostrando apenas cobranças{" "}
+          <span className="font-medium">{FILTRO_LABELS[filtro]}</span> (
+          {visiveis.length}).{" "}
+          <Link
+            href={hrefFiltro(null)}
+            className="text-brand-700 hover:underline"
+          >
+            Ver todas
+          </Link>
+        </p>
+      )}
 
       {pagamentos.length === 0 ? (
         <div className="card p-10 text-center text-gray-500">
           Nenhuma cobrança para {formatCompetencia(competencia)}. Clique em{" "}
           <span className="font-medium">&quot;Gerar cobranças do mês&quot;</span>{" "}
           para criar as cobranças dos clientes recorrentes ativos.
+        </div>
+      ) : visiveis.length === 0 ? (
+        <div className="card p-10 text-center text-gray-500">
+          Nenhuma cobrança {filtro ? FILTRO_LABELS[filtro] : ""} em{" "}
+          {formatCompetencia(competencia)}.{" "}
+          <Link href={hrefFiltro(null)} className="text-brand-700 hover:underline">
+            Ver todas
+          </Link>
         </div>
       ) : (
         <div className="card overflow-x-auto">
@@ -169,7 +245,7 @@ export default async function CobrancasPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {pagamentos.map((p) => {
+              {visiveis.map((p) => {
                 const atrasada =
                   p.status === "PENDENTE" &&
                   estaAtrasada(competencia, p.client.diaVencimento, hoje);
