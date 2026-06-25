@@ -29,6 +29,7 @@ export type ClientFormValues = {
   valorMensal?: string | null;
   custoMensal?: string | null;
   diaVencimento?: string | null;
+  possuiHospedagem?: boolean;
   dataRenovacao?: string | null;
   valorRenovacao?: string | null;
   observacoes?: string | null;
@@ -62,6 +63,9 @@ export function ClientForm({
 }) {
   const [state, formAction] = useFormState(action, undefined);
   const [tipoRelacao, setTipoRelacao] = useState(values?.tipoRelacao ?? "DIRETO");
+  const [possuiHospedagem, setPossuiHospedagem] = useState(
+    values?.possuiHospedagem ?? false
+  );
 
   const contatoValor = (tipo: string) =>
     values?.contatos?.find((c) => c.tipo === tipo)?.valor ?? "";
@@ -270,31 +274,41 @@ export function ClientForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Renovação de hospedagem / domínio
-            </h3>
-          </div>
-          <div>
-            <label className="label">Data da próxima renovação</label>
+        <div className="border-t border-gray-100 pt-4">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
             <input
-              type="date"
-              name="dataRenovacao"
-              defaultValue={values?.dataRenovacao ?? ""}
-              className="input"
+              type="checkbox"
+              name="possuiHospedagem"
+              checked={possuiHospedagem}
+              onChange={(e) => setPossuiHospedagem(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300"
             />
-          </div>
-          <div>
-            <label className="label">Valor da renovação (R$)</label>
-            <input
-              name="valorRenovacao"
-              inputMode="decimal"
-              placeholder="0,00"
-              defaultValue={values?.valorRenovacao ?? ""}
-              className="input"
-            />
-          </div>
+            Este cliente tem hospedagem / domínio (cobrança anual)
+          </label>
+
+          {possuiHospedagem && (
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="label">Data da próxima renovação</label>
+                <input
+                  type="date"
+                  name="dataRenovacao"
+                  defaultValue={values?.dataRenovacao ?? ""}
+                  className="input"
+                />
+              </div>
+              <div>
+                <label className="label">Valor da renovação anual (R$)</label>
+                <input
+                  name="valorRenovacao"
+                  inputMode="decimal"
+                  placeholder="0,00"
+                  defaultValue={values?.valorRenovacao ?? ""}
+                  className="input"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div>

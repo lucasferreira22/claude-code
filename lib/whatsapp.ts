@@ -44,3 +44,16 @@ export function cobrancaMessage(opts: {
     `no valor de ${opts.valorLabel}${venc}. Qualquer dúvida, estou à disposição!`
   );
 }
+
+// Mensagem padrão de lembrete de renovação de hospedagem/domínio (anual).
+export function hospedagemMessage(opts: {
+  valorLabel?: string | null;
+  dataLabel?: string | null;
+}): string {
+  const valor = opts.valorLabel ? ` no valor de ${opts.valorLabel}` : "";
+  const data = opts.dataLabel ? ` (vencimento em ${opts.dataLabel})` : "";
+  return (
+    `Olá! 😊 Passando pra avisar que a renovação anual da sua hospedagem/domínio` +
+    `${valor} está chegando${data}. Qualquer dúvida, estou à disposição!`
+  );
+}

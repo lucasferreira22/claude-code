@@ -52,6 +52,7 @@ export const clientSchema = z.object({
   valorMensal: optionalDecimal,
   custoMensal: optionalDecimal,
   diaVencimento: optionalDayOfMonth,
+  possuiHospedagem: z.boolean().default(false),
   dataRenovacao: optionalDate,
   valorRenovacao: optionalDecimal,
   observacoes: optionalString,

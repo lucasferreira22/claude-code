@@ -121,9 +121,11 @@ model Client {
   // Cobrança recorrente: dia do mês em que o pagamento vence (1–31)
   diaVencimento Int?
 
-  // Hospedagem/domínio: próxima renovação e valor (anual)
-  dataRenovacao  DateTime?
-  valorRenovacao Decimal? @db.Decimal(12, 2)
+  // Hospedagem/domínio (add-on, independente da categoria): se o cliente tem
+  // hospedagem, próxima renovação e valor (cobrança anual).
+  possuiHospedagem Boolean   @default(false)
+  dataRenovacao    DateTime?
+  valorRenovacao   Decimal?  @db.Decimal(12, 2)
 
   observacoes String?
 

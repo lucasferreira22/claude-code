@@ -68,6 +68,7 @@ export default async function EditarClientePage({
           custoMensal: client.custoMensal ? String(client.custoMensal) : "",
           diaVencimento:
             client.diaVencimento != null ? String(client.diaVencimento) : "",
+          possuiHospedagem: client.possuiHospedagem,
           dataRenovacao: toDateInput(client.dataRenovacao),
           valorRenovacao: client.valorRenovacao
             ? String(client.valorRenovacao)
