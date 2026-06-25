@@ -79,3 +79,37 @@ export const agencySchema = z.object({
 });
 
 export type AgencyInput = z.infer<typeof agencySchema>;
+
+// ---------------------------------------------------------------------------
+// Lead vindo da landing page (focus-digital-site) pelo endpoint público
+// /api/leads/intake. Captura o mínimo: quem é e como falar com a pessoa.
+// Exige pelo menos uma forma de contato (e-mail ou telefone).
+// ---------------------------------------------------------------------------
+const optionalEmail = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => (v && v !== "" ? v : undefined))
+  .refine((v) => v === undefined || z.string().email().safeParse(v).success, {
+    message: "E-mail inválido",
+  });
+
+export const leadIntakeSchema = z
+  .object({
+    nome: z.string().trim().min(1, "Nome é obrigatório"),
+    email: optionalEmail,
+    // Contato principal da landing: WhatsApp.
+    whatsapp: optionalString,
+    telefone: optionalString,
+    // Nicho/segmento do negócio — vai para o campo dedicado Client.nicho.
+    nicho: optionalString,
+    // Site ou rede social da empresa (Instagram, site, etc.)
+    site: optionalString,
+    mensagem: optionalString,
+  })
+  .refine((d) => Boolean(d.email) || Boolean(d.whatsapp) || Boolean(d.telefone), {
+    message: "Informe ao menos e-mail ou WhatsApp",
+    path: ["email"],
+  });
+
+export type LeadIntakeInput = z.infer<typeof leadIntakeSchema>;
