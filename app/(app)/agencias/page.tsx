@@ -38,11 +38,6 @@ export default async function AgenciasPage() {
               <p className="mt-3 text-sm text-gray-600">
                 {a._count.clientes} cliente(s) vinculado(s)
               </p>
-              {a.percentualComissao && (
-                <p className="text-xs text-gray-400">
-                  Comissão: {Number(a.percentualComissao)}%
-                </p>
-              )}
             </Link>
           ))}
         </div>

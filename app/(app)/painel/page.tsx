@@ -30,9 +30,6 @@ const financeSelect = {
   diaVencimento: true,
   dataRenovacao: true,
   valorRenovacao: true,
-  partnerAgency: {
-    select: { id: true, nome: true, percentualComissao: true },
-  },
 } as const;
 
 function Stat({
@@ -94,7 +91,7 @@ export default async function PainelPage() {
       </div>
 
       {/* Financeiro */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat
           label="Faturamento mensal"
           value={formatCurrency(resumo.faturamentoMensal)}
@@ -105,14 +102,10 @@ export default async function PainelPage() {
           value={formatCurrency(resumo.custoMensal)}
         />
         <Stat
-          label="Comissões parceria"
-          value={formatCurrency(resumo.comissoes)}
-        />
-        <Stat
           label="Lucro estimado"
           value={formatCurrency(resumo.lucro)}
           accent={resumo.lucro >= 0 ? "text-green-700" : "text-red-700"}
-          hint="Faturamento − custo − comissões"
+          hint="Faturamento − custo"
         />
       </div>
 

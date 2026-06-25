@@ -37,10 +37,6 @@ export default async function EditarAgenciaPage({
           contatoNome: agency.contatoNome,
           contatoEmail: agency.contatoEmail,
           contatoTelefone: agency.contatoTelefone,
-          modeloComissao: agency.modeloComissao,
-          percentualComissao: agency.percentualComissao
-            ? String(agency.percentualComissao)
-            : "",
           observacoes: agency.observacoes,
         }}
       />

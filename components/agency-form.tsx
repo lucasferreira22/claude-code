@@ -9,8 +9,6 @@ export type AgencyFormValues = {
   contatoNome?: string | null;
   contatoEmail?: string | null;
   contatoTelefone?: string | null;
-  modeloComissao?: string | null;
-  percentualComissao?: string | null;
   observacoes?: string | null;
 };
 
@@ -66,30 +64,11 @@ export function AgencyForm({
               className="input"
             />
           </div>
-          <div>
+          <div className="sm:col-span-2">
             <label className="label">Contato (telefone)</label>
             <input
               name="contatoTelefone"
               defaultValue={values?.contatoTelefone ?? ""}
-              className="input"
-            />
-          </div>
-          <div>
-            <label className="label">Percentual de comissão (%)</label>
-            <input
-              name="percentualComissao"
-              inputMode="decimal"
-              placeholder="Ex: 20"
-              defaultValue={values?.percentualComissao ?? ""}
-              className="input"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="label">Modelo de comissão</label>
-            <input
-              name="modeloComissao"
-              placeholder="Ex: 20% sobre o fee mensal"
-              defaultValue={values?.modeloComissao ?? ""}
               className="input"
             />
           </div>

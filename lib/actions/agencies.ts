@@ -13,8 +13,6 @@ function parseAgencyForm(formData: FormData) {
     contatoNome: String(formData.get("contatoNome") ?? ""),
     contatoEmail: String(formData.get("contatoEmail") ?? ""),
     contatoTelefone: String(formData.get("contatoTelefone") ?? ""),
-    modeloComissao: String(formData.get("modeloComissao") ?? ""),
-    percentualComissao: String(formData.get("percentualComissao") ?? ""),
     observacoes: String(formData.get("observacoes") ?? ""),
   };
 }
@@ -38,8 +36,6 @@ export async function createAgency(
       contatoNome: data.contatoNome,
       contatoEmail: data.contatoEmail,
       contatoTelefone: data.contatoTelefone,
-      modeloComissao: data.modeloComissao,
-      percentualComissao: data.percentualComissao ?? null,
       observacoes: data.observacoes,
     },
   });
@@ -69,8 +65,6 @@ export async function updateAgency(
       contatoNome: data.contatoNome,
       contatoEmail: data.contatoEmail,
       contatoTelefone: data.contatoTelefone,
-      modeloComissao: data.modeloComissao,
-      percentualComissao: data.percentualComissao ?? null,
       observacoes: data.observacoes,
     },
   });
