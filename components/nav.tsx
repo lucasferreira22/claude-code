@@ -6,8 +6,6 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/painel", label: "Painel" },
   { href: "/clientes", label: "Clientes" },
-  { href: "/cobrancas", label: "Cobranças" },
-  { href: "/hospedagens", label: "Hospedagens" },
   { href: "/financeiro", label: "Financeiro" },
   { href: "/agencias", label: "Agências Parceiras" },
   { href: "/importar", label: "Importar CSV" },

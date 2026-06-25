@@ -116,7 +116,10 @@ export default async function PainelPage() {
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
               Cobranças do mês
             </h2>
-            <Link href="/cobrancas" className="text-xs text-brand-700 hover:underline">
+            <Link
+              href="/financeiro/cobrancas"
+              className="text-xs text-brand-700 hover:underline"
+            >
               Ver tudo →
             </Link>
           </div>
@@ -124,7 +127,10 @@ export default async function PainelPage() {
           {totalCobranca === 0 ? (
             <p className="text-sm text-gray-400">
               Nenhuma cobrança gerada para {formatCompetencia(competencia)}.{" "}
-              <Link href="/cobrancas" className="text-brand-700 hover:underline">
+              <Link
+                href="/financeiro/cobrancas"
+                className="text-brand-700 hover:underline"
+              >
                 Gerar agora
               </Link>
               .
