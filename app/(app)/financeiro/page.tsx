@@ -44,7 +44,7 @@ export default async function FinanceiroPage() {
       <div>
         <h1 className="text-2xl font-bold">Financeiro</h1>
         <p className="text-sm text-gray-500">
-          Faturamento, custos, comissões e lucro dos clientes ativos.
+          Faturamento, custos e lucro dos clientes ativos.
         </p>
       </div>
 

@@ -25,7 +25,7 @@ export async function markHostingRenewed(clientId: string) {
     data: { dataRenovacao: proxima },
   });
 
-  revalidatePath("/hospedagens");
+  revalidatePath("/financeiro/hospedagens");
   revalidatePath("/painel");
   revalidatePath(`/clientes/${clientId}`);
 }

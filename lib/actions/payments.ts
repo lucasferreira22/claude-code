@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import type { PaymentStatus } from "@prisma/client";
 
 function revalidateFinanceiro() {
-  revalidatePath("/cobrancas");
+  revalidatePath("/financeiro/cobrancas");
   revalidatePath("/painel");
   revalidatePath("/financeiro");
 }
