@@ -16,9 +16,16 @@ function SubmitButton() {
 export function ServiceForm({
   action,
   values,
+  categorias,
 }: {
   action: (prev: ServiceActionState, formData: FormData) => Promise<ServiceActionState>;
-  values: { nome: string; descricao: string | null; ativo: boolean };
+  values: {
+    nome: string;
+    descricao: string | null;
+    ativo: boolean;
+    parentId: string | null;
+  };
+  categorias: { id: string; nome: string }[];
 }) {
   const [state, formAction] = useFormState(action, undefined);
 
@@ -42,6 +49,21 @@ export function ServiceForm({
           className="input"
           placeholder="O que está incluído (opcional)"
         />
+      </div>
+      <div>
+        <label className="label">Categoria</label>
+        <select
+          name="parentId"
+          defaultValue={values.parentId ?? ""}
+          className="input"
+        >
+          <option value="">— Nenhuma (item de topo)</option>
+          {categorias.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nome}
+            </option>
+          ))}
+        </select>
       </div>
       <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
         <input

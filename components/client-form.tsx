@@ -56,7 +56,7 @@ export function ClientForm({
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   agencies: { id: string; nome: string }[];
   users: { id: string; nome: string }[];
-  services: { id: string; nome: string }[];
+  services: { id: string; nome: string; parentId: string | null }[];
   values?: ClientFormValues;
   submitLabel: string;
   cancelHref: string;
@@ -69,6 +69,27 @@ export function ClientForm({
 
   const contatoValor = (tipo: string) =>
     values?.contatos?.find((c) => c.tipo === tipo)?.valor ?? "";
+
+  // Agrupa os serviços: categorias (itens de topo com filhos) viram cabeçalhos;
+  // itens de topo sem filhos (e órfãos) são serviços selecionáveis avulsos.
+  const serviceIds = new Set(services.map((s) => s.id));
+  const topo = services.filter((s) => !s.parentId || !serviceIds.has(s.parentId));
+  const filhosDe = (id: string) => services.filter((s) => s.parentId === id);
+  const categorias = topo.filter((t) => filhosDe(t.id).length > 0);
+  const avulsos = topo.filter((t) => filhosDe(t.id).length === 0);
+
+  const serviceCheckbox = (s: { id: string; nome: string }) => (
+    <label key={s.id} className="flex items-center gap-2 text-sm">
+      <input
+        type="checkbox"
+        name="servicos"
+        value={s.id}
+        defaultChecked={values?.servicos?.includes(s.id)}
+        className="h-4 w-4 rounded border-gray-300"
+      />
+      {s.nome}
+    </label>
+  );
 
   return (
     <form action={formAction} className="space-y-6">
@@ -321,19 +342,22 @@ export function ClientForm({
               </Link>
             </p>
           ) : (
-            <div className="flex flex-wrap gap-4">
-              {services.map((s) => (
-                <label key={s.id} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    name="servicos"
-                    value={s.id}
-                    defaultChecked={values?.servicos?.includes(s.id)}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
-                  {s.nome}
-                </label>
+            <div className="space-y-3">
+              {categorias.map((cat) => (
+                <div key={cat.id}>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    {cat.nome}
+                  </p>
+                  <div className="flex flex-wrap gap-4 pl-1">
+                    {filhosDe(cat.id).map(serviceCheckbox)}
+                  </div>
+                </div>
               ))}
+              {avulsos.length > 0 && (
+                <div className="flex flex-wrap gap-4">
+                  {avulsos.map(serviceCheckbox)}
+                </div>
+              )}
             </div>
           )}
         </div>

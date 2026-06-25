@@ -167,12 +167,17 @@ model ClientService {
 }
 
 // Catálogo de serviços da agência (gerenciável pela tela /servicos).
+// Pode ter hierarquia: uma categoria (ex: "Tráfego Pago") agrupa subserviços
+// (Meta Ads, Google Ads...) via parentId.
 model Service {
   id           String          @id @default(cuid())
   nome         String          @unique
   descricao    String?
   ativo        Boolean         @default(true)
   ordem        Int             @default(0)
+  parent       Service?        @relation("ServiceTree", fields: [parentId], references: [id], onDelete: SetNull)
+  parentId     String?
+  filhos       Service[]       @relation("ServiceTree")
   criadoEm     DateTime        @default(now())
   atualizadoEm DateTime        @updatedAt
   clientes     ClientService[]

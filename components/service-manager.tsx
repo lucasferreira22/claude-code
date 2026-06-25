@@ -15,6 +15,7 @@ export type ServiceRow = {
   descricao: string | null;
   ativo: boolean;
   clientes: number;
+  parentId: string | null;
 };
 
 function AddButton() {
@@ -26,7 +27,13 @@ function AddButton() {
   );
 }
 
-export function ServiceManager({ services }: { services: ServiceRow[] }) {
+export function ServiceManager({
+  services,
+  categorias,
+}: {
+  services: ServiceRow[];
+  categorias: { id: string; nome: string }[];
+}) {
   const [createState, createAction] = useFormState(createService, undefined);
   const [rowMsg, setRowMsg] = useState<{ error?: string; ok?: string } | null>(
     null
@@ -49,19 +56,29 @@ export function ServiceManager({ services }: { services: ServiceRow[] }) {
     });
   }
 
+  // Ordena: cada categoria de topo seguida dos seus filhos.
+  const topo = services.filter((s) => !s.parentId);
+  const filhosDe = (id: string) => services.filter((s) => s.parentId === id);
+  const linhas: { s: ServiceRow; nivel: number; categoria: boolean }[] = [];
+  for (const t of topo) {
+    const filhos = filhosDe(t.id);
+    linhas.push({ s: t, nivel: 0, categoria: filhos.length > 0 });
+    for (const f of filhos) linhas.push({ s: f, nivel: 1, categoria: false });
+  }
+
   return (
     <div className="space-y-6">
       {/* Adicionar serviço */}
       <form
         action={createAction}
-        className="card grid grid-cols-1 gap-3 p-4 sm:grid-cols-[1fr_2fr_auto] sm:items-end"
+        className="card grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end"
       >
         <div>
           <label className="label">Nome do serviço *</label>
           <input
             name="nome"
             required
-            placeholder="Ex: Consultoria"
+            placeholder="Ex: LinkedIn Ads"
             className="input"
           />
         </div>
@@ -69,26 +86,41 @@ export function ServiceManager({ services }: { services: ServiceRow[] }) {
           <label className="label">Descrição</label>
           <input
             name="descricao"
-            placeholder="O que está incluído (opcional)"
+            placeholder="Opcional"
             className="input"
           />
         </div>
+        <div>
+          <label className="label">Categoria</label>
+          <select name="parentId" defaultValue="" className="input">
+            <option value="">— Nenhuma (item de topo)</option>
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nome}
+              </option>
+            ))}
+          </select>
+        </div>
         <AddButton />
         {createState?.error && (
-          <p className="text-sm text-red-600 sm:col-span-3">
+          <p className="text-sm text-red-600 lg:col-span-4">
             {createState.error}
           </p>
         )}
         {createState?.ok && (
-          <p className="text-sm text-green-700 sm:col-span-3">
+          <p className="text-sm text-green-700 lg:col-span-4">
             {createState.ok}
           </p>
         )}
       </form>
 
-      {rowMsg?.error && (
-        <p className="text-sm text-red-600">{rowMsg.error}</p>
-      )}
+      <p className="text-xs text-gray-400">
+        Dica: deixe a categoria em branco para criar um item de topo (que pode
+        virar categoria ao receber subserviços). Ex: crie “Tráfego Pago” como
+        topo e cadastre “Meta Ads” com a categoria “Tráfego Pago”.
+      </p>
+
+      {rowMsg?.error && <p className="text-sm text-red-600">{rowMsg.error}</p>}
       {rowMsg?.ok && <p className="text-sm text-green-700">{rowMsg.ok}</p>}
 
       {/* Lista */}
@@ -108,15 +140,29 @@ export function ServiceManager({ services }: { services: ServiceRow[] }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {services.map((s) => (
+              {linhas.map(({ s, nivel, categoria }) => (
                 <tr key={s.id} className={s.ativo ? "" : "bg-gray-50/60"}>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-800">{s.nome}</p>
-                    {s.descricao && (
-                      <p className="text-xs text-gray-400">{s.descricao}</p>
-                    )}
+                    <div style={{ paddingLeft: nivel * 20 }}>
+                      <p className="flex items-center gap-2 font-medium text-gray-800">
+                        {nivel > 0 && (
+                          <span className="text-gray-300">↳</span>
+                        )}
+                        {s.nome}
+                        {categoria && (
+                          <span className="badge bg-brand-100 text-brand-700">
+                            categoria
+                          </span>
+                        )}
+                      </p>
+                      {s.descricao && (
+                        <p className="text-xs text-gray-400">{s.descricao}</p>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{s.clientes}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {categoria ? "—" : s.clientes}
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`badge ${
