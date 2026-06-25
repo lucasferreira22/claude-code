@@ -48,6 +48,7 @@ export async function POST(req: Request) {
   // 4) Monta contatos (só os preenchidos).
   const contatos: { tipo: TipoContato; valor: string }[] = [];
   if (data.email) contatos.push({ tipo: "EMAIL", valor: data.email });
+  if (data.whatsapp) contatos.push({ tipo: "WHATSAPP", valor: data.whatsapp });
   if (data.telefone) contatos.push({ tipo: "TELEFONE", valor: data.telefone });
 
   // 5) Observações: origem + site/rede social + mensagem livre.
@@ -64,6 +65,7 @@ export async function POST(req: Request) {
     const client = await prisma.client.create({
       data: {
         nomeRazaoSocial: data.nome,
+        nicho: data.nicho,
         tipoRelacao: "DIRETO",
         status: "LEAD",
         categoria: "RECORRENTE",

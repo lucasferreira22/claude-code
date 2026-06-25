@@ -98,13 +98,17 @@ export const leadIntakeSchema = z
   .object({
     nome: z.string().trim().min(1, "Nome é obrigatório"),
     email: optionalEmail,
+    // Contato principal da landing: WhatsApp.
+    whatsapp: optionalString,
     telefone: optionalString,
+    // Nicho/segmento do negócio — vai para o campo dedicado Client.nicho.
+    nicho: optionalString,
     // Site ou rede social da empresa (Instagram, site, etc.)
     site: optionalString,
     mensagem: optionalString,
   })
-  .refine((d) => Boolean(d.email) || Boolean(d.telefone), {
-    message: "Informe ao menos e-mail ou telefone",
+  .refine((d) => Boolean(d.email) || Boolean(d.whatsapp) || Boolean(d.telefone), {
+    message: "Informe ao menos e-mail ou WhatsApp",
     path: ["email"],
   });
 
