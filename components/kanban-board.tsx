@@ -66,7 +66,7 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
 
   return (
     <div
-      className={`flex gap-4 overflow-x-auto pb-4 ${
+      className={`flex h-[calc(100vh-12rem)] gap-4 overflow-x-auto pb-1 ${
         isPending ? "opacity-95" : ""
       }`}
     >
@@ -84,7 +84,7 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
               setOverCol((s) => (s === status ? null : s))
             }
             onDrop={(e) => handleDrop(e, status)}
-            className={`flex w-72 shrink-0 flex-col rounded-lg border p-2 transition-colors ${
+            className={`flex h-full w-72 shrink-0 flex-col rounded-lg border p-2 transition-colors ${
               isOver
                 ? "border-brand-400 bg-brand-50"
                 : "border-gray-200 bg-gray-50"
@@ -99,7 +99,7 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
               </span>
             </div>
 
-            <div className="flex flex-1 flex-col gap-2">
+            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
               {colCards.length === 0 ? (
                 <p className="px-1 py-6 text-center text-xs text-gray-300">
                   Arraste clientes para cá
