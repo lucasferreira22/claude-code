@@ -71,10 +71,20 @@ export const PAYMENT_ATRASADO_BADGE = "bg-red-100 text-red-800";
 export const SERVICO_LABELS: Record<Servico, string> = {
   META_ADS: "Meta Ads",
   GOOGLE_ADS: "Google Ads",
+  TIKTOK_ADS: "TikTok Ads",
+  SOCIAL_MEDIA: "Social Media",
+  CRIACAO_SITE: "Criação de Site",
   OUTROS: "Outros",
 };
 
-export const SERVICO_ORDER: Servico[] = ["META_ADS", "GOOGLE_ADS", "OUTROS"];
+export const SERVICO_ORDER: Servico[] = [
+  "META_ADS",
+  "GOOGLE_ADS",
+  "TIKTOK_ADS",
+  "SOCIAL_MEDIA",
+  "CRIACAO_SITE",
+  "OUTROS",
+];
 
 export const TIPO_CONTATO_LABELS: Record<TipoContato, string> = {
   TELEFONE: "Telefone",
