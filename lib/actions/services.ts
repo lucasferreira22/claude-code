@@ -20,12 +20,13 @@ export async function createService(
 
   const nome = String(formData.get("nome") ?? "").trim();
   const descricao = String(formData.get("descricao") ?? "").trim() || null;
+  const parentId = String(formData.get("parentId") ?? "").trim() || null;
   if (!nome) return { error: "Informe o nome do serviço" };
 
   const existing = await prisma.service.findUnique({ where: { nome } });
   if (existing) return { error: "Já existe um serviço com esse nome" };
 
-  await prisma.service.create({ data: { nome, descricao } });
+  await prisma.service.create({ data: { nome, descricao, parentId } });
   revalidate();
   return { ok: `Serviço "${nome}" criado.` };
 }
@@ -41,7 +42,9 @@ export async function updateService(
   const nome = String(formData.get("nome") ?? "").trim();
   const descricao = String(formData.get("descricao") ?? "").trim() || null;
   const ativo = formData.get("ativo") === "on";
+  let parentId = String(formData.get("parentId") ?? "").trim() || null;
   if (!nome) return { error: "Informe o nome do serviço" };
+  if (parentId === id) parentId = null; // não pode ser pai de si mesmo
 
   const dup = await prisma.service.findUnique({ where: { nome } });
   if (dup && dup.id !== id)
@@ -49,7 +52,7 @@ export async function updateService(
 
   await prisma.service.update({
     where: { id },
-    data: { nome, descricao, ativo },
+    data: { nome, descricao, ativo, parentId },
   });
   revalidate();
   return { ok: "Serviço atualizado." };

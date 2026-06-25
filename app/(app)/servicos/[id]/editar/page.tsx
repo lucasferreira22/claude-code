@@ -12,6 +12,15 @@ export default async function EditarServicoPage({
   const service = await prisma.service.findUnique({ where: { id: params.id } });
   if (!service) notFound();
 
+  // Categorias possíveis = itens de topo, exceto o próprio serviço.
+  const categorias = (
+    await prisma.service.findMany({
+      where: { parentId: null, id: { not: service.id } },
+      select: { id: true, nome: true },
+      orderBy: { nome: "asc" },
+    })
+  ).map((c) => ({ id: c.id, nome: c.nome }));
+
   const action = updateService.bind(null, service.id);
 
   return (
@@ -25,10 +34,12 @@ export default async function EditarServicoPage({
 
       <ServiceForm
         action={action}
+        categorias={categorias}
         values={{
           nome: service.nome,
           descricao: service.descricao,
           ativo: service.ativo,
+          parentId: service.parentId,
         }}
       />
     </div>

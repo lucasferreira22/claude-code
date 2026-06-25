@@ -15,7 +15,7 @@ export default async function NovoClientePage() {
     }),
     prisma.service.findMany({
       where: { ativo: true },
-      select: { id: true, nome: true },
+      select: { id: true, nome: true, parentId: true },
       orderBy: [{ ordem: "asc" }, { nome: "asc" }],
     }),
   ]);
