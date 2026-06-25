@@ -52,6 +52,11 @@ function emptyPorStatus(): Record<ClientStatus, number> {
   );
 }
 
+// Parcela mensal da hospedagem: a cobrança é anual, então rateia por 12.
+export function hospedagemMensal(c: FinanceClient): number {
+  return (num(c.valorRenovacao) ?? 0) / 12;
+}
+
 export function summarize(clients: FinanceClient[]): FinanceSummary {
   const porCategoria = emptyPorCategoria();
   const porStatus = emptyPorStatus();
@@ -64,8 +69,12 @@ export function summarize(clients: FinanceClient[]): FinanceSummary {
 
     if (c.status === "ATIVO") {
       const v = num(c.valorMensal) ?? 0;
-      faturamentoMensal += v;
+      const hosp = hospedagemMensal(c);
+      faturamentoMensal += v + hosp;
+      // Mensalidade entra na categoria do cliente; a hospedagem rateada entra
+      // sempre na linha "Hospedagem" (é receita de hospedagem).
       porCategoria[c.categoria].faturamento += v;
+      porCategoria.HOSPEDAGEM.faturamento += hosp;
       custoMensal += num(c.custoMensal) ?? 0;
     }
   }
