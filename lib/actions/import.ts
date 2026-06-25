@@ -49,6 +49,11 @@ function parseServicos(v: string | undefined): Servico[] {
   if (n.includes("meta") || n.includes("facebook") || n.includes("insta"))
     out.add("META_ADS");
   if (n.includes("google")) out.add("GOOGLE_ADS");
+  if (n.includes("tiktok") || n.includes("tik tok")) out.add("TIKTOK_ADS");
+  if (n.includes("social") || n.includes("midia social") || n.includes("smm"))
+    out.add("SOCIAL_MEDIA");
+  if (n.includes("site") || n.includes("web") || n.includes("landing"))
+    out.add("CRIACAO_SITE");
   if (n.includes("ambos") || n.includes("todos")) {
     out.add("META_ADS");
     out.add("GOOGLE_ADS");
