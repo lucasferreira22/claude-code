@@ -73,8 +73,6 @@ export const agencySchema = z.object({
   contatoNome: optionalString,
   contatoEmail: optionalString,
   contatoTelefone: optionalString,
-  modeloComissao: optionalString,
-  percentualComissao: optionalDecimal,
   observacoes: optionalString,
 });
 

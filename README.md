@@ -87,8 +87,6 @@ automaticamente se ainda não existirem.
 ## Roadmap (fora do escopo da Fase 1)
 
 Já previsto na modelagem para evolução futura:
-- **Financeiro**: faturas, pagamentos, inadimplência (base: `clients.valorMensal`
-  e `partner_agencies.percentualComissao`)
 - Relatórios e dashboards
 - Permissões diferenciadas (admin vs colaborador)
 - Integrações (WhatsApp, etc.)

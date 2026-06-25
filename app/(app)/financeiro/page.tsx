@@ -1,12 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import {
-  summarize,
-  comissoesPorAgencia,
-  comissaoCliente,
-  num,
-  type FinanceClient,
-} from "@/lib/finance";
+import { summarize, num, type FinanceClient } from "@/lib/finance";
 import {
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
@@ -25,9 +19,6 @@ const financeSelect = {
   diaVencimento: true,
   dataRenovacao: true,
   valorRenovacao: true,
-  partnerAgency: {
-    select: { id: true, nome: true, percentualComissao: true },
-  },
 } as const;
 
 export default async function FinanceiroPage() {
@@ -38,7 +29,6 @@ export default async function FinanceiroPage() {
   const clients = rows as unknown as FinanceClient[];
 
   const resumo = summarize(clients);
-  const porAgencia = comissoesPorAgencia(clients);
 
   // Detalhamento por cliente (somente ativos com algum valor)
   const ativos = clients
@@ -46,8 +36,7 @@ export default async function FinanceiroPage() {
     .map((c) => {
       const valor = num(c.valorMensal) ?? 0;
       const custo = num(c.custoMensal) ?? 0;
-      const comissao = comissaoCliente(c);
-      return { c, valor, custo, comissao, lucro: valor - custo - comissao };
+      return { c, valor, custo, lucro: valor - custo };
     });
 
   return (
@@ -60,7 +49,7 @@ export default async function FinanceiroPage() {
       </div>
 
       {/* Totais */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="card p-5">
           <p className="text-xs uppercase tracking-wide text-gray-400">
             Faturamento
@@ -73,14 +62,6 @@ export default async function FinanceiroPage() {
           <p className="text-xs uppercase tracking-wide text-gray-400">Custo</p>
           <p className="mt-1 text-2xl font-bold">
             {formatCurrency(resumo.custoMensal)}
-          </p>
-        </div>
-        <div className="card p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-400">
-            Comissões
-          </p>
-          <p className="mt-1 text-2xl font-bold">
-            {formatCurrency(resumo.comissoes)}
           </p>
         </div>
         <div className="card p-5">
@@ -120,46 +101,6 @@ export default async function FinanceiroPage() {
         </ul>
       </section>
 
-      {/* Comissões por agência */}
-      {porAgencia.length > 0 && (
-        <section className="card p-6">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Comissões por agência parceira
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
-                <tr>
-                  <th className="px-3 py-2">Agência</th>
-                  <th className="px-3 py-2 text-right">Faturamento</th>
-                  <th className="px-3 py-2 text-right">Comissão</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {porAgencia.map((a) => (
-                  <tr key={a.agenciaId}>
-                    <td className="px-3 py-2">
-                      <Link
-                        href={`/agencias/${a.agenciaId}`}
-                        className="text-brand-700 hover:underline"
-                      >
-                        {a.nome}
-                      </Link>
-                    </td>
-                    <td className="px-3 py-2 text-right text-gray-600">
-                      {formatCurrency(a.faturamento)}
-                    </td>
-                    <td className="px-3 py-2 text-right text-gray-700">
-                      {formatCurrency(a.comissao)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
       {/* Por cliente */}
       <section className="card overflow-x-auto">
         <h2 className="px-6 pt-6 text-sm font-semibold uppercase tracking-wide text-gray-500">
@@ -171,19 +112,18 @@ export default async function FinanceiroPage() {
               <th className="px-4 py-3">Cliente</th>
               <th className="px-4 py-3 text-right">Valor</th>
               <th className="px-4 py-3 text-right">Custo</th>
-              <th className="px-4 py-3 text-right">Comissão</th>
               <th className="px-4 py-3 text-right">Lucro</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {ativos.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
                   Nenhum cliente ativo com valor mensal.
                 </td>
               </tr>
             ) : (
-              ativos.map(({ c, valor, custo, comissao, lucro }) => (
+              ativos.map(({ c, valor, custo, lucro }) => (
                 <tr key={c.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <Link
@@ -198,9 +138,6 @@ export default async function FinanceiroPage() {
                   </td>
                   <td className="px-4 py-3 text-right text-gray-600">
                     {custo > 0 ? formatCurrency(custo) : "—"}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-600">
-                    {comissao > 0 ? formatCurrency(comissao) : "—"}
                   </td>
                   <td
                     className={`px-4 py-3 text-right font-medium ${

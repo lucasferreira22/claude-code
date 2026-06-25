@@ -21,14 +21,12 @@ export type FinanceClient = {
   diaVencimento: number | null;
   dataRenovacao: Date | null;
   valorRenovacao: unknown;
-  partnerAgency: { id: string; nome: string; percentualComissao: unknown } | null;
 };
 
 export type FinanceSummary = {
   faturamentoMensal: number; // soma de valorMensal dos clientes ATIVOS
   custoMensal: number; // soma de custoMensal dos clientes ATIVOS
-  comissoes: number; // comissões devidas a agências parceiras (ATIVOS)
-  lucro: number; // faturamento - custo - comissões
+  lucro: number; // faturamento - custo
   totalClientes: number;
   porCategoria: Record<Categoria, { count: number; faturamento: number }>;
   porStatus: Record<ClientStatus, number>;
@@ -54,21 +52,11 @@ function emptyPorStatus(): Record<ClientStatus, number> {
   );
 }
 
-// Comissão mensal de um cliente de parceria (valorMensal × percentual/100).
-export function comissaoCliente(c: FinanceClient): number {
-  if (c.tipoRelacao !== "PARCERIA" || !c.partnerAgency) return 0;
-  const pct = num(c.partnerAgency.percentualComissao);
-  const valor = num(c.valorMensal);
-  if (!pct || !valor) return 0;
-  return (valor * pct) / 100;
-}
-
 export function summarize(clients: FinanceClient[]): FinanceSummary {
   const porCategoria = emptyPorCategoria();
   const porStatus = emptyPorStatus();
   let faturamentoMensal = 0;
   let custoMensal = 0;
-  let comissoes = 0;
 
   for (const c of clients) {
     porStatus[c.status]++;
@@ -79,43 +67,17 @@ export function summarize(clients: FinanceClient[]): FinanceSummary {
       faturamentoMensal += v;
       porCategoria[c.categoria].faturamento += v;
       custoMensal += num(c.custoMensal) ?? 0;
-      comissoes += comissaoCliente(c);
     }
   }
 
   return {
     faturamentoMensal,
     custoMensal,
-    comissoes,
-    lucro: faturamentoMensal - custoMensal - comissoes,
+    lucro: faturamentoMensal - custoMensal,
     totalClientes: clients.length,
     porCategoria,
     porStatus,
   };
-}
-
-// Comissões agregadas por agência parceira (apenas clientes ATIVOS).
-export type ComissaoAgencia = {
-  agenciaId: string;
-  nome: string;
-  faturamento: number;
-  comissao: number;
-};
-
-export function comissoesPorAgencia(clients: FinanceClient[]): ComissaoAgencia[] {
-  const map = new Map<string, ComissaoAgencia>();
-  for (const c of clients) {
-    if (c.status !== "ATIVO" || c.tipoRelacao !== "PARCERIA" || !c.partnerAgency)
-      continue;
-    const ag = c.partnerAgency;
-    const cur =
-      map.get(ag.id) ??
-      { agenciaId: ag.id, nome: ag.nome, faturamento: 0, comissao: 0 };
-    cur.faturamento += num(c.valorMensal) ?? 0;
-    cur.comissao += comissaoCliente(c);
-    map.set(ag.id, cur);
-  }
-  return Array.from(map.values()).sort((a, b) => b.comissao - a.comissao);
 }
 
 // ---------------------------------------------------------------------------

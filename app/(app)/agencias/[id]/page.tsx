@@ -82,16 +82,6 @@ export default async function AgenciaDetailPage({
             {agency.contatoTelefone ?? "—"}
           </dd>
         </div>
-        <div>
-          <dt className="text-xs uppercase tracking-wide text-gray-400">
-            Comissão
-          </dt>
-          <dd className="text-sm text-gray-800">
-            {agency.percentualComissao
-              ? `${Number(agency.percentualComissao)}%`
-              : agency.modeloComissao ?? "—"}
-          </dd>
-        </div>
         {agency.observacoes && (
           <div className="col-span-2 sm:col-span-4">
             <dt className="text-xs uppercase tracking-wide text-gray-400">

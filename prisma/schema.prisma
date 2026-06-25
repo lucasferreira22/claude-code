@@ -39,8 +39,6 @@ model PartnerAgency {
   contatoNome        String?
   contatoEmail       String?
   contatoTelefone    String?
-  modeloComissao     String? // texto livre (ex: "20% sobre o fee mensal")
-  percentualComissao Decimal? @db.Decimal(5, 2)
   observacoes        String?
   criadoEm           DateTime @default(now())
   atualizadoEm       DateTime @updatedAt
