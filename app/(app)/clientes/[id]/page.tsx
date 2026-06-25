@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { deleteClient, deleteNote } from "@/lib/actions/clients";
+import { waLink } from "@/lib/whatsapp";
 import { NoteForm } from "@/components/note-form";
 import { DeleteButton } from "@/components/delete-button";
 import { StatusSelect } from "@/components/status-select";
@@ -54,6 +55,14 @@ export default async function ClienteDetailPage({
 
   const deleteAction = deleteClient.bind(null, client.id);
 
+  const whatsappNumero = client.contatos.find(
+    (c) => c.tipo === "WHATSAPP"
+  )?.valor;
+  const whatsappHref = waLink(
+    whatsappNumero,
+    "Olá! 😊 Aqui é da Focus Digital. Tudo bem?"
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -89,6 +98,24 @@ export default async function ClienteDetailPage({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {whatsappHref && (
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4 fill-current"
+                aria-hidden="true"
+              >
+                <path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.4 0-.5 0-.1-.6-1.5-.9-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 5 4.3 1.9.7 2.6.8 3.5.7.6-.1 1.7-.7 1.9-1.4.2-.6.2-1.2.2-1.3-.1-.2-.3-.2-.6-.3z" />
+                <path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.9.9-2.8-.2-.3A8 8 0 1 1 12 20z" />
+              </svg>
+              WhatsApp
+            </a>
+          )}
           <Link href={`/clientes/${client.id}/editar`} className="btn-secondary">
             Editar
           </Link>
