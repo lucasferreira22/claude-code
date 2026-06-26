@@ -71,7 +71,7 @@ export default async function TarefasPage() {
     );
   }
 
-  let erro = false;
+  let erroMsg: string | null = null;
   let data = { porCliente: [] as Awaited<
     ReturnType<typeof getTarefasOperacional>
   >["porCliente"], comVencimento: [] as Awaited<
@@ -79,8 +79,8 @@ export default async function TarefasPage() {
   >["comVencimento"] };
   try {
     data = await getTarefasOperacional();
-  } catch {
-    erro = true;
+  } catch (e) {
+    erroMsg = e instanceof Error ? e.message : "erro desconhecido";
   }
 
   // Casa as tarefas-pai (clientes do Todoist) com os clientes do CRM por nome.
@@ -120,10 +120,13 @@ export default async function TarefasPage() {
         </p>
       </div>
 
-      {erro ? (
+      {erroMsg ? (
         <div className="card p-8 text-center text-gray-500">
-          Não foi possível carregar as tarefas do Todoist agora. Tente novamente
-          em instantes.
+          Não foi possível carregar as tarefas do Todoist agora.
+          <br />
+          <span className="mt-2 block font-mono text-xs text-red-500">
+            {erroMsg}
+          </span>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

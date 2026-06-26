@@ -64,14 +64,17 @@ export function normalizarNome(s: string): string {
 }
 
 async function api<T>(path: string): Promise<T> {
-  const token = process.env.TODOIST_API_TOKEN;
+  // trim: evita falha quando o token entra com espaço/quebra de linha no env.
+  const token = process.env.TODOIST_API_TOKEN?.trim();
   if (!token) throw new Error("TODOIST_API_TOKEN não configurado");
   const res = await fetch(`${API}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
     // Cache de 5 min para não estourar o rate limit do Todoist.
     next: { revalidate: 300 },
   });
-  if (!res.ok) throw new Error(`Todoist respondeu ${res.status}`);
+  if (!res.ok) {
+    throw new Error(`Todoist respondeu ${res.status} ${res.statusText}`.trim());
+  }
   return res.json() as Promise<T>;
 }
 
