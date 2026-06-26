@@ -11,9 +11,9 @@ export default async function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center text-center">
           <img
-            src="/logo-focus.png"
+            src="/logo-focus.svg"
             alt="Focus Digital"
-            className="mb-3 h-14 w-auto"
+            className="mb-3 h-12 w-auto"
           />
           <p className="text-sm text-gray-500">CRM · Gestão de clientes</p>
         </div>
