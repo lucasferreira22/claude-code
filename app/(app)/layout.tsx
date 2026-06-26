@@ -22,9 +22,9 @@ export default async function AppLayout({
           <div className="flex items-center gap-6">
             <Link href="/painel" className="shrink-0">
               <img
-                src="/logo-focus.png"
+                src="/logo-focus.svg"
                 alt="Focus Digital"
-                className="h-12 w-auto"
+                className="h-10 w-auto"
               />
             </Link>
             <Nav />
