@@ -68,7 +68,7 @@ export default async function HospedagensPage() {
           <p className="text-xs uppercase tracking-wide text-gray-400">
             Receita anual (renovações)
           </p>
-          <p className="mt-1 text-2xl font-bold">
+          <p className="sensivel mt-1 text-2xl font-bold">
             {formatCurrency(valorAnualTotal)}
           </p>
         </div>
@@ -128,7 +128,7 @@ export default async function HospedagensPage() {
                         {CATEGORIA_LABELS[c.categoria]}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700">
+                    <td className="sensivel px-4 py-3 text-right text-gray-700">
                       {c.valorRenovacao
                         ? formatCurrency(Number(c.valorRenovacao))
                         : "—"}

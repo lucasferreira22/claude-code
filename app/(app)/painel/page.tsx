@@ -46,7 +46,9 @@ function Stat({
   return (
     <div className="card p-5">
       <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
-      <p className={`mt-1 text-2xl font-bold ${accent ?? "text-gray-900"}`}>
+      <p
+        className={`sensivel mt-1 text-2xl font-bold ${accent ?? "text-gray-900"}`}
+      >
         {value}
       </p>
       {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
@@ -145,15 +147,17 @@ export default async function PainelPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-green-700">
-                  Recebido: {formatCurrency(recebido)}
+                  Recebido:{" "}
+                  <span className="sensivel">{formatCurrency(recebido)}</span>
                 </span>
                 <span className="text-amber-700">
-                  Pendente: {formatCurrency(pendente)}
+                  Pendente:{" "}
+                  <span className="sensivel">{formatCurrency(pendente)}</span>
                 </span>
               </div>
               <p className="text-xs text-gray-400">
                 {pctRecebido.toFixed(0)}% recebido de{" "}
-                {formatCurrency(totalCobranca)}
+                <span className="sensivel">{formatCurrency(totalCobranca)}</span>
               </p>
             </div>
           )}
@@ -230,7 +234,9 @@ export default async function PainelPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3 whitespace-nowrap">
-                  <span className="text-gray-600">{formatCurrency(v.valor)}</span>
+                  <span className="sensivel text-gray-600">
+                    {formatCurrency(v.valor)}
+                  </span>
                   <span
                     className={`text-xs ${
                       v.emDias < 0

@@ -161,7 +161,9 @@ export default async function CobrancasPage({
           <p className="text-xs uppercase tracking-wide text-gray-400">
             A receber (total)
           </p>
-          <p className="mt-1 text-xl font-bold">{formatCurrency(total)}</p>
+          <p className="sensivel mt-1 text-xl font-bold">
+            {formatCurrency(total)}
+          </p>
         </Link>
         <Link
           href={hrefFiltro("pago")}
@@ -172,7 +174,7 @@ export default async function CobrancasPage({
           <p className="text-xs uppercase tracking-wide text-gray-400">
             Recebido
           </p>
-          <p className="mt-1 text-xl font-bold text-green-700">
+          <p className="sensivel mt-1 text-xl font-bold text-green-700">
             {formatCurrency(recebido)}
           </p>
         </Link>
@@ -185,7 +187,7 @@ export default async function CobrancasPage({
           <p className="text-xs uppercase tracking-wide text-gray-400">
             Pendente
           </p>
-          <p className="mt-1 text-xl font-bold text-amber-700">
+          <p className="sensivel mt-1 text-xl font-bold text-amber-700">
             {formatCurrency(pendente)}
           </p>
         </Link>
@@ -282,7 +284,7 @@ export default async function CobrancasPage({
                         ? `Dia ${p.client.diaVencimento}`
                         : "—"}
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700">
+                    <td className="sensivel px-4 py-3 text-right text-gray-700">
                       {formatCurrency(Number(p.valor))}
                     </td>
                     <td className="px-4 py-3">
