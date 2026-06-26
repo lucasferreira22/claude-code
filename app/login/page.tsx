@@ -4,13 +4,17 @@ import { LoginForm } from "./login-form";
 
 export default async function LoginPage() {
   const session = await auth();
-  if (session?.user) redirect("/clientes");
+  if (session?.user) redirect("/painel");
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-brand-700">Focus Digital</h1>
+        <div className="mb-6 flex flex-col items-center text-center">
+          <img
+            src="/logo-focus.png"
+            alt="Focus Digital"
+            className="mb-3 h-12 w-auto"
+          />
           <p className="text-sm text-gray-500">CRM · Gestão de clientes</p>
         </div>
         <div className="card p-6">
