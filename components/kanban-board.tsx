@@ -32,11 +32,25 @@ const STATUS_ACCENT: Record<ClientStatus, string> = {
   ENCERRADO: "border-l-red-400",
 };
 
+// Remove acentos e caixa para uma busca tolerante.
+function normalizar(s: string) {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+}
+
 export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
   const [cards, setCards] = useState<KanbanCard[]>(initial);
+  const [busca, setBusca] = useState("");
   const [dragId, setDragId] = useState<string | null>(null);
   const [overCol, setOverCol] = useState<ClientStatus | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const q = normalizar(busca.trim());
+  const filtrados = q
+    ? cards.filter((c) => normalizar(c.nomeRazaoSocial).includes(q))
+    : cards;
 
   function handleDrop(e: React.DragEvent, status: ClientStatus) {
     e.preventDefault();
@@ -65,13 +79,29 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
   }
 
   return (
-    <div
-      className={`flex h-[calc(100vh-12rem)] gap-4 overflow-x-auto pb-1 ${
-        isPending ? "opacity-95" : ""
-      }`}
-    >
-      {STATUS_ORDER.map((status) => {
-        const colCards = cards.filter((c) => c.status === status);
+    <div className="space-y-3">
+      <div className="relative max-w-sm">
+        <input
+          type="search"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Pesquisar cliente pelo nome..."
+          className="input"
+        />
+        {q && (
+          <span className="mt-1 block text-xs text-gray-400">
+            {filtrados.length} resultado(s)
+          </span>
+        )}
+      </div>
+
+      <div
+        className={`flex h-[calc(100vh-16rem)] gap-4 overflow-x-auto pb-1 ${
+          isPending ? "opacity-95" : ""
+        }`}
+      >
+        {STATUS_ORDER.map((status) => {
+          const colCards = filtrados.filter((c) => c.status === status);
         const isOver = overCol === status;
         return (
           <div
@@ -150,8 +180,9 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
               )}
             </div>
           </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
