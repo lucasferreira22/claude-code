@@ -13,7 +13,12 @@ export default async function LoginPage() {
           <img
             src="/logo-focus.svg"
             alt="Focus Digital"
-            className="mb-3 h-12 w-auto"
+            className="mb-3 h-12 w-auto dark:hidden"
+          />
+          <img
+            src="/logo-focus-branco.svg"
+            alt="Focus Digital"
+            className="mb-3 hidden h-12 w-auto dark:block"
           />
           <p className="text-sm text-gray-500">CRM · Gestão de clientes</p>
         </div>
