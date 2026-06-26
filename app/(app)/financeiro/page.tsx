@@ -60,7 +60,7 @@ export default async function FinanceiroPage() {
           <p className="text-xs uppercase tracking-wide text-gray-400">
             Faturamento mensal
           </p>
-          <p className="mt-1 text-2xl font-bold">
+          <p className="sensivel mt-1 text-2xl font-bold">
             {formatCurrency(resumo.faturamentoMensal)}
           </p>
           <p className="mt-1 text-xs text-gray-400">
@@ -69,14 +69,14 @@ export default async function FinanceiroPage() {
         </div>
         <div className="card p-5">
           <p className="text-xs uppercase tracking-wide text-gray-400">Custo</p>
-          <p className="mt-1 text-2xl font-bold">
+          <p className="sensivel mt-1 text-2xl font-bold">
             {formatCurrency(resumo.custoMensal)}
           </p>
         </div>
         <div className="card p-5">
           <p className="text-xs uppercase tracking-wide text-gray-400">Lucro</p>
           <p
-            className={`mt-1 text-2xl font-bold ${
+            className={`sensivel mt-1 text-2xl font-bold ${
               resumo.lucro >= 0 ? "text-green-700" : "text-red-700"
             }`}
           >
@@ -102,7 +102,7 @@ export default async function FinanceiroPage() {
                   ({resumo.porCategoria[cat].count})
                 </span>
               </span>
-              <span className="font-medium text-gray-700">
+              <span className="sensivel font-medium text-gray-700">
                 {formatCurrency(resumo.porCategoria[cat].faturamento)}
               </span>
             </li>
@@ -142,14 +142,14 @@ export default async function FinanceiroPage() {
                       {c.nomeRazaoSocial}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-right text-gray-600">
+                  <td className="sensivel px-4 py-3 text-right text-gray-600">
                     {formatCurrency(valor)}
                   </td>
-                  <td className="px-4 py-3 text-right text-gray-600">
+                  <td className="sensivel px-4 py-3 text-right text-gray-600">
                     {custo > 0 ? formatCurrency(custo) : "—"}
                   </td>
                   <td
-                    className={`px-4 py-3 text-right font-medium ${
+                    className={`sensivel px-4 py-3 text-right font-medium ${
                       lucro >= 0 ? "text-green-700" : "text-red-700"
                     }`}
                   >

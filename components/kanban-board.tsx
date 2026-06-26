@@ -163,7 +163,7 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
                         {CATEGORIA_LABELS[card.categoria]}
                       </span>
                       {card.valorMensal ? (
-                        <span className="text-xs text-gray-500">
+                        <span className="sensivel text-xs text-gray-500">
                           {formatCurrency(card.valorMensal)}/mês
                         </span>
                       ) : null}

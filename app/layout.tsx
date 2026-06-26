@@ -13,6 +13,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
+      <head>
+        {/* Aplica o modo privacidade antes da pintura, evitando "piscar" os
+            valores quando a opção está ativa. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('dadosOcultos')==='1')document.documentElement.classList.add('dados-ocultos')}catch(e){}",
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

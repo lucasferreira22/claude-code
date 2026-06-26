@@ -154,15 +154,23 @@ export default async function ClienteDetailPage({
               />
               <Field
                 label="Valor mensal"
-                value={formatCurrency(
-                  client.valorMensal ? Number(client.valorMensal) : null
-                )}
+                value={
+                  <span className="sensivel">
+                    {formatCurrency(
+                      client.valorMensal ? Number(client.valorMensal) : null
+                    )}
+                  </span>
+                }
               />
               <Field
                 label="Custo mensal"
-                value={formatCurrency(
-                  client.custoMensal ? Number(client.custoMensal) : null
-                )}
+                value={
+                  <span className="sensivel">
+                    {formatCurrency(
+                      client.custoMensal ? Number(client.custoMensal) : null
+                    )}
+                  </span>
+                }
               />
               <Field
                 label="Dia de vencimento"
@@ -171,15 +179,25 @@ export default async function ClienteDetailPage({
               <Field
                 label="Hospedagem"
                 value={
-                  client.possuiHospedagem
-                    ? client.dataRenovacao
-                      ? `Sim · renova ${formatDate(client.dataRenovacao)}${
-                          client.valorRenovacao
-                            ? ` · ${formatCurrency(Number(client.valorRenovacao))}/ano`
-                            : ""
-                        }`
-                      : "Sim"
-                    : "Não"
+                  client.possuiHospedagem ? (
+                    client.dataRenovacao ? (
+                      <>
+                        Sim · renova {formatDate(client.dataRenovacao)}
+                        {client.valorRenovacao ? (
+                          <>
+                            {" · "}
+                            <span className="sensivel">
+                              {formatCurrency(Number(client.valorRenovacao))}/ano
+                            </span>
+                          </>
+                        ) : null}
+                      </>
+                    ) : (
+                      "Sim"
+                    )
+                  ) : (
+                    "Não"
+                  )
                 }
               />
               <Field

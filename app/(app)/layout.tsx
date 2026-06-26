@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Nav } from "@/components/nav";
 import { LogoutButton } from "@/components/logout-button";
+import { PrivacyToggle } from "@/components/privacy-toggle";
 
 // App autenticado: nada é pré-renderizado estaticamente (depende de sessão + DB).
 export const dynamic = "force-dynamic";
@@ -29,7 +30,8 @@ export default async function AppLayout({
             </Link>
             <Nav />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <PrivacyToggle />
             <span className="hidden text-sm text-gray-500 sm:inline">
               {session.user.name ?? session.user.email}
             </span>
