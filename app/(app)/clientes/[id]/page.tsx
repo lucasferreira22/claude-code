@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { deleteClient, deleteNote } from "@/lib/actions/clients";
 import { waLink } from "@/lib/whatsapp";
+import { getDemandasDoCliente } from "@/lib/todoist";
 import { NoteForm } from "@/components/note-form";
 import { DeleteButton } from "@/components/delete-button";
 import { StatusSelect } from "@/components/status-select";
@@ -51,6 +52,9 @@ export default async function ClienteDetailPage({
   });
 
   if (!client) notFound();
+
+  // Demandas pendentes do cliente no Todoist (null = integração off/erro).
+  const demandas = await getDemandasDoCliente(client.nomeRazaoSocial);
 
   const deleteAction = deleteClient.bind(null, client.id);
 
@@ -267,6 +271,53 @@ export default async function ClienteDetailPage({
             </h2>
             <StatusSelect clientId={client.id} current={client.status} />
           </section>
+
+          {demandas !== null && (
+            <section className="card p-6">
+              <h2 className="mb-3 flex items-center justify-between text-sm font-semibold uppercase tracking-wide text-gray-500">
+                Tarefas (Todoist)
+                <span className="text-xs font-normal text-gray-400">
+                  {demandas.length} pendente(s)
+                </span>
+              </h2>
+              {demandas.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  Nenhuma demanda pendente.
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {demandas.map((d) => (
+                    <li key={d.id} className="flex items-start gap-2 text-sm">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400" />
+                      <div className="min-w-0">
+                        <a
+                          href={d.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-800 hover:underline"
+                        >
+                          {d.titulo}
+                        </a>
+                        {d.vencimentoLabel && (
+                          <span
+                            className={`ml-2 text-xs ${
+                              d.emDias !== null && d.emDias < 0
+                                ? "font-medium text-red-600"
+                                : d.emDias === 0
+                                  ? "font-medium text-amber-600"
+                                  : "text-gray-400"
+                            }`}
+                          >
+                            {d.vencimentoLabel}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
 
           <section className="card p-6">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
