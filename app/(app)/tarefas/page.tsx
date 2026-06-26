@@ -27,9 +27,11 @@ function VencBadge({ emDias }: { emDias: number | null }) {
 function DemandaItem({
   d,
   clienteNome,
+  clienteHref,
 }: {
   d: Demanda;
   clienteNome?: string | null;
+  clienteHref?: string | null;
 }) {
   return (
     <li className="flex items-center justify-between gap-3 py-2 text-sm">
@@ -42,9 +44,17 @@ function DemandaItem({
         >
           {d.titulo}
         </a>
-        {clienteNome && (
-          <span className="ml-2 text-xs text-gray-400">{clienteNome}</span>
-        )}
+        {clienteNome &&
+          (clienteHref ? (
+            <Link
+              href={clienteHref}
+              className="ml-2 text-xs text-brand-700 hover:underline"
+            >
+              {clienteNome}
+            </Link>
+          ) : (
+            <span className="ml-2 text-xs text-gray-400">{clienteNome}</span>
+          ))}
       </div>
       <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
         {d.recorrente && <span className="text-xs text-gray-300">↻</span>}
@@ -54,6 +64,43 @@ function DemandaItem({
         <VencBadge emDias={d.emDias} />
       </div>
     </li>
+  );
+}
+
+type Item = { demanda: Demanda; clienteNome: string | null };
+
+function Bloco({
+  titulo,
+  itens,
+  hrefDe,
+  vazio,
+}: {
+  titulo: string;
+  itens: Item[];
+  hrefDe: (nome: string | null) => string | null;
+  vazio?: string;
+}) {
+  return (
+    <section className="card p-6">
+      <h2 className="mb-3 flex items-center justify-between text-sm font-semibold uppercase tracking-wide text-gray-500">
+        {titulo}
+        <span className="text-xs font-normal text-gray-400">{itens.length}</span>
+      </h2>
+      {itens.length === 0 ? (
+        <p className="text-sm text-gray-400">{vazio ?? "Nada por aqui."}</p>
+      ) : (
+        <ul className="divide-y divide-gray-100">
+          {itens.map((it) => (
+            <DemandaItem
+              key={it.demanda.id}
+              d={it.demanda}
+              clienteNome={it.clienteNome}
+              clienteHref={hrefDe(it.clienteNome)}
+            />
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -72,51 +119,43 @@ export default async function TarefasPage() {
   }
 
   let erroMsg: string | null = null;
-  let data = { porCliente: [] as Awaited<
-    ReturnType<typeof getTarefasOperacional>
-  >["porCliente"], comVencimento: [] as Awaited<
-    ReturnType<typeof getTarefasOperacional>
-  >["comVencimento"] };
+  let comVencimento: Item[] = [];
   try {
-    data = await getTarefasOperacional();
+    const data = await getTarefasOperacional();
+    comVencimento = data.comVencimento;
   } catch (e) {
     erroMsg = e instanceof Error ? e.message : "erro desconhecido";
   }
 
-  // Casa as tarefas-pai (clientes do Todoist) com os clientes do CRM por nome.
+  // Casa o nome do cliente (Todoist) com o cliente do CRM para gerar o link.
   const clientes = await prisma.client.findMany({
     select: { id: true, nomeRazaoSocial: true },
   });
   const idPorNome = new Map(
     clientes.map((c) => [normalizarNome(c.nomeRazaoSocial), c.id])
   );
-  const clienteId = (nome: string) => {
+  const hrefDe = (nome: string | null): string | null => {
+    if (!nome) return null;
     const n = normalizarNome(nome);
-    if (idPorNome.has(n)) return idPorNome.get(n)!;
+    if (idPorNome.has(n)) return `/clientes/${idPorNome.get(n)}`;
     for (const [nm, id] of idPorNome)
-      if (nm.includes(n) || n.includes(nm)) return id;
+      if (nm.includes(n) || n.includes(nm)) return `/clientes/${id}`;
     return null;
   };
 
-  const hojeEAtrasadas = data.comVencimento.filter(
-    (v) => v.demanda.emDias !== null && v.demanda.emDias <= 0
-  );
-  const porClienteAtivos = data.porCliente
-    .filter((c) => c.pendentes.length > 0)
-    .sort((a, b) => a.nome.localeCompare(b.nome));
-
-  const totalPendentes = data.porCliente.reduce(
-    (s, c) => s + c.pendentes.length,
-    0
-  );
+  // Só tarefas com prazo, em buckets ordenados: atrasadas → hoje → próximas.
+  // (comVencimento já vem ordenado por emDias crescente.)
+  const atrasadas = comVencimento.filter((v) => (v.demanda.emDias ?? 0) < 0);
+  const hoje = comVencimento.filter((v) => v.demanda.emDias === 0);
+  const proximas = comVencimento.filter((v) => (v.demanda.emDias ?? 0) > 0);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Tarefas</h1>
         <p className="text-sm text-gray-500">
-          Demandas dos clientes sincronizadas do Todoist (somente leitura) ·{" "}
-          {totalPendentes} pendente(s)
+          Demandas com prazo, sincronizadas do Todoist (somente leitura) ·{" "}
+          {comVencimento.length} com prazo
         </p>
       </div>
 
@@ -129,70 +168,25 @@ export default async function TarefasPage() {
           </span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Hoje e atrasadas */}
-          <section className="card p-6 lg:col-span-1">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-              Hoje e atrasadas
-            </h2>
-            {hojeEAtrasadas.length === 0 ? (
-              <p className="text-sm text-gray-400">Nada vencendo. 🎉</p>
-            ) : (
-              <ul className="divide-y divide-gray-100">
-                {hojeEAtrasadas.map((v) => (
-                  <DemandaItem
-                    key={v.demanda.id}
-                    d={v.demanda}
-                    clienteNome={v.clienteNome}
-                  />
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {/* Por cliente */}
-          <section className="card p-6 lg:col-span-2">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-              Demandas por cliente
-            </h2>
-            {porClienteAtivos.length === 0 ? (
-              <p className="text-sm text-gray-400">
-                Nenhuma demanda pendente encontrada no projeto Operacional.
-              </p>
-            ) : (
-              <div className="space-y-5">
-                {porClienteAtivos.map((c) => {
-                  const cid = clienteId(c.nome);
-                  return (
-                    <div key={c.taskId}>
-                      <div className="mb-1 flex items-center gap-2">
-                        {cid ? (
-                          <Link
-                            href={`/clientes/${cid}`}
-                            className="text-sm font-semibold text-brand-700 hover:underline"
-                          >
-                            {c.nome}
-                          </Link>
-                        ) : (
-                          <span className="text-sm font-semibold text-gray-800">
-                            {c.nome}
-                          </span>
-                        )}
-                        <span className="text-xs text-gray-400">
-                          {c.pendentes.length}
-                        </span>
-                      </div>
-                      <ul className="divide-y divide-gray-100 pl-1">
-                        {c.pendentes.map((d) => (
-                          <DemandaItem key={d.id} d={d} />
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
+        <div className="space-y-6">
+          <Bloco
+            titulo="Atrasadas"
+            itens={atrasadas}
+            hrefDe={hrefDe}
+            vazio="Nenhuma tarefa atrasada. 🎉"
+          />
+          <Bloco
+            titulo="Hoje"
+            itens={hoje}
+            hrefDe={hrefDe}
+            vazio="Nada para hoje."
+          />
+          <Bloco
+            titulo="Próximas"
+            itens={proximas}
+            hrefDe={hrefDe}
+            vazio="Sem tarefas futuras com prazo."
+          />
         </div>
       )}
     </div>

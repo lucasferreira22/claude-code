@@ -109,11 +109,16 @@ function diffDias(dateStr: string, hoje = new Date()): number {
   return Math.round((due.getTime() - a.getTime()) / 86400000);
 }
 
+// Remove as etiquetas internas entre colchetes (ex: "... [fcg]") do título.
+function limparTitulo(s: string): string {
+  return s.replace(/\s*\[[^\]]*\]/g, "").trim() || s.trim();
+}
+
 function toDemanda(t: TodoistTask): Demanda {
   const dueDate = t.due?.date ?? null;
   return {
     id: t.id,
-    titulo: t.content,
+    titulo: limparTitulo(t.content),
     url: t.url ?? `https://app.todoist.com/app/task/${t.id}`,
     due: dueDate,
     vencimentoLabel: t.due?.string ?? dueDate,
@@ -154,7 +159,9 @@ export async function getTarefasOperacional(): Promise<TarefasData> {
     .filter((t) => t.due?.date)
     .map((t) => ({
       demanda: toDemanda(t),
-      clienteNome: t.parent_id ? nomePorPai.get(t.parent_id) ?? null : t.content,
+      // Para sub-tarefas, o cliente é a tarefa-pai. Tarefas avulsas (sem pai),
+      // como as "[geral]", ficam sem cliente.
+      clienteNome: t.parent_id ? nomePorPai.get(t.parent_id) ?? null : null,
     }))
     .sort((a, b) => (a.demanda.emDias ?? 0) - (b.demanda.emDias ?? 0));
 
