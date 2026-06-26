@@ -19,7 +19,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{if(localStorage.getItem('dadosOcultos')==='1')document.documentElement.classList.add('dados-ocultos')}catch(e){}",
+              "try{var d=document.documentElement;if(localStorage.getItem('dadosOcultos')==='1')d.classList.add('dados-ocultos');if(localStorage.getItem('tema')==='dark')d.classList.add('dark')}catch(e){}",
           }}
         />
       </head>

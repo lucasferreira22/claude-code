@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { Nav } from "@/components/nav";
 import { LogoutButton } from "@/components/logout-button";
 import { PrivacyToggle } from "@/components/privacy-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // App autenticado: nada é pré-renderizado estaticamente (depende de sessão + DB).
 export const dynamic = "force-dynamic";
@@ -25,12 +26,18 @@ export default async function AppLayout({
               <img
                 src="/logo-focus.svg"
                 alt="Focus Digital"
-                className="h-7 w-auto"
+                className="h-7 w-auto dark:hidden"
+              />
+              <img
+                src="/logo-focus-branco.svg"
+                alt="Focus Digital"
+                className="hidden h-7 w-auto dark:block"
               />
             </Link>
             <Nav />
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <PrivacyToggle />
             <span className="hidden text-sm text-gray-500 sm:inline">
               {session.user.name ?? session.user.email}
