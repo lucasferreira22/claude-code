@@ -7,6 +7,7 @@ const links = [
   { href: "/painel", label: "Painel" },
   { href: "/clientes", label: "Clientes" },
   { href: "/comercial", label: "Comercial" },
+  { href: "/tarefas", label: "Tarefas" },
   { href: "/financeiro", label: "Financeiro" },
   { href: "/servicos", label: "Serviços" },
   { href: "/agencias", label: "Agências Parceiras" },
