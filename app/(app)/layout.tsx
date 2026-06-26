@@ -24,7 +24,7 @@ export default async function AppLayout({
               <img
                 src="/logo-focus.svg"
                 alt="Focus Digital"
-                className="h-10 w-auto"
+                className="h-9 w-auto"
               />
             </Link>
             <Nav />
