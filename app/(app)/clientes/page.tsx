@@ -85,9 +85,14 @@ export default async function ClientesPage({
             {clients.length} de {total} cliente(s)
           </p>
         </div>
-        <Link href="/clientes/novo" className="btn-primary">
-          + Novo cliente
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/importar" className="btn-secondary">
+            Importar CSV
+          </Link>
+          <Link href="/clientes/novo" className="btn-primary">
+            + Novo cliente
+          </Link>
+        </div>
       </div>
 
       <form
