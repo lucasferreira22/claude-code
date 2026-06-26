@@ -6,7 +6,9 @@
 //   - as DEMANDAS do cliente são as sub-tarefas dessa tarefa-pai
 // A API REST v2 retorna apenas tarefas ativas (pendentes), que é o que importa.
 
-const API = "https://api.todoist.com/rest/v2";
+// API unificada v1 do Todoist (a REST v2 foi descontinuada → respondia 410).
+// As respostas são paginadas: { results: [...], next_cursor: "..." | null }.
+const API = "https://api.todoist.com/api/v1";
 const PROJETO_PADRAO = "Operacional";
 
 type TodoistDue = {
@@ -25,7 +27,7 @@ type TodoistTask = {
   parent_id: string | null;
   priority: number;
   due: TodoistDue;
-  url: string;
+  url?: string;
 };
 
 export type Demanda = {
@@ -63,19 +65,41 @@ export function normalizarNome(s: string): string {
     .trim();
 }
 
-async function api<T>(path: string): Promise<T> {
+// GET paginado: acumula `results` seguindo o `next_cursor` (formato v1).
+// Tolera também respostas que venham como array simples.
+async function apiList<T>(path: string): Promise<T[]> {
   // trim: evita falha quando o token entra com espaço/quebra de linha no env.
   const token = process.env.TODOIST_API_TOKEN?.trim();
   if (!token) throw new Error("TODOIST_API_TOKEN não configurado");
-  const res = await fetch(`${API}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    // Cache de 5 min para não estourar o rate limit do Todoist.
-    next: { revalidate: 300 },
-  });
-  if (!res.ok) {
-    throw new Error(`Todoist respondeu ${res.status} ${res.statusText}`.trim());
-  }
-  return res.json() as Promise<T>;
+
+  const out: T[] = [];
+  let cursor: string | null = null;
+  do {
+    const sep = path.includes("?") ? "&" : "?";
+    const url =
+      `${API}${path}${sep}limit=200` +
+      (cursor ? `&cursor=${encodeURIComponent(cursor)}` : "");
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      // Cache de 5 min para não estourar o rate limit do Todoist.
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) {
+      throw new Error(`Todoist respondeu ${res.status} ${res.statusText}`.trim());
+    }
+    const json = (await res.json()) as
+      | T[]
+      | { results?: T[]; next_cursor?: string | null };
+    if (Array.isArray(json)) {
+      out.push(...json);
+      cursor = null;
+    } else {
+      out.push(...(json.results ?? []));
+      cursor = json.next_cursor ?? null;
+    }
+  } while (cursor);
+
+  return out;
 }
 
 function diffDias(dateStr: string, hoje = new Date()): number {
@@ -90,7 +114,7 @@ function toDemanda(t: TodoistTask): Demanda {
   return {
     id: t.id,
     titulo: t.content,
-    url: t.url,
+    url: t.url ?? `https://app.todoist.com/app/task/${t.id}`,
     due: dueDate,
     vencimentoLabel: t.due?.string ?? dueDate,
     recorrente: Boolean(t.due?.is_recurring),
@@ -100,13 +124,13 @@ function toDemanda(t: TodoistTask): Demanda {
 
 // Lê o projeto "Operacional" e organiza por cliente (tarefa-pai) + vencimentos.
 export async function getTarefasOperacional(): Promise<TarefasData> {
-  const projects = await api<{ id: string; name: string }[]>("/projects");
+  const projects = await apiList<{ id: string; name: string }>("/projects");
   const proj =
     projects.find((p) => normalizarNome(p.name) === normalizarNome(PROJETO_PADRAO)) ??
     projects.find((p) => normalizarNome(p.name).includes("operacional"));
   if (!proj) return { porCliente: [], comVencimento: [] };
 
-  const tasks = await api<TodoistTask[]>(`/tasks?project_id=${proj.id}`);
+  const tasks = await apiList<TodoistTask>(`/tasks?project_id=${proj.id}`);
 
   const parents = tasks.filter((t) => !t.parent_id);
   const subsPorPai = new Map<string, TodoistTask[]>();
