@@ -11,7 +11,6 @@ const links = [
   { href: "/financeiro", label: "Financeiro" },
   { href: "/servicos", label: "Serviços" },
   { href: "/agencias", label: "Agências Parceiras" },
-  { href: "/importar", label: "Importar CSV" },
 ];
 
 export function Nav() {
