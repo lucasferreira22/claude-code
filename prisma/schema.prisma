@@ -118,6 +118,10 @@ model Client {
   dataRenovacao    DateTime?
   valorRenovacao   Decimal?  @db.Decimal(12, 2)
 
+  // Integração com o Meta (Marketing API): ID da conta de anúncio do cliente
+  // (ex: "act_123456789"). Usado para puxar as métricas dos anúncios.
+  metaAdAccountId String?
+
   observacoes String?
 
   criadoEm     DateTime @default(now())
