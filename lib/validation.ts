@@ -55,6 +55,7 @@ export const clientSchema = z.object({
   possuiHospedagem: z.boolean().default(false),
   dataRenovacao: optionalDate,
   valorRenovacao: optionalDecimal,
+  metaAdAccountId: optionalString,
   observacoes: optionalString,
   // IDs dos serviços do catálogo (tabela services).
   servicos: z.array(z.string()).default([]),

@@ -79,6 +79,7 @@ export default async function EditarClientePage({
           valorRenovacao: client.valorRenovacao
             ? String(client.valorRenovacao)
             : "",
+          metaAdAccountId: client.metaAdAccountId,
           observacoes: client.observacoes,
           servicos: client.servicos.map((s) => s.serviceId),
           contatos: client.contatos.map((c) => ({ tipo: c.tipo, valor: c.valor })),

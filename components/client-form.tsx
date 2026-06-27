@@ -30,6 +30,7 @@ export type ClientFormValues = {
   possuiHospedagem?: boolean;
   dataRenovacao?: string | null;
   valorRenovacao?: string | null;
+  metaAdAccountId?: string | null;
   observacoes?: string | null;
   servicos?: string[];
   contatos?: { tipo: string; valor: string }[];
@@ -330,6 +331,20 @@ export function ClientForm({
               </div>
             </div>
           )}
+        </div>
+
+        <div className="border-t border-gray-100 pt-4">
+          <label className="label">ID da conta de anúncio do Meta</label>
+          <input
+            name="metaAdAccountId"
+            placeholder="act_123456789"
+            defaultValue={values?.metaAdAccountId ?? ""}
+            className="input sm:max-w-xs"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Usado para puxar as métricas dos anúncios (encontrado no Gerenciador
+            de Anúncios do Meta).
+          </p>
         </div>
 
         <div>
