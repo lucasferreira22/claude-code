@@ -37,10 +37,20 @@ const ACTION_LABELS: Record<string, string> = {
   purchase: "Compras",
   "onsite_conversion.purchase": "Compras",
   "offsite_conversion.fb_pixel_purchase": "Compras",
-  messaging_conversation_started_7d: "Conversas iniciadas",
   post_engagement: "Engajamento",
   video_view: "Views de vídeo",
 };
+
+// Resolve o rótulo de um tipo de ação (com casos especiais por padrão de nome).
+function labelDaAcao(actionType: string): string | null {
+  if (ACTION_LABELS[actionType]) return ACTION_LABELS[actionType];
+  // Conversas por mensagem (objetivo "Mensagens") têm vários sufixos.
+  if (actionType.includes("messaging_conversation_started"))
+    return "Conversas iniciadas";
+  // Variações de lead (pixel/conversão).
+  if (actionType.includes("lead")) return "Leads";
+  return null;
+}
 
 function num(v: unknown): number {
   const n = Number(v);
@@ -96,7 +106,7 @@ export async function getMetaInsights(
   const consolidado = new Map<string, number>();
   if (Array.isArray(row.actions)) {
     for (const a of row.actions) {
-      const label = ACTION_LABELS[a.action_type];
+      const label = labelDaAcao(a.action_type);
       if (label) consolidado.set(label, (consolidado.get(label) ?? 0) + num(a.value));
     }
   }
