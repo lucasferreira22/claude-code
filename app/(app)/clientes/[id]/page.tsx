@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { deleteClient, deleteNote } from "@/lib/actions/clients";
 import { waLink } from "@/lib/whatsapp";
 import { getDemandasDoCliente } from "@/lib/todoist";
+import { MetaMetrics } from "@/components/meta-metrics";
+import type { MetaPeriodo } from "@/lib/meta";
 import { NoteForm } from "@/components/note-form";
 import { DeleteButton } from "@/components/delete-button";
 import { StatusSelect } from "@/components/status-select";
@@ -30,9 +32,15 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 
 export default async function ClienteDetailPage({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams: { meta?: string };
 }) {
+  const metaPeriodo: MetaPeriodo =
+    searchParams.meta === "last_30d" || searchParams.meta === "last_7d"
+      ? searchParams.meta
+      : "this_month";
   const client = await prisma.client.findUnique({
     where: { id: params.id },
     include: {
@@ -239,6 +247,15 @@ export default async function ClienteDetailPage({
               </div>
             )}
           </section>
+
+          {/* Métricas do Meta (se a conta de anúncio estiver vinculada) */}
+          {client.metaAdAccountId && (
+            <MetaMetrics
+              clientId={client.id}
+              adAccountId={client.metaAdAccountId}
+              periodo={metaPeriodo}
+            />
+          )}
 
           {/* Diário de interações */}
           <section className="card p-6">
