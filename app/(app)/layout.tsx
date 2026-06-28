@@ -23,7 +23,7 @@ export default async function AppLayout({
       <div className="absolute inset-0 grid-bg-overlay opacity-60 z-0" />
       
       <header className="relative z-10 border-b border-border-default bg-surface-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-6">
             <Link href="/painel" className="shrink-0">
               <img
@@ -49,7 +49,7 @@ export default async function AppLayout({
           </div>
         </div>
       </header>
-      <main className="relative z-10 mx-auto max-w-6xl px-4 py-6">{children}</main>
+      <main className="relative z-10 mx-auto max-w-[1600px] px-6 py-6">{children}</main>
     </div>
   );
 }
