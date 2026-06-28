@@ -75,7 +75,7 @@ function StatCard({
         <div>
           <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
           <p
-            className={`sensivel mt-1.5 text-2xl font-bold font-mono ${accent ?? "text-text-primary"}`}
+            className={`sensivel mt-1.5 text-2xl font-bold nums ${accent ?? "text-text-primary"}`}
           >
             {value}
           </p>
@@ -158,7 +158,7 @@ function DonutChart({ data }: { data: { label: string; value: number; color: str
               style={{ backgroundColor: d.color }}
             />
             <span className="text-text-secondary">{d.label}</span>
-            <span className="ml-auto font-mono font-medium text-text-primary">{d.value}</span>
+            <span className="ml-auto nums font-medium text-text-primary">{d.value}</span>
           </li>
         ))}
       </ul>
@@ -180,7 +180,7 @@ function HorizontalBars({ data }: { data: { label: string; count: number; revenu
           <div key={d.label}>
             <div className="mb-1 flex items-center justify-between text-sm">
               <span className="text-text-secondary">{d.label}</span>
-              <span className="font-mono font-medium text-text-primary">{d.count}</span>
+              <span className="nums font-medium text-text-primary">{d.count}</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-surface-elevated">
               <div
@@ -188,7 +188,7 @@ function HorizontalBars({ data }: { data: { label: string; count: number; revenu
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <p className="mt-0.5 text-right text-xs font-mono text-text-muted sensivel">
+            <p className="mt-0.5 text-right text-xs nums text-text-muted sensivel">
               {formatCurrency(d.revenue)}/mês
             </p>
           </div>
@@ -395,15 +395,15 @@ export default async function PainelPage() {
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-status-success">Recebido</span>
-                  <span className="sensivel font-mono font-medium">{formatCurrency(recebido)}</span>
+                  <span className="sensivel nums font-medium">{formatCurrency(recebido)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-status-warning">Pendente</span>
-                  <span className="sensivel font-mono font-medium">{formatCurrency(pendente)}</span>
+                  <span className="sensivel nums font-medium">{formatCurrency(pendente)}</span>
                 </div>
                 <div className="flex justify-between border-t border-border-subtle pt-1.5">
                   <span className="text-text-muted">Total</span>
-                  <span className="sensivel font-mono font-semibold">{formatCurrency(totalCobranca)}</span>
+                  <span className="sensivel nums font-semibold">{formatCurrency(totalCobranca)}</span>
                 </div>
               </div>
             </div>
@@ -451,7 +451,7 @@ export default async function PainelPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3 whitespace-nowrap">
-                  <span className="sensivel font-mono text-text-secondary">
+                  <span className="sensivel nums text-text-secondary">
                     {formatCurrency(v.valor)}
                   </span>
                   <span

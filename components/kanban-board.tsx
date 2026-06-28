@@ -125,7 +125,7 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
               <span className={`badge ${STATUS_BADGE[status]}`}>
                 {STATUS_LABELS[status]}
               </span>
-              <span className="text-xs font-mono font-medium text-text-muted">
+              <span className="text-xs nums font-medium text-text-muted">
                 {colCards.length}
               </span>
             </div>
@@ -164,7 +164,7 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
                         {CATEGORIA_LABELS[card.categoria]}
                       </span>
                       {card.valorMensal ? (
-                        <span className="sensivel text-xs font-mono text-text-secondary">
+                        <span className="sensivel text-xs nums text-text-secondary">
                           {formatCurrency(card.valorMensal)}/mês
                         </span>
                       ) : null}

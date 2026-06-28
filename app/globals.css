@@ -88,6 +88,13 @@ body {
   @apply bg-surface-page text-text-primary antialiased transition-colors duration-200;
 }
 
+/* Números tabulares — alinha dígitos sem trocar a tipografia.
+   Usa o recurso OpenType `tnum` da Inter em vez de font-mono. */
+.nums {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
 /* Modo privacidade: borra os valores marcados com .sensivel quando o
    <html> tem a classe .dados-ocultos (acionada pelo olhinho no cabeçalho). */
 html.dados-ocultos .sensivel {

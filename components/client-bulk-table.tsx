@@ -220,7 +220,7 @@ export function ClientBulkTable({
                 <td className="px-4 py-3 text-text-secondary">
                   {c.responsavelNome ?? "—"}
                 </td>
-                <td className="sensivel px-4 py-3 font-mono text-text-secondary">
+                <td className="sensivel px-4 py-3 nums text-text-secondary">
                   {formatCurrency(c.valorMensal)}
                 </td>
                 <td className="px-4 py-3">
