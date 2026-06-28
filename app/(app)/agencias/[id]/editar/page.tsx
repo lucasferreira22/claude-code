@@ -21,7 +21,7 @@ export default async function EditarAgenciaPage({
       <div>
         <Link
           href={`/agencias/${agency.id}`}
-          className="text-sm text-brand-700 hover:underline"
+          className="text-sm text-accent-primary hover:underline"
         >
           ← Voltar para a agência
         </Link>

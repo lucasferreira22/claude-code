@@ -28,7 +28,7 @@ export function PrivacyToggle() {
       onClick={toggle}
       title={oculto ? "Mostrar valores" : "Ocultar valores"}
       aria-label={oculto ? "Mostrar valores" : "Ocultar valores"}
-      className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+      className="rounded-md p-1.5 text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
     >
       {oculto ? (
         // olho cortado (valores ocultos)

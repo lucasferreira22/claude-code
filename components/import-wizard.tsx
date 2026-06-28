@@ -114,10 +114,10 @@ export function ImportWizard() {
     <div className="space-y-6">
       {/* Passo 1: upload */}
       <section className="card p-6">
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-text-secondary">
           1. Selecione o arquivo CSV
         </h2>
-        <p className="mb-3 text-sm text-gray-500">
+        <p className="mb-3 text-sm text-text-secondary">
           A primeira linha do arquivo deve conter os nomes das colunas.
         </p>
         <input
@@ -127,7 +127,7 @@ export function ImportWizard() {
           className="block text-sm"
         />
         {fileName && (
-          <p className="mt-2 text-xs text-gray-400">
+          <p className="mt-2 text-xs text-text-muted">
             {fileName} · {rows.length} linha(s) detectada(s)
           </p>
         )}
@@ -137,7 +137,7 @@ export function ImportWizard() {
         <>
           {/* Passo 2: mapeamento */}
           <section className="card p-6">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-text-secondary">
               2. Revise o mapeamento de colunas
             </h2>
             <div className="space-y-2">
@@ -146,7 +146,7 @@ export function ImportWizard() {
                   key={field.key}
                   className="grid grid-cols-1 items-center gap-2 sm:grid-cols-2"
                 >
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-text-primary">
                     {field.label}
                     {field.required && (
                       <span className="text-red-500"> *</span>
@@ -170,7 +170,7 @@ export function ImportWizard() {
               ))}
             </div>
             {!nameMapped && (
-              <p className="mt-3 text-sm text-amber-600">
+              <p className="mt-3 text-sm text-status-warning">
                 Mapeie a coluna do nome do cliente para continuar (campo
                 obrigatório).
               </p>
@@ -179,12 +179,12 @@ export function ImportWizard() {
 
           {/* Passo 3: prévia */}
           <section className="card p-6">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-text-secondary">
               3. Prévia (primeiras {previewRows.length} linhas)
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
-                <thead className="bg-gray-50 text-left text-gray-500">
+                <thead className="bg-surface-elevated text-left text-text-secondary">
                   <tr>
                     {IMPORT_FIELDS.filter(
                       (f) => mapping[f.key] && mapping[f.key] !== IGNORE
@@ -195,13 +195,13 @@ export function ImportWizard() {
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-border-subtle">
                   {previewRows.map((r, i) => (
                     <tr key={i}>
                       {IMPORT_FIELDS.filter(
                         (f) => mapping[f.key] && mapping[f.key] !== IGNORE
                       ).map((f) => (
-                        <td key={f.key} className="px-2 py-2 text-gray-700">
+                        <td key={f.key} className="px-2 py-2 text-text-primary">
                           {r[f.key] || "—"}
                         </td>
                       ))}
@@ -222,7 +222,7 @@ export function ImportWizard() {
                   ? "Importando..."
                   : `Importar ${rows.length} cliente(s)`}
               </button>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-text-muted">
                 Linhas sem nome serão ignoradas.
               </span>
             </div>
@@ -233,20 +233,20 @@ export function ImportWizard() {
       {/* Resultado */}
       {result && (
         <section className="card p-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-text-secondary">
             Resultado da importação
           </h2>
           <ul className="space-y-1 text-sm">
-            <li className="text-green-700">
+            <li className="text-status-success">
               {result.created} cliente(s) importado(s) com sucesso.
             </li>
             {result.skipped > 0 && (
-              <li className="text-gray-500">
+              <li className="text-text-secondary">
                 {result.skipped} linha(s) ignorada(s) (sem nome).
               </li>
             )}
             {result.errors.length > 0 && (
-              <li className="text-red-600">
+              <li className="text-status-error">
                 {result.errors.length} erro(s):
                 <ul className="ml-4 list-disc">
                   {result.errors.slice(0, 10).map((err, i) => (

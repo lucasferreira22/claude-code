@@ -20,7 +20,7 @@ export default async function LoginPage() {
             alt="Focus Digital"
             className="mb-3 hidden h-12 w-auto dark:block"
           />
-          <p className="text-sm text-gray-500">CRM · Gestão de clientes</p>
+          <p className="text-sm text-text-secondary">CRM · Gestão de clientes</p>
         </div>
         <div className="card p-6">
           <LoginForm />

@@ -6,7 +6,7 @@ export default function NovaAgenciaPage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/agencias" className="text-sm text-brand-700 hover:underline">
+        <Link href="/agencias" className="text-sm text-accent-primary hover:underline">
           ← Voltar para agências
         </Link>
         <h1 className="mt-1 text-2xl font-bold">Nova agência parceira</h1>

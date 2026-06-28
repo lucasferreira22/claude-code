@@ -120,7 +120,7 @@ export default async function CobrancasPage({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Cobranças</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-secondary">
             Controle de pagamentos · {formatCompetencia(competencia)}
           </p>
         </div>
@@ -158,7 +158,7 @@ export default async function CobrancasPage({
             filtro === null ? "ring-2 ring-brand-500" : ""
           }`}
         >
-          <p className="text-xs uppercase tracking-wide text-gray-400">
+          <p className="text-xs uppercase tracking-wide text-text-muted">
             A receber (total)
           </p>
           <p className="sensivel mt-1 text-xl font-bold">
@@ -171,10 +171,10 @@ export default async function CobrancasPage({
             filtro === "pago" ? "ring-2 ring-green-500" : ""
           }`}
         >
-          <p className="text-xs uppercase tracking-wide text-gray-400">
+          <p className="text-xs uppercase tracking-wide text-text-muted">
             Recebido
           </p>
-          <p className="sensivel mt-1 text-xl font-bold text-green-700">
+          <p className="sensivel mt-1 text-xl font-bold text-status-success">
             {formatCurrency(recebido)}
           </p>
         </Link>
@@ -184,10 +184,10 @@ export default async function CobrancasPage({
             filtro === "pendente" ? "ring-2 ring-amber-500" : ""
           }`}
         >
-          <p className="text-xs uppercase tracking-wide text-gray-400">
+          <p className="text-xs uppercase tracking-wide text-text-muted">
             Pendente
           </p>
-          <p className="sensivel mt-1 text-xl font-bold text-amber-700">
+          <p className="sensivel mt-1 text-xl font-bold text-status-warning">
             {formatCurrency(pendente)}
           </p>
         </Link>
@@ -197,23 +197,23 @@ export default async function CobrancasPage({
             filtro === "atrasado" ? "ring-2 ring-red-500" : ""
           }`}
         >
-          <p className="text-xs uppercase tracking-wide text-gray-400">
+          <p className="text-xs uppercase tracking-wide text-text-muted">
             Em atraso
           </p>
-          <p className="mt-1 text-xl font-bold text-red-700">
+          <p className="mt-1 text-xl font-bold text-status-error">
             {atrasados} cliente(s)
           </p>
         </Link>
       </div>
 
       {filtro && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-secondary">
           Mostrando apenas cobranças{" "}
           <span className="font-medium">{FILTRO_LABELS[filtro]}</span> (
           {visiveis.length}).{" "}
           <Link
             href={hrefFiltro(null)}
-            className="text-brand-700 hover:underline"
+            className="text-accent-primary hover:underline"
           >
             Ver todas
           </Link>
@@ -221,23 +221,23 @@ export default async function CobrancasPage({
       )}
 
       {pagamentos.length === 0 ? (
-        <div className="card p-10 text-center text-gray-500">
+        <div className="card p-10 text-center text-text-secondary">
           Nenhuma cobrança para {formatCompetencia(competencia)}. Clique em{" "}
           <span className="font-medium">&quot;Gerar cobranças do mês&quot;</span>{" "}
           para criar as cobranças dos clientes recorrentes ativos.
         </div>
       ) : visiveis.length === 0 ? (
-        <div className="card p-10 text-center text-gray-500">
+        <div className="card p-10 text-center text-text-secondary">
           Nenhuma cobrança {filtro ? FILTRO_LABELS[filtro] : ""} em{" "}
           {formatCompetencia(competencia)}.{" "}
-          <Link href={hrefFiltro(null)} className="text-brand-700 hover:underline">
+          <Link href={hrefFiltro(null)} className="text-accent-primary hover:underline">
             Ver todas
           </Link>
         </div>
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+            <thead className="border-b border-border-default bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <th className="px-4 py-3">Cliente</th>
                 <th className="px-4 py-3">Vencimento</th>
@@ -246,7 +246,7 @@ export default async function CobrancasPage({
                 <th className="px-4 py-3 text-right">Ação</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border-subtle">
               {visiveis.map((p) => {
                 const atrasada =
                   p.status === "PENDENTE" &&
@@ -270,21 +270,21 @@ export default async function CobrancasPage({
                       )
                     : null;
                 return (
-                  <tr key={p.id} className="hover:bg-gray-50">
+                  <tr key={p.id} className="hover:bg-surface-elevated">
                     <td className="px-4 py-3">
                       <Link
                         href={`/clientes/${p.client.id}`}
-                        className="font-medium text-brand-700 hover:underline"
+                        className="font-medium text-accent-primary hover:underline"
                       >
                         {p.client.nomeRazaoSocial}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">
+                    <td className="px-4 py-3 text-text-secondary">
                       {p.client.diaVencimento
                         ? `Dia ${p.client.diaVencimento}`
                         : "—"}
                     </td>
-                    <td className="sensivel px-4 py-3 text-right text-gray-700">
+                    <td className="sensivel px-4 py-3 text-right text-text-primary">
                       {formatCurrency(Number(p.valor))}
                     </td>
                     <td className="px-4 py-3">

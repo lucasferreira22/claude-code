@@ -45,7 +45,7 @@ export function LoginForm() {
         />
       </div>
       {errorMessage && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-status-error" role="alert">
           {errorMessage}
         </p>
       )}

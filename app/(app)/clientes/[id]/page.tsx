@@ -24,8 +24,8 @@ import {
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-gray-400">{label}</dt>
-      <dd className="text-sm text-gray-800">{value || "—"}</dd>
+      <dt className="text-xs uppercase tracking-wide text-text-muted">{label}</dt>
+      <dd className="text-sm text-text-primary">{value || "—"}</dd>
     </div>
   );
 }
@@ -80,7 +80,7 @@ export default async function ClienteDetailPage({
         <div>
           <Link
             href="/clientes"
-            className="text-sm text-brand-700 hover:underline"
+            className="text-sm text-accent-primary hover:underline"
           >
             ← Voltar para clientes
           </Link>
@@ -93,14 +93,14 @@ export default async function ClienteDetailPage({
               {CATEGORIA_LABELS[client.categoria]}
             </span>
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-secondary">
             {TIPO_RELACAO_LABELS[client.tipoRelacao]}
             {client.partnerAgency && (
               <>
                 {" · via "}
                 <Link
                   href={`/agencias/${client.partnerAgency.id}`}
-                  className="text-brand-700 hover:underline"
+                  className="text-accent-primary hover:underline"
                 >
                   {client.partnerAgency.nome}
                 </Link>
@@ -141,7 +141,7 @@ export default async function ClienteDetailPage({
         <div className="space-y-6 lg:col-span-2">
           {/* Dados cadastrais */}
           <section className="card p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-secondary">
               Dados cadastrais
             </h2>
             <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -219,14 +219,14 @@ export default async function ClienteDetailPage({
             </dl>
 
             {client.contatos.length > 0 && (
-              <div className="mt-4 border-t border-gray-100 pt-4">
-                <h3 className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+              <div className="mt-4 border-t border-border-subtle pt-4">
+                <h3 className="mb-2 text-xs uppercase tracking-wide text-text-muted">
                   Contatos
                 </h3>
                 <ul className="space-y-1 text-sm">
                   {client.contatos.map((c) => (
                     <li key={c.id}>
-                      <span className="text-gray-500">
+                      <span className="text-text-secondary">
                         {TIPO_CONTATO_LABELS[c.tipo]}:
                       </span>{" "}
                       {c.valor}
@@ -237,11 +237,11 @@ export default async function ClienteDetailPage({
             )}
 
             {client.observacoes && (
-              <div className="mt-4 border-t border-gray-100 pt-4">
-                <h3 className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+              <div className="mt-4 border-t border-border-subtle pt-4">
+                <h3 className="mb-2 text-xs uppercase tracking-wide text-text-muted">
                   Observações
                 </h3>
-                <p className="whitespace-pre-wrap text-sm text-gray-700">
+                <p className="whitespace-pre-wrap text-sm text-text-primary">
                   {client.observacoes}
                 </p>
               </div>
@@ -259,14 +259,14 @@ export default async function ClienteDetailPage({
 
           {/* Diário de interações */}
           <section className="card p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-secondary">
               Diário de interações
             </h2>
             <NoteForm clientId={client.id} />
 
             <ul className="mt-6 space-y-4">
               {client.notas.length === 0 && (
-                <li className="text-sm text-gray-400">
+                <li className="text-sm text-text-muted">
                   Nenhuma anotação ainda.
                 </li>
               )}
@@ -278,7 +278,7 @@ export default async function ClienteDetailPage({
                     className="border-l-2 border-brand-100 pl-4"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-text-muted">
                         {formatDateTime(nota.criadoEm)}
                         {nota.autor?.nome && ` · ${nota.autor.nome}`}
                       </span>
@@ -288,7 +288,7 @@ export default async function ClienteDetailPage({
                         confirmMessage="Remover esta anotação?"
                       />
                     </div>
-                    <p className="whitespace-pre-wrap text-sm text-gray-800">
+                    <p className="whitespace-pre-wrap text-sm text-text-primary">
                       {nota.conteudo}
                     </p>
                   </li>
@@ -301,7 +301,7 @@ export default async function ClienteDetailPage({
         {/* Coluna lateral */}
         <div className="space-y-6">
           <section className="card p-6">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-text-secondary">
               Status atual
             </h2>
             <StatusSelect clientId={client.id} current={client.status} />
@@ -309,14 +309,14 @@ export default async function ClienteDetailPage({
 
           {demandas !== null && (
             <section className="card p-6">
-              <h2 className="mb-3 flex items-center justify-between text-sm font-semibold uppercase tracking-wide text-gray-500">
+              <h2 className="mb-3 flex items-center justify-between text-sm font-semibold uppercase tracking-wide text-text-secondary">
                 Tarefas (Todoist)
-                <span className="text-xs font-normal text-gray-400">
+                <span className="text-xs font-normal text-text-muted">
                   {demandas.length} pendente(s)
                 </span>
               </h2>
               {demandas.length === 0 ? (
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-text-muted">
                   Nenhuma demanda pendente.
                 </p>
               ) : (
@@ -329,7 +329,7 @@ export default async function ClienteDetailPage({
                           href={d.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-gray-800 hover:underline"
+                          className="text-text-primary hover:underline"
                         >
                           {d.titulo}
                         </a>
@@ -337,10 +337,10 @@ export default async function ClienteDetailPage({
                           <span
                             className={`ml-2 text-xs ${
                               d.emDias !== null && d.emDias < 0
-                                ? "font-medium text-red-600"
+                                ? "font-medium text-status-error"
                                 : d.emDias === 0
-                                  ? "font-medium text-amber-600"
-                                  : "text-gray-400"
+                                  ? "font-medium text-status-warning"
+                                  : "text-text-muted"
                             }`}
                           >
                             {d.vencimentoLabel}
@@ -355,7 +355,7 @@ export default async function ClienteDetailPage({
           )}
 
           <section className="card p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-secondary">
               Histórico de status
             </h2>
             <ol className="space-y-4">
@@ -363,7 +363,7 @@ export default async function ClienteDetailPage({
                 <li key={h.id} className="flex gap-3">
                   <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-400" />
                   <div>
-                    <p className="text-sm text-gray-800">
+                    <p className="text-sm text-text-primary">
                       {h.statusAnterior ? (
                         <>
                           {STATUS_LABELS[h.statusAnterior]} →{" "}
@@ -380,7 +380,7 @@ export default async function ClienteDetailPage({
                         </>
                       )}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-text-muted">
                       {formatDateTime(h.dataMudanca)}
                       {h.alteradoPor?.nome && ` · ${h.alteradoPor.nome}`}
                     </p>

@@ -19,7 +19,7 @@ export default async function ComercialPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Comercial</h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-secondary">
           Funil de {clients.length} cliente(s) · arraste os cards entre as
           etapas para mudar o status.
         </p>

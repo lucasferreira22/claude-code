@@ -12,7 +12,7 @@ export default async function AgenciasPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Agências Parceiras</h1>
-          <p className="text-sm text-gray-500">{agencies.length} agência(s)</p>
+          <p className="text-sm text-text-secondary">{agencies.length} agência(s)</p>
         </div>
         <Link href="/agencias/novo" className="btn-primary">
           + Nova agência
@@ -20,7 +20,7 @@ export default async function AgenciasPage() {
       </div>
 
       {agencies.length === 0 ? (
-        <div className="card p-10 text-center text-gray-500">
+        <div className="card p-10 text-center text-text-secondary">
           Nenhuma agência parceira cadastrada.
         </div>
       ) : (
@@ -31,11 +31,11 @@ export default async function AgenciasPage() {
               href={`/agencias/${a.id}`}
               className="card p-5 transition-shadow hover:shadow-md"
             >
-              <h2 className="font-semibold text-brand-700">{a.nome}</h2>
+              <h2 className="font-semibold text-accent-primary">{a.nome}</h2>
               {a.contatoNome && (
-                <p className="text-sm text-gray-500">{a.contatoNome}</p>
+                <p className="text-sm text-text-secondary">{a.contatoNome}</p>
               )}
-              <p className="mt-3 text-sm text-gray-600">
+              <p className="mt-3 text-sm text-text-secondary">
                 {a._count.clientes} cliente(s) vinculado(s)
               </p>
             </Link>

@@ -26,7 +26,7 @@ export default async function EditarServicoPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/servicos" className="text-sm text-brand-700 hover:underline">
+        <Link href="/servicos" className="text-sm text-accent-primary hover:underline">
           ← Voltar para serviços
         </Link>
         <h1 className="mt-1 text-2xl font-bold">Editar serviço</h1>

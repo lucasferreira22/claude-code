@@ -89,7 +89,7 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
           className="input"
         />
         {q && (
-          <span className="mt-1 block text-xs text-gray-400">
+          <span className="mt-1 block text-xs text-text-muted">
             {filtrados.length} resultado(s)
           </span>
         )}
@@ -132,7 +132,7 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
 
             <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
               {colCards.length === 0 ? (
-                <p className="px-1 py-6 text-center text-xs text-gray-300">
+                <p className="px-1 py-6 text-center text-xs text-text-muted">
                   Arraste clientes para cá
                 </p>
               ) : (

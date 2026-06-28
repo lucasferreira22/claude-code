@@ -38,7 +38,7 @@ export default async function AgenciaDetailPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Link href="/agencias" className="text-sm text-brand-700 hover:underline">
+          <Link href="/agencias" className="text-sm text-accent-primary hover:underline">
             ← Voltar para agências
           </Link>
           <h1 className="mt-1 text-2xl font-bold">{agency.nome}</h1>
@@ -63,31 +63,31 @@ export default async function AgenciaDetailPage({
 
       <section className="card grid grid-cols-2 gap-4 p-6 sm:grid-cols-4">
         <div>
-          <dt className="text-xs uppercase tracking-wide text-gray-400">
+          <dt className="text-xs uppercase tracking-wide text-text-muted">
             Contato
           </dt>
-          <dd className="text-sm text-gray-800">{agency.contatoNome ?? "—"}</dd>
+          <dd className="text-sm text-text-primary">{agency.contatoNome ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-gray-400">
+          <dt className="text-xs uppercase tracking-wide text-text-muted">
             E-mail
           </dt>
-          <dd className="text-sm text-gray-800">{agency.contatoEmail ?? "—"}</dd>
+          <dd className="text-sm text-text-primary">{agency.contatoEmail ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-gray-400">
+          <dt className="text-xs uppercase tracking-wide text-text-muted">
             Telefone
           </dt>
-          <dd className="text-sm text-gray-800">
+          <dd className="text-sm text-text-primary">
             {agency.contatoTelefone ?? "—"}
           </dd>
         </div>
         {agency.observacoes && (
           <div className="col-span-2 sm:col-span-4">
-            <dt className="text-xs uppercase tracking-wide text-gray-400">
+            <dt className="text-xs uppercase tracking-wide text-text-muted">
               Observações
             </dt>
-            <dd className="whitespace-pre-wrap text-sm text-gray-800">
+            <dd className="whitespace-pre-wrap text-sm text-text-primary">
               {agency.observacoes}
             </dd>
           </div>
@@ -95,18 +95,18 @@ export default async function AgenciaDetailPage({
       </section>
 
       <section className="card">
-        <div className="border-b border-gray-100 px-6 py-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <div className="border-b border-border-subtle px-6 py-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
             Clientes desta agência ({agency.clientes.length})
           </h2>
         </div>
         {agency.clientes.length === 0 ? (
-          <p className="p-6 text-sm text-gray-400">
+          <p className="p-6 text-sm text-text-muted">
             Nenhum cliente vinculado a esta agência.
           </p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+            <thead className="bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <th className="px-6 py-3">Cliente</th>
                 <th className="px-6 py-3">Nicho</th>
@@ -114,19 +114,19 @@ export default async function AgenciaDetailPage({
                 <th className="px-6 py-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border-subtle">
               {agency.clientes.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-50">
+                <tr key={c.id} className="hover:bg-surface-elevated">
                   <td className="px-6 py-3">
                     <Link
                       href={`/clientes/${c.id}`}
-                      className="font-medium text-brand-700 hover:underline"
+                      className="font-medium text-accent-primary hover:underline"
                     >
                       {c.nomeRazaoSocial}
                     </Link>
                   </td>
-                  <td className="px-6 py-3 text-gray-600">{c.nicho ?? "—"}</td>
-                  <td className="px-6 py-3 text-gray-600">
+                  <td className="px-6 py-3 text-text-secondary">{c.nicho ?? "—"}</td>
+                  <td className="px-6 py-3 text-text-secondary">
                     {formatCurrency(
                       c.valorMensal ? Number(c.valorMensal) : null
                     )}

@@ -88,7 +88,7 @@ export function ClientForm({
         name="servicos"
         value={s.id}
         defaultChecked={values?.servicos?.includes(s.id)}
-        className="h-4 w-4 rounded border-gray-300"
+        className="h-4 w-4 rounded border-border-default"
       />
       {s.nome}
     </label>
@@ -97,7 +97,7 @@ export function ClientForm({
   return (
     <form action={formAction} className="space-y-6">
       <div className="card space-y-4 p-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
           Dados do cliente
         </h2>
 
@@ -145,7 +145,7 @@ export function ClientForm({
       </div>
 
       <div className="card space-y-4 p-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
           Relação e contrato
         </h2>
 
@@ -181,7 +181,7 @@ export function ClientForm({
                 ))}
               </select>
               {agencies.length === 0 && (
-                <p className="mt-1 text-xs text-amber-600">
+                <p className="mt-1 text-xs text-status-warning">
                   Nenhuma agência cadastrada.{" "}
                   <Link href="/agencias/novo" className="underline">
                     Cadastrar agência
@@ -276,7 +276,7 @@ export function ClientForm({
               defaultValue={values?.custoMensal ?? ""}
               className="input"
             />
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-text-muted">
               Usado para calcular o lucro.
             </p>
           </div>
@@ -292,20 +292,20 @@ export function ClientForm({
               defaultValue={values?.diaVencimento ?? ""}
               className="input"
             />
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-text-muted">
               Dia do mês do pagamento recorrente (1–31).
             </p>
           </div>
         </div>
 
-        <div className="border-t border-gray-100 pt-4">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        <div className="border-t border-border-subtle pt-4">
+          <label className="flex items-center gap-2 text-sm font-medium text-text-primary">
             <input
               type="checkbox"
               name="possuiHospedagem"
               checked={possuiHospedagem}
               onChange={(e) => setPossuiHospedagem(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-4 w-4 rounded border-border-default"
             />
             Este cliente tem hospedagem / domínio (cobrança anual)
           </label>
@@ -335,7 +335,7 @@ export function ClientForm({
           )}
         </div>
 
-        <div className="border-t border-gray-100 pt-4">
+        <div className="border-t border-border-subtle pt-4">
           <label className="label">Conta de anúncio do Meta</label>
           {metaAdAccounts && metaAdAccounts.length > 0 ? (
             <select
@@ -364,7 +364,7 @@ export function ClientForm({
               className="input sm:max-w-xs"
             />
           )}
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-xs text-text-muted">
             Vincula a conta do cliente no Meta para puxar as métricas dos
             anúncios.
           </p>
@@ -373,7 +373,7 @@ export function ClientForm({
         <div>
           <span className="label">Serviços contratados</span>
           {services.length === 0 ? (
-            <p className="text-sm text-amber-600">
+            <p className="text-sm text-status-warning">
               Nenhum serviço cadastrado.{" "}
               <Link href="/servicos" className="underline">
                 Cadastrar serviços
@@ -383,7 +383,7 @@ export function ClientForm({
             <div className="space-y-3">
               {categorias.map((cat) => (
                 <div key={cat.id}>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-text-muted">
                     {cat.nome}
                   </p>
                   <div className="flex flex-wrap gap-4 pl-1">
@@ -402,7 +402,7 @@ export function ClientForm({
       </div>
 
       <div className="card space-y-4 p-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
           Contatos
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -435,7 +435,7 @@ export function ClientForm({
       </div>
 
       <div className="card space-y-4 p-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
           Observações
         </h2>
         <textarea
@@ -448,7 +448,7 @@ export function ClientForm({
       </div>
 
       {state?.error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-status-error" role="alert">
           {state.error}
         </p>
       )}

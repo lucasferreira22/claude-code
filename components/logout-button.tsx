@@ -5,7 +5,7 @@ export function LogoutButton() {
     <form action={logout}>
       <button
         type="submit"
-        className="text-sm text-gray-500 hover:text-gray-900"
+        className="text-sm text-text-muted hover:text-text-primary transition-colors duration-200"
       >
         Sair
       </button>

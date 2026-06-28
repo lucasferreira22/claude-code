@@ -81,7 +81,7 @@ export default async function ClientesPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Clientes</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-secondary">
             {clients.length} de {total} cliente(s)
           </p>
         </div>
@@ -183,7 +183,7 @@ export default async function ClientesPage({
       </form>
 
       {clients.length === 0 ? (
-        <div className="card p-10 text-center text-gray-500">
+        <div className="card p-10 text-center text-text-secondary">
           Nenhum cliente encontrado.
         </div>
       ) : (

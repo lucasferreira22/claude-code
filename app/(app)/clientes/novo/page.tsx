@@ -25,7 +25,7 @@ export default async function NovoClientePage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/clientes" className="text-sm text-brand-700 hover:underline">
+        <Link href="/clientes" className="text-sm text-accent-primary hover:underline">
           ← Voltar para clientes
         </Link>
         <h1 className="mt-1 text-2xl font-bold">Novo cliente</h1>

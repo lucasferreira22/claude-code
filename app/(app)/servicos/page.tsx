@@ -23,7 +23,7 @@ export default async function ServicosPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Serviços</h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-secondary">
           Catálogo de serviços da agência. Os serviços ativos aparecem no
           cadastro de clientes.
         </p>

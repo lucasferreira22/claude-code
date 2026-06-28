@@ -27,7 +27,7 @@ export function ThemeToggle() {
       onClick={toggle}
       title={dark ? "Modo claro" : "Modo escuro"}
       aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
-      className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+      className="rounded-button p-1.5 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-all duration-200"
     >
       {dark ? (
         // sol (clicar volta pro claro)

@@ -65,18 +65,18 @@ export function ServiceForm({
           ))}
         </select>
       </div>
-      <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+      <label className="flex items-center gap-2 text-sm font-medium text-text-primary">
         <input
           type="checkbox"
           name="ativo"
           defaultChecked={values.ativo}
-          className="h-4 w-4 rounded border-gray-300"
+          className="h-4 w-4 rounded border-border-default"
         />
         Ativo (aparece no cadastro de clientes)
       </label>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-      {state?.ok && <p className="text-sm text-green-700">{state.ok}</p>}
+      {state?.error && <p className="text-sm text-status-error">{state.error}</p>}
+      {state?.ok && <p className="text-sm text-status-success">{state.ok}</p>}
 
       <div className="flex gap-2">
         <SubmitButton />

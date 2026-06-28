@@ -103,35 +103,35 @@ export function ServiceManager({
         </div>
         <AddButton />
         {createState?.error && (
-          <p className="text-sm text-red-600 lg:col-span-4">
+          <p className="text-sm text-status-error lg:col-span-4">
             {createState.error}
           </p>
         )}
         {createState?.ok && (
-          <p className="text-sm text-green-700 lg:col-span-4">
+          <p className="text-sm text-status-success lg:col-span-4">
             {createState.ok}
           </p>
         )}
       </form>
 
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-text-muted">
         Dica: deixe a categoria em branco para criar um item de topo (que pode
         virar categoria ao receber subserviços). Ex: crie “Tráfego Pago” como
         topo e cadastre “Meta Ads” com a categoria “Tráfego Pago”.
       </p>
 
-      {rowMsg?.error && <p className="text-sm text-red-600">{rowMsg.error}</p>}
-      {rowMsg?.ok && <p className="text-sm text-green-700">{rowMsg.ok}</p>}
+      {rowMsg?.error && <p className="text-sm text-status-error">{rowMsg.error}</p>}
+      {rowMsg?.ok && <p className="text-sm text-status-success">{rowMsg.ok}</p>}
 
       {/* Lista */}
       {services.length === 0 ? (
-        <div className="card p-10 text-center text-gray-500">
+        <div className="card p-10 text-center text-text-secondary">
           Nenhum serviço cadastrado ainda.
         </div>
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+            <thead className="border-b border-border-default bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <th className="px-4 py-3">Serviço</th>
                 <th className="px-4 py-3">Clientes</th>
@@ -139,28 +139,28 @@ export function ServiceManager({
                 <th className="px-4 py-3 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border-subtle">
               {linhas.map(({ s, nivel, categoria }) => (
-                <tr key={s.id} className={s.ativo ? "" : "bg-gray-50/60"}>
+                <tr key={s.id} className={s.ativo ? "" : "bg-surface-elevated/60"}>
                   <td className="px-4 py-3">
                     <div style={{ paddingLeft: nivel * 20 }}>
-                      <p className="flex items-center gap-2 font-medium text-gray-800">
+                      <p className="flex items-center gap-2 font-medium text-text-primary">
                         {nivel > 0 && (
-                          <span className="text-gray-300">↳</span>
+                          <span className="text-text-muted">↳</span>
                         )}
                         {s.nome}
                         {categoria && (
-                          <span className="badge bg-brand-100 text-brand-700">
+                          <span className="badge bg-accent-subtle text-accent-primary">
                             categoria
                           </span>
                         )}
                       </p>
                       {s.descricao && (
-                        <p className="text-xs text-gray-400">{s.descricao}</p>
+                        <p className="text-xs text-text-muted">{s.descricao}</p>
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-text-secondary">
                     {categoria ? "—" : s.clientes}
                   </td>
                   <td className="px-4 py-3">
@@ -168,7 +168,7 @@ export function ServiceManager({
                       className={`badge ${
                         s.ativo
                           ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-500"
+                          : "bg-surface-elevated text-text-secondary"
                       }`}
                     >
                       {s.ativo ? "Ativo" : "Inativo"}
@@ -179,20 +179,20 @@ export function ServiceManager({
                       <button
                         type="button"
                         onClick={() => onToggle(s.id, !s.ativo)}
-                        className="text-sm text-gray-600 hover:underline"
+                        className="text-sm text-text-secondary hover:underline"
                       >
                         {s.ativo ? "Desativar" : "Ativar"}
                       </button>
                       <Link
                         href={`/servicos/${s.id}/editar`}
-                        className="text-sm text-brand-700 hover:underline"
+                        className="text-sm text-accent-primary hover:underline"
                       >
                         Editar
                       </Link>
                       <button
                         type="button"
                         onClick={() => onDelete(s.id, s.nome)}
-                        className="text-sm text-red-600 hover:underline"
+                        className="text-sm text-status-error hover:underline"
                       >
                         Excluir
                       </button>

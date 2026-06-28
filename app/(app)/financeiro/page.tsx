@@ -49,7 +49,7 @@ export default async function FinanceiroPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Financeiro</h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-secondary">
           Faturamento, custos e lucro dos clientes ativos.
         </p>
       </div>
@@ -57,27 +57,27 @@ export default async function FinanceiroPage() {
       {/* Totais */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="card p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-400">
+          <p className="text-xs uppercase tracking-wide text-text-muted">
             Faturamento mensal
           </p>
           <p className="sensivel mt-1 text-2xl font-bold">
             {formatCurrency(resumo.faturamentoMensal)}
           </p>
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-xs text-text-muted">
             Inclui hospedagem diluída (÷12)
           </p>
         </div>
         <div className="card p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-400">Custo</p>
+          <p className="text-xs uppercase tracking-wide text-text-muted">Custo</p>
           <p className="sensivel mt-1 text-2xl font-bold">
             {formatCurrency(resumo.custoMensal)}
           </p>
         </div>
         <div className="card p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-400">Lucro</p>
+          <p className="text-xs uppercase tracking-wide text-text-muted">Lucro</p>
           <p
             className={`sensivel mt-1 text-2xl font-bold ${
-              resumo.lucro >= 0 ? "text-green-700" : "text-red-700"
+              resumo.lucro >= 0 ? "text-status-success" : "text-status-error"
             }`}
           >
             {formatCurrency(resumo.lucro)}
@@ -87,7 +87,7 @@ export default async function FinanceiroPage() {
 
       {/* Por categoria */}
       <section className="card p-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-secondary">
           Faturamento por categoria
         </h2>
         <ul className="space-y-2">
@@ -98,11 +98,11 @@ export default async function FinanceiroPage() {
             >
               <span className={`badge ${CATEGORIA_BADGE[cat]}`}>
                 {CATEGORIA_LABELS[cat]}
-                <span className="ml-1 text-gray-500">
+                <span className="ml-1 text-text-secondary">
                   ({resumo.porCategoria[cat].count})
                 </span>
               </span>
-              <span className="sensivel font-medium text-gray-700">
+              <span className="sensivel font-medium text-text-primary">
                 {formatCurrency(resumo.porCategoria[cat].faturamento)}
               </span>
             </li>
@@ -112,11 +112,11 @@ export default async function FinanceiroPage() {
 
       {/* Por cliente */}
       <section className="card overflow-x-auto">
-        <h2 className="px-6 pt-6 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="px-6 pt-6 text-sm font-semibold uppercase tracking-wide text-text-secondary">
           Detalhamento por cliente (ativos)
         </h2>
         <table className="mt-4 w-full text-sm">
-          <thead className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+          <thead className="border-b border-border-default bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-secondary">
             <tr>
               <th className="px-4 py-3">Cliente</th>
               <th className="px-4 py-3 text-right">Valor</th>
@@ -124,33 +124,33 @@ export default async function FinanceiroPage() {
               <th className="px-4 py-3 text-right">Lucro</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border-subtle">
             {ativos.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={4} className="px-4 py-6 text-center text-text-muted">
                   Nenhum cliente ativo com valor mensal.
                 </td>
               </tr>
             ) : (
               ativos.map(({ c, valor, custo, lucro }) => (
-                <tr key={c.id} className="hover:bg-gray-50">
+                <tr key={c.id} className="hover:bg-surface-elevated">
                   <td className="px-4 py-3">
                     <Link
                       href={`/clientes/${c.id}`}
-                      className="font-medium text-brand-700 hover:underline"
+                      className="font-medium text-accent-primary hover:underline"
                     >
                       {c.nomeRazaoSocial}
                     </Link>
                   </td>
-                  <td className="sensivel px-4 py-3 text-right text-gray-600">
+                  <td className="sensivel px-4 py-3 text-right text-text-secondary">
                     {formatCurrency(valor)}
                   </td>
-                  <td className="sensivel px-4 py-3 text-right text-gray-600">
+                  <td className="sensivel px-4 py-3 text-right text-text-secondary">
                     {custo > 0 ? formatCurrency(custo) : "—"}
                   </td>
                   <td
                     className={`sensivel px-4 py-3 text-right font-medium ${
-                      lucro >= 0 ? "text-green-700" : "text-red-700"
+                      lucro >= 0 ? "text-status-success" : "text-status-error"
                     }`}
                   >
                     {formatCurrency(lucro)}

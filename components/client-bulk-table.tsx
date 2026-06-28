@@ -71,8 +71,8 @@ export function ClientBulkTable({
     <div className="space-y-3">
       {/* Barra de ações em massa */}
       {selected.size > 0 && (
-        <div className="card flex flex-wrap items-end gap-3 border-brand-200 bg-brand-50 p-4">
-          <span className="text-sm font-medium text-gray-700">
+        <div className="card flex flex-wrap items-end gap-3 border-accent-subtle-border bg-accent-subtle p-4">
+          <span className="text-sm font-medium text-text-primary">
             {selected.size} selecionado(s)
           </span>
 
@@ -135,7 +135,7 @@ export function ClientBulkTable({
             {hiddenIds}
             <button
               type="submit"
-              className="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
+              className="btn-primary"
             >
               Excluir selecionados
             </button>
@@ -145,7 +145,7 @@ export function ClientBulkTable({
 
       {(message || error) && (
         <p
-          className={`text-sm ${error ? "text-red-600" : "text-green-700"}`}
+          className={`text-sm ${error ? "text-status-error" : "text-status-success"}`}
           role="status"
         >
           {error || message}
@@ -154,14 +154,14 @@ export function ClientBulkTable({
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+          <thead className="border-b border-border-default bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-muted">
             <tr>
               <th className="px-4 py-3">
                 <input
                   type="checkbox"
                   checked={allSelected}
                   onChange={toggleAll}
-                  className="h-4 w-4 rounded border-gray-300"
+                  className="h-4 w-4 rounded border-border-default"
                   aria-label="Selecionar todos"
                 />
               </th>
@@ -175,30 +175,30 @@ export function ClientBulkTable({
               <th className="px-4 py-3">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border-subtle">
             {clients.map((c) => (
               <tr
                 key={c.id}
-                className={selected.has(c.id) ? "bg-brand-50/50" : "hover:bg-gray-50"}
+                className={selected.has(c.id) ? "bg-accent-subtle" : "hover:bg-surface-hover"}
               >
                 <td className="px-4 py-3">
                   <input
                     type="checkbox"
                     checked={selected.has(c.id)}
                     onChange={() => toggle(c.id)}
-                    className="h-4 w-4 rounded border-gray-300"
+                    className="h-4 w-4 rounded border-border-default"
                     aria-label={`Selecionar ${c.nomeRazaoSocial}`}
                   />
                 </td>
                 <td className="px-4 py-3">
                   <Link
                     href={`/clientes/${c.id}`}
-                    className="font-medium text-brand-700 hover:underline"
+                    className="font-medium text-accent-primary hover:underline"
                   >
                     {c.nomeRazaoSocial}
                   </Link>
                   {c.partnerAgencyNome && (
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-text-muted">
                       via {c.partnerAgencyNome}
                     </div>
                   )}
@@ -208,19 +208,19 @@ export function ClientBulkTable({
                     {CATEGORIA_LABELS[c.categoria]}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-gray-600">
+                <td className="px-4 py-3 text-text-secondary">
                   {TIPO_RELACAO_LABELS[c.tipoRelacao]}
                 </td>
-                <td className="px-4 py-3 text-gray-600">{c.nicho ?? "—"}</td>
-                <td className="px-4 py-3 text-gray-600">
+                <td className="px-4 py-3 text-text-secondary">{c.nicho ?? "—"}</td>
+                <td className="px-4 py-3 text-text-secondary">
                   {c.servicos.length === 0
                     ? "—"
                     : c.servicos.join(", ")}
                 </td>
-                <td className="px-4 py-3 text-gray-600">
+                <td className="px-4 py-3 text-text-secondary">
                   {c.responsavelNome ?? "—"}
                 </td>
-                <td className="sensivel px-4 py-3 text-gray-600">
+                <td className="sensivel px-4 py-3 font-mono text-text-secondary">
                   {formatCurrency(c.valorMensal)}
                 </td>
                 <td className="px-4 py-3">

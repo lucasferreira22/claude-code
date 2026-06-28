@@ -51,7 +51,7 @@ export default async function HospedagensPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Hospedagens</h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-secondary">
           Renovações anuais de hospedagem e domínio — de todos os clientes.
         </p>
       </div>
@@ -59,13 +59,13 @@ export default async function HospedagensPage() {
       {/* Resumo */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="card p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-400">
+          <p className="text-xs uppercase tracking-wide text-text-muted">
             Clientes com hospedagem
           </p>
           <p className="mt-1 text-2xl font-bold">{clientes.length}</p>
         </div>
         <div className="card p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-400">
+          <p className="text-xs uppercase tracking-wide text-text-muted">
             Receita anual (renovações)
           </p>
           <p className="sensivel mt-1 text-2xl font-bold">
@@ -73,15 +73,15 @@ export default async function HospedagensPage() {
           </p>
         </div>
         <div className="card p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-400">
+          <p className="text-xs uppercase tracking-wide text-text-muted">
             Renovam nos próximos 30 dias
           </p>
-          <p className="mt-1 text-2xl font-bold text-amber-700">{proximos30}</p>
+          <p className="mt-1 text-2xl font-bold text-status-warning">{proximos30}</p>
         </div>
       </div>
 
       {clientes.length === 0 ? (
-        <div className="card p-10 text-center text-gray-500">
+        <div className="card p-10 text-center text-text-secondary">
           Nenhum cliente com hospedagem. Marque a opção{" "}
           <span className="font-medium">
             &quot;Este cliente tem hospedagem&quot;
@@ -91,7 +91,7 @@ export default async function HospedagensPage() {
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+            <thead className="border-b border-border-default bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <th className="px-4 py-3">Cliente</th>
                 <th className="px-4 py-3">Categoria</th>
@@ -100,7 +100,7 @@ export default async function HospedagensPage() {
                 <th className="px-4 py-3 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border-subtle">
               {clientes.map((c) => {
                 const dias = diasPara(c.dataRenovacao, hoje);
                 const renovar = markHostingRenewed.bind(null, c.id);
@@ -114,11 +114,11 @@ export default async function HospedagensPage() {
                   })
                 );
                 return (
-                  <tr key={c.id} className="hover:bg-gray-50">
+                  <tr key={c.id} className="hover:bg-surface-elevated">
                     <td className="px-4 py-3">
                       <Link
                         href={`/clientes/${c.id}`}
-                        className="font-medium text-brand-700 hover:underline"
+                        className="font-medium text-accent-primary hover:underline"
                       >
                         {c.nomeRazaoSocial}
                       </Link>
@@ -128,7 +128,7 @@ export default async function HospedagensPage() {
                         {CATEGORIA_LABELS[c.categoria]}
                       </span>
                     </td>
-                    <td className="sensivel px-4 py-3 text-right text-gray-700">
+                    <td className="sensivel px-4 py-3 text-right text-text-primary">
                       {c.valorRenovacao
                         ? formatCurrency(Number(c.valorRenovacao))
                         : "—"}
@@ -136,7 +136,7 @@ export default async function HospedagensPage() {
                     <td className="px-4 py-3">
                       {c.dataRenovacao ? (
                         <span className="flex items-center gap-2">
-                          <span className="text-gray-700">
+                          <span className="text-text-primary">
                             {formatDate(c.dataRenovacao)}
                           </span>
                           {dias !== null && (
@@ -146,7 +146,7 @@ export default async function HospedagensPage() {
                                   ? "bg-red-100 text-red-800"
                                   : dias <= 30
                                     ? "bg-amber-100 text-amber-800"
-                                    : "bg-gray-100 text-gray-600"
+                                    : "bg-surface-elevated text-text-secondary"
                               }`}
                             >
                               {dias < 0
@@ -158,7 +158,7 @@ export default async function HospedagensPage() {
                           )}
                         </span>
                       ) : (
-                        <span className="text-gray-400">Sem data</span>
+                        <span className="text-text-muted">Sem data</span>
                       )}
                     </td>
                     <td className="px-4 py-3">

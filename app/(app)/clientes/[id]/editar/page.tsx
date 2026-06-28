@@ -45,7 +45,7 @@ export default async function EditarClientePage({
       <div>
         <Link
           href={`/clientes/${client.id}`}
-          className="text-sm text-brand-700 hover:underline"
+          className="text-sm text-accent-primary hover:underline"
         >
           ← Voltar para o cliente
         </Link>

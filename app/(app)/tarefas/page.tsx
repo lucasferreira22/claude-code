@@ -14,7 +14,7 @@ function VencBadge({ emDias }: { emDias: number | null }) {
       ? "bg-red-100 text-red-800"
       : emDias === 0
         ? "bg-amber-100 text-amber-800"
-        : "bg-gray-100 text-gray-600";
+        : "bg-surface-elevated text-text-secondary";
   const txt =
     emDias < 0
       ? `atrasada ${Math.abs(emDias)}d`
@@ -40,7 +40,7 @@ function DemandaItem({
           href={d.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-800 hover:underline"
+          className="text-text-primary hover:underline"
         >
           {d.titulo}
         </a>
@@ -48,18 +48,18 @@ function DemandaItem({
           (clienteHref ? (
             <Link
               href={clienteHref}
-              className="ml-2 text-xs text-brand-700 hover:underline"
+              className="ml-2 text-xs text-accent-primary hover:underline"
             >
               {clienteNome}
             </Link>
           ) : (
-            <span className="ml-2 text-xs text-gray-400">{clienteNome}</span>
+            <span className="ml-2 text-xs text-text-muted">{clienteNome}</span>
           ))}
       </div>
       <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
-        {d.recorrente && <span className="text-xs text-gray-300">↻</span>}
+        {d.recorrente && <span className="text-xs text-text-muted">↻</span>}
         {d.vencimentoLabel && (
-          <span className="text-xs text-gray-500">{d.vencimentoLabel}</span>
+          <span className="text-xs text-text-secondary">{d.vencimentoLabel}</span>
         )}
         <VencBadge emDias={d.emDias} />
       </div>
@@ -82,14 +82,14 @@ function Bloco({
 }) {
   return (
     <section className="card p-6">
-      <h2 className="mb-3 flex items-center justify-between text-sm font-semibold uppercase tracking-wide text-gray-500">
+      <h2 className="mb-3 flex items-center justify-between text-sm font-semibold uppercase tracking-wide text-text-secondary">
         {titulo}
-        <span className="text-xs font-normal text-gray-400">{itens.length}</span>
+        <span className="text-xs font-normal text-text-muted">{itens.length}</span>
       </h2>
       {itens.length === 0 ? (
-        <p className="text-sm text-gray-400">{vazio ?? "Nada por aqui."}</p>
+        <p className="text-sm text-text-muted">{vazio ?? "Nada por aqui."}</p>
       ) : (
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-border-subtle">
           {itens.map((it) => (
             <DemandaItem
               key={it.demanda.id}
@@ -109,7 +109,7 @@ export default async function TarefasPage() {
     return (
       <div className="space-y-4">
         <h1 className="text-2xl font-bold">Tarefas</h1>
-        <div className="card p-8 text-center text-gray-500">
+        <div className="card p-8 text-center text-text-secondary">
           A integração com o Todoist ainda não está configurada. Defina a
           variável <code className="font-mono">TODOIST_API_TOKEN</code> no
           ambiente (Vercel) para exibir as tarefas aqui.
@@ -153,14 +153,14 @@ export default async function TarefasPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Tarefas</h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-secondary">
           Demandas com prazo, sincronizadas do Todoist (somente leitura) ·{" "}
           {comVencimento.length} com prazo
         </p>
       </div>
 
       {erroMsg ? (
-        <div className="card p-8 text-center text-gray-500">
+        <div className="card p-8 text-center text-text-secondary">
           Não foi possível carregar as tarefas do Todoist agora.
           <br />
           <span className="mt-2 block font-mono text-xs text-red-500">

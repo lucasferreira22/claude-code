@@ -45,13 +45,13 @@ function Stat({
 }) {
   return (
     <div className="card p-5">
-      <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
+      <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
       <p
-        className={`sensivel mt-1 text-2xl font-bold ${accent ?? "text-gray-900"}`}
+        className={`sensivel mt-1 text-2xl font-bold font-mono ${accent ?? "text-text-primary"}`}
       >
         {value}
       </p>
-      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-text-muted">{hint}</p>}
     </div>
   );
 }
@@ -87,7 +87,7 @@ export default async function PainelPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Painel</h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-secondary">
           Visão geral · {formatCompetencia(competencia)}
         </p>
       </div>
@@ -106,7 +106,7 @@ export default async function PainelPage() {
         <Stat
           label="Lucro estimado"
           value={formatCurrency(resumo.lucro)}
-          accent={resumo.lucro >= 0 ? "text-green-700" : "text-red-700"}
+          accent={resumo.lucro >= 0 ? "text-status-success" : "text-status-error"}
           hint="Faturamento − custo"
         />
       </div>
@@ -115,23 +115,23 @@ export default async function PainelPage() {
         {/* Cobranças do mês */}
         <section className="card p-6 lg:col-span-1">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
               Cobranças do mês
             </h2>
             <Link
               href="/financeiro/cobrancas"
-              className="text-xs text-brand-700 hover:underline"
+              className="text-xs text-accent-primary hover:underline"
             >
               Ver tudo →
             </Link>
           </div>
 
           {totalCobranca === 0 ? (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-text-muted">
               Nenhuma cobrança gerada para {formatCompetencia(competencia)}.{" "}
               <Link
                 href="/financeiro/cobrancas"
-                className="text-brand-700 hover:underline"
+                className="text-accent-primary hover:underline"
               >
                 Gerar agora
               </Link>
@@ -139,23 +139,23 @@ export default async function PainelPage() {
             </p>
           ) : (
             <div className="space-y-3">
-              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-surface-elevated">
                 <div
-                  className="h-full rounded-full bg-green-500"
+                  className="h-full rounded-full bg-status-success"
                   style={{ width: `${pctRecebido}%` }}
                 />
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-green-700">
+                <span className="text-status-success">
                   Recebido:{" "}
-                  <span className="sensivel">{formatCurrency(recebido)}</span>
+                  <span className="sensivel font-mono">{formatCurrency(recebido)}</span>
                 </span>
-                <span className="text-amber-700">
+                <span className="text-status-warning">
                   Pendente:{" "}
-                  <span className="sensivel">{formatCurrency(pendente)}</span>
+                  <span className="sensivel font-mono">{formatCurrency(pendente)}</span>
                 </span>
               </div>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-text-muted">
                 {pctRecebido.toFixed(0)}% recebido de{" "}
                 <span className="sensivel">{formatCurrency(totalCobranca)}</span>
               </p>
@@ -165,7 +165,7 @@ export default async function PainelPage() {
 
         {/* Clientes por categoria */}
         <section className="card p-6">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-muted">
             Clientes por categoria
           </h2>
           <ul className="space-y-2">
@@ -174,13 +174,13 @@ export default async function PainelPage() {
                 <span className={`badge ${CATEGORIA_BADGE[c]}`}>
                   {CATEGORIA_LABELS[c]}
                 </span>
-                <span className="font-medium text-gray-700">
+                <span className="font-medium font-mono text-text-primary">
                   {resumo.porCategoria[c].count}
                 </span>
               </li>
             ))}
-            <li className="flex items-center justify-between border-t border-gray-100 pt-2 text-sm">
-              <span className="text-gray-500">Total</span>
+            <li className="flex items-center justify-between border-t border-border-subtle pt-2 text-sm">
+              <span className="text-text-secondary">Total</span>
               <span className="font-semibold">{resumo.totalClientes}</span>
             </li>
           </ul>
@@ -188,7 +188,7 @@ export default async function PainelPage() {
 
         {/* Clientes por status */}
         <section className="card p-6">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-muted">
             Clientes por status
           </h2>
           <ul className="space-y-2">
@@ -197,7 +197,7 @@ export default async function PainelPage() {
                 <span className={`badge ${STATUS_BADGE[s]}`}>
                   {STATUS_LABELS[s]}
                 </span>
-                <span className="font-medium text-gray-700">
+                <span className="font-medium font-mono text-text-primary">
                   {resumo.porStatus[s]}
                 </span>
               </li>
@@ -208,15 +208,15 @@ export default async function PainelPage() {
 
       {/* Próximos vencimentos */}
       <section className="card p-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-muted">
           Próximos vencimentos (14 dias)
         </h2>
         {vencimentos.length === 0 ? (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-text-muted">
             Nenhum vencimento ou renovação nos próximos 14 dias.
           </p>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-border-subtle">
             {vencimentos.map((v) => (
               <li
                 key={`${v.clientId}-${v.tipo}`}
@@ -225,25 +225,25 @@ export default async function PainelPage() {
                 <div className="min-w-0">
                   <Link
                     href={`/clientes/${v.clientId}`}
-                    className="font-medium text-brand-700 hover:underline"
+                    className="font-medium text-accent-primary hover:underline"
                   >
                     {v.nome}
                   </Link>
-                  <span className="ml-2 text-xs text-gray-400">
+                  <span className="ml-2 text-xs text-text-muted">
                     {v.tipo === "MENSAL" ? "Mensalidade" : "Renovação"}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 whitespace-nowrap">
-                  <span className="sensivel text-gray-600">
+                  <span className="sensivel font-mono text-text-secondary">
                     {formatCurrency(v.valor)}
                   </span>
                   <span
                     className={`text-xs ${
                       v.emDias < 0
-                        ? "font-medium text-red-600"
+                        ? "font-medium text-status-error"
                         : v.emDias <= 3
-                          ? "font-medium text-amber-600"
-                          : "text-gray-400"
+                          ? "font-medium text-status-warning"
+                          : "text-text-muted"
                     }`}
                   >
                     {v.emDias < 0

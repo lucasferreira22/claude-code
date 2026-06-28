@@ -21,8 +21,8 @@ function Metrica({
   sensivel?: boolean;
 }) {
   return (
-    <div className="rounded-md border border-gray-100 p-3">
-      <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
+    <div className="rounded-md border border-border-subtle p-3">
+      <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
       <p className={`mt-0.5 text-lg font-semibold ${sensivel ? "sensivel" : ""}`}>
         {valor}
       </p>
@@ -54,7 +54,7 @@ export async function MetaMetrics({
   return (
     <section className="card p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
           Métricas do Meta
         </h2>
         <div className="flex gap-1">
@@ -65,8 +65,8 @@ export async function MetaMetrics({
               scroll={false}
               className={`rounded-md px-2.5 py-1 text-xs font-medium ${
                 p.key === periodo
-                  ? "bg-brand-600 text-white"
-                  : "border border-gray-200 text-gray-500 hover:bg-gray-50"
+                  ? "bg-accent-primary text-white"
+                  : "border border-border-default text-text-secondary hover:bg-surface-elevated"
               }`}
             >
               {p.label}
@@ -76,18 +76,18 @@ export async function MetaMetrics({
       </div>
 
       {!metaConfigurado() ? (
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-text-muted">
           Integração com o Meta não configurada (defina{" "}
           <code className="font-mono">META_ACCESS_TOKEN</code> no ambiente).
         </p>
       ) : erro ? (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-secondary">
           Não foi possível carregar as métricas.
           <br />
           <span className="font-mono text-xs text-red-500">{erro}</span>
         </p>
       ) : !dados || dados.impressions === 0 ? (
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-text-muted">
           Sem dados de anúncios no período selecionado.
         </p>
       ) : (
@@ -110,19 +110,19 @@ export async function MetaMetrics({
           </div>
 
           {dados.resultados.length > 0 && (
-            <div className="border-t border-gray-100 pt-3">
-              <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+            <div className="border-t border-border-subtle pt-3">
+              <p className="mb-2 text-xs uppercase tracking-wide text-text-muted">
                 Resultados
               </p>
               <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
                 {dados.resultados.map((r) => (
-                  <span key={r.tipo} className="text-gray-700">
+                  <span key={r.tipo} className="text-text-primary">
                     {r.tipo}:{" "}
                     <span className="font-semibold">{inteiro(r.valor)}</span>
                   </span>
                 ))}
                 {cpl !== null && (
-                  <span className="text-gray-700">
+                  <span className="text-text-primary">
                     CPL:{" "}
                     <span className="sensivel font-semibold">
                       {formatCurrency(cpl)}
