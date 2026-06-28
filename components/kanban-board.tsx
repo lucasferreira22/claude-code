@@ -25,11 +25,11 @@ export type KanbanCard = {
 
 // Cor da borda esquerda do card por status (acento visual).
 const STATUS_ACCENT: Record<ClientStatus, string> = {
-  LEAD: "border-l-gray-400",
-  EM_NEGOCIACAO: "border-l-amber-400",
-  ATIVO: "border-l-green-500",
-  PAUSADO: "border-l-orange-400",
-  ENCERRADO: "border-l-red-400",
+  LEAD: "border-l-text-muted",
+  EM_NEGOCIACAO: "border-l-status-warning",
+  ATIVO: "border-l-status-success",
+  PAUSADO: "border-l-accent-primary",
+  ENCERRADO: "border-l-status-error",
 };
 
 // Remove acentos e caixa para uma busca tolerante.
@@ -114,17 +114,18 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
               setOverCol((s) => (s === status ? null : s))
             }
             onDrop={(e) => handleDrop(e, status)}
-            className={`flex h-full w-72 shrink-0 flex-col rounded-lg border p-2 transition-colors ${
+            className={`flex h-full w-72 shrink-0 flex-col rounded-card border p-3 transition-all duration-200 ${
               isOver
-                ? "border-brand-400 bg-brand-50"
-                : "border-gray-200 bg-gray-50"
+                ? "border-accent-primary bg-accent-subtle shadow-hover"
+                : "border-border-default bg-surface-card"
             }`}
           >
-            <div className="mb-2 flex items-center justify-between px-1">
+            {/* Visual Concept: status connection indicator */}
+            <div className="relative mb-3 flex items-center justify-between px-1">
               <span className={`badge ${STATUS_BADGE[status]}`}>
                 {STATUS_LABELS[status]}
               </span>
-              <span className="text-xs font-medium text-gray-400">
+              <span className="text-xs font-mono font-medium text-text-muted">
                 {colCards.length}
               </span>
             </div>
@@ -145,13 +146,13 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
                       setDragId(card.id);
                     }}
                     onDragEnd={() => setDragId(null)}
-                    className={`cursor-grab rounded-md border border-l-4 bg-white p-3 shadow-sm active:cursor-grabbing ${
+                    className={`cursor-grab rounded-card border border-border-default border-l-4 bg-surface-page p-3 shadow-card hover:shadow-hover hover:bg-surface-hover active:cursor-grabbing transition-all duration-200 ${
                       STATUS_ACCENT[card.status]
-                    } ${dragId === card.id ? "opacity-40" : ""}`}
+                    } ${dragId === card.id ? "opacity-30 scale-95" : ""}`}
                   >
                     <Link
                       href={`/clientes/${card.id}`}
-                      className="font-medium text-brand-700 hover:underline"
+                      className="font-medium text-accent-primary hover:underline"
                       draggable={false}
                     >
                       {card.nomeRazaoSocial}
@@ -163,13 +164,13 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
                         {CATEGORIA_LABELS[card.categoria]}
                       </span>
                       {card.valorMensal ? (
-                        <span className="sensivel text-xs text-gray-500">
+                        <span className="sensivel text-xs font-mono text-text-secondary">
                           {formatCurrency(card.valorMensal)}/mês
                         </span>
                       ) : null}
                     </div>
                     {(card.responsavelNome || card.partnerAgencyNome) && (
-                      <p className="mt-1 truncate text-xs text-gray-400">
+                      <p className="mt-1 truncate text-xs text-text-muted">
                         {card.partnerAgencyNome
                           ? `via ${card.partnerAgencyNome}`
                           : card.responsavelNome}

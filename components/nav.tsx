@@ -24,10 +24,10 @@ export function Nav() {
           <Link
             key={link.href}
             href={link.href}
-            className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-button px-3 py-2 text-sm font-medium transition-all duration-200 ${
               active
-                ? "bg-brand-50 text-brand-700"
-                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                ? "bg-accent-subtle text-accent-primary"
+                : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
             }`}
           >
             {link.label}

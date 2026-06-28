@@ -24,11 +24,11 @@ export const STATUS_ORDER: ClientStatus[] = [
 ];
 
 export const STATUS_BADGE: Record<ClientStatus, string> = {
-  LEAD: "bg-gray-100 text-gray-700",
-  EM_NEGOCIACAO: "bg-amber-100 text-amber-800",
-  ATIVO: "bg-green-100 text-green-800",
-  PAUSADO: "bg-orange-100 text-orange-800",
-  ENCERRADO: "bg-red-100 text-red-800",
+  LEAD: "bg-surface-elevated text-text-secondary border-border-default",
+  EM_NEGOCIACAO: "bg-status-warning/10 text-status-warning border-status-warning/20",
+  ATIVO: "bg-status-success/10 text-status-success border-status-success/20",
+  PAUSADO: "bg-accent-subtle text-accent-primary border-accent-primary/20",
+  ENCERRADO: "bg-status-error/10 text-status-error border-status-error/20",
 };
 
 export const TIPO_RELACAO_LABELS: Record<TipoRelacao, string> = {
@@ -49,9 +49,9 @@ export const CATEGORIA_ORDER: Categoria[] = [
 ];
 
 export const CATEGORIA_BADGE: Record<Categoria, string> = {
-  RECORRENTE: "bg-blue-100 text-blue-800",
-  PONTUAL: "bg-purple-100 text-purple-800",
-  HOSPEDAGEM: "bg-teal-100 text-teal-800",
+  RECORRENTE: "bg-accent-subtle text-accent-primary border-accent-primary/20",
+  PONTUAL: "bg-surface-elevated text-text-primary border-border-default",
+  HOSPEDAGEM: "bg-status-success/10 text-status-success border-status-success/20",
 };
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
@@ -60,12 +60,12 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
 };
 
 export const PAYMENT_STATUS_BADGE: Record<PaymentStatus, string> = {
-  PENDENTE: "bg-amber-100 text-amber-800",
-  PAGO: "bg-green-100 text-green-800",
+  PENDENTE: "bg-status-warning/10 text-status-warning border-status-warning/20",
+  PAGO: "bg-status-success/10 text-status-success border-status-success/20",
 };
 
 // Badge para cobrança em atraso (status derivado na UI, não armazenado).
-export const PAYMENT_ATRASADO_BADGE = "bg-red-100 text-red-800";
+export const PAYMENT_ATRASADO_BADGE = "bg-status-error/10 text-status-error border-status-error/20";
 
 export const TIPO_CONTATO_LABELS: Record<TipoContato, string> = {
   TELEFONE: "Telefone",

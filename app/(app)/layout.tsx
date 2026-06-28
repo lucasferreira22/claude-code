@@ -18,8 +18,11 @@ export default async function AppLayout({
   if (!session?.user) redirect("/login");
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-gray-200 bg-white">
+    <div className="min-h-screen bg-surface-page text-text-primary relative">
+      {/* Background grid texture overlay */}
+      <div className="absolute inset-0 grid-bg-overlay opacity-60 z-0" />
+      
+      <header className="relative z-10 border-b border-border-default bg-surface-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-6">
             <Link href="/painel" className="shrink-0">
@@ -39,14 +42,14 @@ export default async function AppLayout({
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <PrivacyToggle />
-            <span className="hidden text-sm text-gray-500 sm:inline">
+            <span className="hidden text-sm text-text-secondary sm:inline">
               {session.user.name ?? session.user.email}
             </span>
             <LogoutButton />
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+      <main className="relative z-10 mx-auto max-w-6xl px-4 py-6">{children}</main>
     </div>
   );
 }
