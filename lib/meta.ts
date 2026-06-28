@@ -27,6 +27,38 @@ export function metaConfigurado(): boolean {
   return Boolean(process.env.META_ACCESS_TOKEN);
 }
 
+// Lista as contas de anúncio que o token tem acesso (para o seletor no cadastro).
+// Pagina por cursor; retorna vazio se não houver token ou em caso de erro.
+export async function getMetaAdAccounts(): Promise<
+  { id: string; nome: string }[]
+> {
+  const token = process.env.META_ACCESS_TOKEN?.trim();
+  if (!token) return [];
+
+  const out: { id: string; nome: string }[] = [];
+  try {
+    let after = "";
+    do {
+      const url =
+        `${API}/me/adaccounts?fields=name,account_id&limit=200` +
+        (after ? `&after=${encodeURIComponent(after)}` : "");
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        next: { revalidate: 1800 }, // 30 min
+      });
+      if (!res.ok) break;
+      const json = await res.json();
+      for (const a of json?.data ?? [])
+        out.push({ id: a.id, nome: a.name ?? a.id });
+      after = json?.paging?.cursors?.after ?? "";
+    } while (after && out.length < 1000);
+  } catch {
+    return out;
+  }
+
+  return out.sort((a, b) => a.nome.localeCompare(b.nome));
+}
+
 // Tipos de ação do Meta -> rótulos amigáveis (e consolidação de equivalentes).
 const ACTION_LABELS: Record<string, string> = {
   lead: "Leads",
