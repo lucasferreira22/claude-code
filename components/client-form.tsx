@@ -50,6 +50,7 @@ export function ClientForm({
   agencies,
   users,
   services,
+  metaAdAccounts,
   values,
   submitLabel,
   cancelHref,
@@ -58,6 +59,7 @@ export function ClientForm({
   agencies: { id: string; nome: string }[];
   users: { id: string; nome: string }[];
   services: { id: string; nome: string; parentId: string | null }[];
+  metaAdAccounts?: { id: string; nome: string }[];
   values?: ClientFormValues;
   submitLabel: string;
   cancelHref: string;
@@ -334,16 +336,37 @@ export function ClientForm({
         </div>
 
         <div className="border-t border-gray-100 pt-4">
-          <label className="label">ID da conta de anúncio do Meta</label>
-          <input
-            name="metaAdAccountId"
-            placeholder="act_123456789"
-            defaultValue={values?.metaAdAccountId ?? ""}
-            className="input sm:max-w-xs"
-          />
+          <label className="label">Conta de anúncio do Meta</label>
+          {metaAdAccounts && metaAdAccounts.length > 0 ? (
+            <select
+              name="metaAdAccountId"
+              defaultValue={values?.metaAdAccountId ?? ""}
+              className="input sm:max-w-md"
+            >
+              <option value="">— Nenhuma —</option>
+              {values?.metaAdAccountId &&
+                !metaAdAccounts.some((a) => a.id === values.metaAdAccountId) && (
+                  <option value={values.metaAdAccountId}>
+                    {values.metaAdAccountId} (atual)
+                  </option>
+                )}
+              {metaAdAccounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.nome} — {a.id}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              name="metaAdAccountId"
+              placeholder="act_123456789"
+              defaultValue={values?.metaAdAccountId ?? ""}
+              className="input sm:max-w-xs"
+            />
+          )}
           <p className="mt-1 text-xs text-gray-400">
-            Usado para puxar as métricas dos anúncios (encontrado no Gerenciador
-            de Anúncios do Meta).
+            Vincula a conta do cliente no Meta para puxar as métricas dos
+            anúncios.
           </p>
         </div>
 

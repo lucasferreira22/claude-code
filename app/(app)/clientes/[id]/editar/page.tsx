@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { updateClient } from "@/lib/actions/clients";
+import { getMetaAdAccounts } from "@/lib/meta";
 import { ClientForm } from "@/components/client-form";
 
 function toDateInput(date: Date | null): string {
@@ -14,7 +15,7 @@ export default async function EditarClientePage({
 }: {
   params: { id: string };
 }) {
-  const [client, agencies, users, services] = await Promise.all([
+  const [client, agencies, users, services, metaAdAccounts] = await Promise.all([
     prisma.client.findUnique({
       where: { id: params.id },
       include: { servicos: true, contatos: true },
@@ -32,6 +33,7 @@ export default async function EditarClientePage({
       select: { id: true, nome: true, parentId: true },
       orderBy: [{ ordem: "asc" }, { nome: "asc" }],
     }),
+    getMetaAdAccounts(),
   ]);
 
   if (!client) notFound();
@@ -55,6 +57,7 @@ export default async function EditarClientePage({
         agencies={agencies}
         users={users}
         services={services}
+        metaAdAccounts={metaAdAccounts}
         submitLabel="Salvar alterações"
         cancelHref={`/clientes/${client.id}`}
         values={{

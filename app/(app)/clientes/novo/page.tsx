@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/actions/clients";
+import { getMetaAdAccounts } from "@/lib/meta";
 import { ClientForm } from "@/components/client-form";
 
 export default async function NovoClientePage() {
-  const [agencies, users, services] = await Promise.all([
+  const [agencies, users, services, metaAdAccounts] = await Promise.all([
     prisma.partnerAgency.findMany({
       select: { id: true, nome: true },
       orderBy: { nome: "asc" },
@@ -18,6 +19,7 @@ export default async function NovoClientePage() {
       select: { id: true, nome: true, parentId: true },
       orderBy: [{ ordem: "asc" }, { nome: "asc" }],
     }),
+    getMetaAdAccounts(),
   ]);
 
   return (
@@ -34,6 +36,7 @@ export default async function NovoClientePage() {
         agencies={agencies}
         users={users}
         services={services}
+        metaAdAccounts={metaAdAccounts}
         submitLabel="Cadastrar cliente"
         cancelHref="/clientes"
       />
