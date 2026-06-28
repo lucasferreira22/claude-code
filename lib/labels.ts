@@ -27,7 +27,7 @@ export const STATUS_BADGE: Record<ClientStatus, string> = {
   LEAD: "bg-surface-elevated text-text-secondary border-border-default",
   EM_NEGOCIACAO: "bg-status-warning/10 text-status-warning border-status-warning/20",
   ATIVO: "bg-status-success/10 text-status-success border-status-success/20",
-  PAUSADO: "bg-accent-subtle text-accent-primary border-accent-primary/20",
+  PAUSADO: "bg-status-info/10 text-status-info border-status-info/20",
   ENCERRADO: "bg-status-error/10 text-status-error border-status-error/20",
 };
 

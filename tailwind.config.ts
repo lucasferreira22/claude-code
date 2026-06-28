@@ -38,6 +38,9 @@ const config: Config = {
           warning: "var(--status-warning)",
           "warning-subtle": "var(--status-warning-subtle)",
           "warning-subtle-border": "var(--status-warning-subtle-border)",
+          info: "var(--status-info)",
+          "info-subtle": "var(--status-info-subtle)",
+          "info-subtle-border": "var(--status-info-subtle-border)",
         },
         border: {
           default: "var(--border-default)",

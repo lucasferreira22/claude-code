@@ -28,7 +28,7 @@ const STATUS_ACCENT: Record<ClientStatus, string> = {
   LEAD: "border-l-text-muted",
   EM_NEGOCIACAO: "border-l-status-warning",
   ATIVO: "border-l-status-success",
-  PAUSADO: "border-l-accent-primary",
+  PAUSADO: "border-l-status-info",
   ENCERRADO: "border-l-status-error",
 };
 

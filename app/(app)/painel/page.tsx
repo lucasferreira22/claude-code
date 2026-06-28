@@ -35,7 +35,7 @@ const STATUS_CHART_COLORS: Record<string, string> = {
   LEAD: "#9ca3af",
   EM_NEGOCIACAO: "#f59e0b",
   ATIVO: "#10b981",
-  PAUSADO: "#e5142b",
+  PAUSADO: "#3b82f6",
   ENCERRADO: "#ef4444",
 };
 
