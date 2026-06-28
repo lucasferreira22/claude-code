@@ -124,6 +124,26 @@ html.dados-ocultos .sensivel {
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border border-border-default transition-all duration-200;
   }
+  /* Badge de urgência — vencida/atrasada */
+  .badge-danger {
+    @apply badge border-status-error-subtle-border bg-status-error-subtle text-status-error;
+  }
+  /* Badge de urgência — atenção/hoje */
+  .badge-warning {
+    @apply badge border-status-warning-subtle-border bg-status-warning-subtle text-status-warning;
+  }
+  /* Badge de sucesso — ativo */
+  .badge-success {
+    @apply badge border-status-success-subtle-border bg-status-success-subtle text-status-success;
+  }
+  /* Botão WhatsApp — verde semântico fixo */
+  .btn-whatsapp {
+    @apply btn bg-[#25D366] text-white hover:bg-[#1ebe5a] active:scale-[0.98];
+  }
+  /* Card selecionável com ring de destaque */
+  .ring-active {
+    @apply ring-2 ring-accent-primary ring-offset-1;
+  }
 }
 
 /* Grade de pontos sutil (grid pattern) no background */

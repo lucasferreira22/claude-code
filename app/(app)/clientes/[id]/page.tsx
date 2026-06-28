@@ -114,7 +114,7 @@ export default async function ClienteDetailPage({
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
+              className="btn-whatsapp"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -275,7 +275,7 @@ export default async function ClienteDetailPage({
                 return (
                   <li
                     key={nota.id}
-                    className="border-l-2 border-brand-100 pl-4"
+                    className="border-l-2 border-accent-subtle-border pl-4"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-text-muted">
@@ -323,7 +323,7 @@ export default async function ClienteDetailPage({
                 <ul className="space-y-2">
                   {demandas.map((d) => (
                     <li key={d.id} className="flex items-start gap-2 text-sm">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400" />
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-primary" />
                       <div className="min-w-0">
                         <a
                           href={d.url}
@@ -361,7 +361,7 @@ export default async function ClienteDetailPage({
             <ol className="space-y-4">
               {client.statusHistory.map((h) => (
                 <li key={h.id} className="flex gap-3">
-                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-400" />
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-accent-primary" />
                   <div>
                     <p className="text-sm text-text-primary">
                       {h.statusAnterior ? (

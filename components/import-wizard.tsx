@@ -149,7 +149,7 @@ export function ImportWizard() {
                   <span className="text-sm text-text-primary">
                     {field.label}
                     {field.required && (
-                      <span className="text-red-500"> *</span>
+                      <span className="text-status-error"> *</span>
                     )}
                   </span>
                   <select

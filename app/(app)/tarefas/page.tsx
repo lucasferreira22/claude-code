@@ -11,9 +11,9 @@ function VencBadge({ emDias }: { emDias: number | null }) {
   if (emDias === null) return null;
   const cls =
     emDias < 0
-      ? "bg-red-100 text-red-800"
+      ? "badge-danger"
       : emDias === 0
-        ? "bg-amber-100 text-amber-800"
+        ? "badge-warning"
         : "bg-surface-elevated text-text-secondary";
   const txt =
     emDias < 0
@@ -163,7 +163,7 @@ export default async function TarefasPage() {
         <div className="card p-8 text-center text-text-secondary">
           Não foi possível carregar as tarefas do Todoist agora.
           <br />
-          <span className="mt-2 block font-mono text-xs text-red-500">
+          <span className="mt-2 block font-mono text-xs text-status-error">
             {erroMsg}
           </span>
         </div>

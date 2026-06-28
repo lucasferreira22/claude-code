@@ -143,9 +143,9 @@ export default async function HospedagensPage() {
                             <span
                               className={`badge ${
                                 dias < 0
-                                  ? "bg-red-100 text-red-800"
+                                  ? "badge-danger"
                                   : dias <= 30
-                                    ? "bg-amber-100 text-amber-800"
+                                    ? "badge-warning"
                                     : "bg-surface-elevated text-text-secondary"
                               }`}
                             >
@@ -169,7 +169,7 @@ export default async function HospedagensPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                             title="Avisar renovação no WhatsApp"
-                            className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
+                            className="btn-whatsapp"
                           >
                             <svg
                               viewBox="0 0 24 24"

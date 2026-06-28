@@ -167,7 +167,7 @@ export function ServiceManager({
                     <span
                       className={`badge ${
                         s.ativo
-                          ? "bg-green-100 text-green-800"
+                          ? "badge-success"
                           : "bg-surface-elevated text-text-secondary"
                       }`}
                     >

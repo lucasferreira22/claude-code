@@ -154,8 +154,8 @@ export default async function CobrancasPage({
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Link
           href={hrefFiltro(null)}
-          className={`card p-5 transition hover:border-brand-300 ${
-            filtro === null ? "ring-2 ring-brand-500" : ""
+          className={`card p-5 transition hover:border-accent-subtle-border ${
+            filtro === null ? "ring-active" : ""
           }`}
         >
           <p className="text-xs uppercase tracking-wide text-text-muted">
@@ -167,8 +167,8 @@ export default async function CobrancasPage({
         </Link>
         <Link
           href={hrefFiltro("pago")}
-          className={`card p-5 transition hover:border-brand-300 ${
-            filtro === "pago" ? "ring-2 ring-green-500" : ""
+          className={`card p-5 transition hover:border-accent-subtle-border ${
+            filtro === "pago" ? "ring-active" : ""
           }`}
         >
           <p className="text-xs uppercase tracking-wide text-text-muted">
@@ -180,8 +180,8 @@ export default async function CobrancasPage({
         </Link>
         <Link
           href={hrefFiltro("pendente")}
-          className={`card p-5 transition hover:border-brand-300 ${
-            filtro === "pendente" ? "ring-2 ring-amber-500" : ""
+          className={`card p-5 transition hover:border-accent-subtle-border ${
+            filtro === "pendente" ? "ring-active" : ""
           }`}
         >
           <p className="text-xs uppercase tracking-wide text-text-muted">
@@ -193,8 +193,8 @@ export default async function CobrancasPage({
         </Link>
         <Link
           href={hrefFiltro("atrasado")}
-          className={`card p-5 transition hover:border-brand-300 ${
-            filtro === "atrasado" ? "ring-2 ring-red-500" : ""
+          className={`card p-5 transition hover:border-accent-subtle-border ${
+            filtro === "atrasado" ? "ring-active" : ""
           }`}
         >
           <p className="text-xs uppercase tracking-wide text-text-muted">
@@ -308,7 +308,7 @@ export default async function CobrancasPage({
                             target="_blank"
                             rel="noopener noreferrer"
                             title="Enviar lembrete no WhatsApp"
-                            className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
+                            className="btn-whatsapp"
                           >
                             <svg
                               viewBox="0 0 24 24"

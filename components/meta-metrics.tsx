@@ -84,7 +84,7 @@ export async function MetaMetrics({
         <p className="text-sm text-text-secondary">
           Não foi possível carregar as métricas.
           <br />
-          <span className="font-mono text-xs text-red-500">{erro}</span>
+          <span className="font-mono text-xs text-status-error">{erro}</span>
         </p>
       ) : !dados || dados.impressions === 0 ? (
         <p className="text-sm text-text-muted">
