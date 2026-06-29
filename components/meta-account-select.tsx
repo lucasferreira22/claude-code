@@ -63,12 +63,12 @@ export function MetaAccountSelect({
       />
 
       {open && (
-        <div className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+        <div className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-border-default bg-surface-elevated py-1 shadow-float">
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => escolher(null)}
-            className="block w-full px-3 py-2 text-left text-sm text-gray-400 hover:bg-gray-50"
+            className="block w-full px-3 py-2 text-left text-sm text-text-muted hover:bg-surface-hover"
           >
             — Nenhuma —
           </button>
@@ -78,16 +78,16 @@ export function MetaAccountSelect({
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => escolher(a)}
-              className={`block w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
-                a.id === selectedId ? "bg-brand-50" : ""
+              className={`block w-full px-3 py-2 text-left text-sm hover:bg-surface-hover ${
+                a.id === selectedId ? "bg-accent-subtle" : ""
               }`}
             >
-              <span className="text-gray-800">{a.nome}</span>
-              <span className="ml-1 text-xs text-gray-400">{a.id}</span>
+              <span className="text-text-primary">{a.nome}</span>
+              <span className="ml-1 text-xs text-text-muted">{a.id}</span>
             </button>
           ))}
           {filtradas.length === 0 && (
-            <p className="px-3 py-2 text-sm text-gray-400">
+            <p className="px-3 py-2 text-sm text-text-muted">
               Nenhuma conta encontrada.
             </p>
           )}
