@@ -119,7 +119,7 @@ export default async function CobrancasPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Cobranças</h1>
+          <h1 className="text-2xl font-bold">Cobranças recorrentes mensais</h1>
           <p className="text-sm text-text-secondary">
             Controle de pagamentos · {formatCompetencia(competencia)}
           </p>
