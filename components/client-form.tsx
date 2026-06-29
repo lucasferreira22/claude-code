@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 import type { ActionState } from "@/lib/actions/clients";
+import { MetaAccountSelect } from "@/components/meta-account-select";
 import {
   STATUS_LABELS,
   STATUS_ORDER,
@@ -338,24 +339,10 @@ export function ClientForm({
         <div className="border-t border-border-subtle pt-4">
           <label className="label">Conta de anúncio do Meta</label>
           {metaAdAccounts && metaAdAccounts.length > 0 ? (
-            <select
-              name="metaAdAccountId"
+            <MetaAccountSelect
+              accounts={metaAdAccounts}
               defaultValue={values?.metaAdAccountId ?? ""}
-              className="input sm:max-w-md"
-            >
-              <option value="">— Nenhuma —</option>
-              {values?.metaAdAccountId &&
-                !metaAdAccounts.some((a) => a.id === values.metaAdAccountId) && (
-                  <option value={values.metaAdAccountId}>
-                    {values.metaAdAccountId} (atual)
-                  </option>
-                )}
-              {metaAdAccounts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.nome} — {a.id}
-                </option>
-              ))}
-            </select>
+            />
           ) : (
             <input
               name="metaAdAccountId"
