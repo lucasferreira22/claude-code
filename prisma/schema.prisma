@@ -80,6 +80,20 @@ enum PaymentStatus {
   PAGO
 }
 
+// Cobrança avulsa: pontual (uma vez) ou recorrente.
+enum TipoCobranca {
+  PONTUAL
+  RECORRENTE
+}
+
+// Periodicidade de uma cobrança avulsa recorrente.
+enum Recorrencia {
+  MENSAL
+  TRIMESTRAL
+  SEMESTRAL
+  ANUAL
+}
+
 // ---------------------------------------------------------------------------
 // Clientes — núcleo do sistema
 // ---------------------------------------------------------------------------
@@ -127,11 +141,12 @@ model Client {
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
-  servicos      ClientService[]
-  contatos      ClientContact[]
-  notas         ClientNote[]
-  statusHistory ClientStatusHistory[]
-  pagamentos    Payment[]
+  servicos        ClientService[]
+  contatos        ClientContact[]
+  notas           ClientNote[]
+  statusHistory   ClientStatusHistory[]
+  pagamentos      Payment[]
+  cobrancasAvulsas CustomCharge[]
 
   @@index([tipoRelacao])
   @@index([status])
@@ -156,6 +171,68 @@ model Payment {
   @@unique([clientId, competencia])
   @@index([competencia, status])
   @@map("payments")
+}
+
+// ---------------------------------------------------------------------------
+// Cobranças avulsas — cada categoria vira uma "aba" criável em Financeiro
+// (ex.: "Criação de Sites"), agrupando cobranças pontuais/recorrentes de
+// vários clientes. Modelo espelha o de Cobranças mensais: a definição
+// (CustomCharge) + status por competência (CustomChargePayment).
+// ---------------------------------------------------------------------------
+
+// Aba/categoria de cobrança avulsa, com nome personalizado pelo usuário.
+model ChargeCategory {
+  id           String         @id @default(cuid())
+  nome         String
+  ordem        Int            @default(0)
+  ativo        Boolean        @default(true)
+  criadoEm     DateTime       @default(now())
+  atualizadoEm DateTime       @updatedAt
+
+  cobrancas CustomCharge[]
+
+  @@map("charge_categories")
+}
+
+// Cobrança avulsa de um cliente dentro de uma categoria.
+model CustomCharge {
+  id                 String         @id @default(cuid())
+  category           ChargeCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId         String
+  client             Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId           String
+  descricao          String?
+  valor              Decimal        @db.Decimal(12, 2)
+  tipo               TipoCobranca   @default(RECORRENTE)
+  // null quando tipo = PONTUAL
+  recorrencia        Recorrencia?
+  // Data-âncora: 1º vencimento (define o dia e, nas recorrentes, o ciclo)
+  primeiroVencimento DateTime
+  ativo              Boolean        @default(true)
+  criadoEm           DateTime       @default(now())
+  atualizadoEm       DateTime       @updatedAt
+
+  pagamentos CustomChargePayment[]
+
+  @@index([categoryId])
+  @@index([clientId])
+  @@map("custom_charges")
+}
+
+// Status de pagamento de uma cobrança avulsa numa competência (mês). Criado
+// sob demanda quando a ocorrência do mês é marcada como paga.
+model CustomChargePayment {
+  id           String        @id @default(cuid())
+  charge       CustomCharge  @relation(fields: [chargeId], references: [id], onDelete: Cascade)
+  chargeId     String
+  competencia  String        // "AAAA-MM"
+  status       PaymentStatus @default(PENDENTE)
+  pagoEm       DateTime?
+  criadoEm     DateTime      @default(now())
+  atualizadoEm DateTime      @updatedAt
+
+  @@unique([chargeId, competencia])
+  @@map("custom_charge_payments")
 }
 
 // Serviços contratados (N:N modelado como tabela de junção com enum)

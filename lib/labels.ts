@@ -5,6 +5,7 @@ import type {
   TipoContato,
   Categoria,
   PaymentStatus,
+  Recorrencia,
 } from "@prisma/client";
 
 export const STATUS_LABELS: Record<ClientStatus, string> = {
@@ -66,6 +67,13 @@ export const PAYMENT_STATUS_BADGE: Record<PaymentStatus, string> = {
 
 // Badge para cobrança em atraso (status derivado na UI, não armazenado).
 export const PAYMENT_ATRASADO_BADGE = "bg-status-error/10 text-status-error border-status-error/20";
+
+export const RECORRENCIA_LABELS: Record<Recorrencia, string> = {
+  MENSAL: "Mensal",
+  TRIMESTRAL: "Trimestral",
+  SEMESTRAL: "Semestral",
+  ANUAL: "Anual",
+};
 
 export const TIPO_CONTATO_LABELS: Record<TipoContato, string> = {
   TELEFONE: "Telefone",
