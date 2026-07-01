@@ -5,22 +5,27 @@ import { getMetaAdAccounts } from "@/lib/meta";
 import { ClientForm } from "@/components/client-form";
 
 export default async function NovoClientePage() {
-  const [agencies, users, services, metaAdAccounts] = await Promise.all([
-    prisma.partnerAgency.findMany({
-      select: { id: true, nome: true },
-      orderBy: { nome: "asc" },
-    }),
-    prisma.user.findMany({
-      select: { id: true, nome: true },
-      orderBy: { nome: "asc" },
-    }),
-    prisma.service.findMany({
-      where: { ativo: true },
-      select: { id: true, nome: true, parentId: true },
-      orderBy: [{ ordem: "asc" }, { nome: "asc" }],
-    }),
-    getMetaAdAccounts(),
-  ]);
+  const [agencies, users, services, stages, metaAdAccounts] =
+    await Promise.all([
+      prisma.partnerAgency.findMany({
+        select: { id: true, nome: true },
+        orderBy: { nome: "asc" },
+      }),
+      prisma.user.findMany({
+        select: { id: true, nome: true },
+        orderBy: { nome: "asc" },
+      }),
+      prisma.service.findMany({
+        where: { ativo: true },
+        select: { id: true, nome: true, parentId: true },
+        orderBy: [{ ordem: "asc" }, { nome: "asc" }],
+      }),
+      prisma.pipelineStage.findMany({
+        orderBy: { ordem: "asc" },
+        select: { id: true, nome: true, cor: true },
+      }),
+      getMetaAdAccounts(),
+    ]);
 
   return (
     <div className="space-y-6">
@@ -36,6 +41,7 @@ export default async function NovoClientePage() {
         agencies={agencies}
         users={users}
         services={services}
+        stages={stages}
         metaAdAccounts={metaAdAccounts}
         submitLabel="Cadastrar cliente"
         cancelHref="/clientes"

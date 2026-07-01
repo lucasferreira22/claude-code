@@ -6,15 +6,28 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { clientSchema } from "@/lib/validation";
-import { CATEGORIA_ORDER, STATUS_ORDER } from "@/lib/labels";
-import type {
-  Categoria,
-  ClientStatus,
-  Prisma,
-  TipoContato,
-} from "@prisma/client";
+import { CATEGORIA_ORDER } from "@/lib/labels";
+import type { Categoria, Prisma, TipoContato } from "@prisma/client";
 
 const CONTATO_TIPOS: TipoContato[] = ["WHATSAPP", "TELEFONE", "EMAIL"];
+
+// Etapa padrão (primeira do funil, por ordem) para novos clientes sem etapa.
+async function defaultStageId(): Promise<string | null> {
+  const s = await prisma.pipelineStage.findFirst({
+    orderBy: { ordem: "asc" },
+    select: { id: true },
+  });
+  return s?.id ?? null;
+}
+
+async function stageNome(stageId: string | null): Promise<string> {
+  if (!stageId) return "—";
+  const s = await prisma.pipelineStage.findUnique({
+    where: { id: stageId },
+    select: { nome: true },
+  });
+  return s?.nome ?? "—";
+}
 
 function parseClientForm(formData: FormData) {
   // IDs dos serviços selecionados (checkboxes alimentados pelo catálogo).
@@ -40,7 +53,7 @@ function parseClientForm(formData: FormData) {
         ? String(formData.get("partnerAgencyId") ?? "")
         : "",
     responsavelId: String(formData.get("responsavelId") ?? ""),
-    status: String(formData.get("status") ?? "LEAD"),
+    stageId: String(formData.get("stageId") ?? ""),
     categoria: String(formData.get("categoria") ?? "RECORRENTE"),
     dataInicioContrato: String(formData.get("dataInicioContrato") ?? ""),
     dataFimContrato: String(formData.get("dataFimContrato") ?? ""),
@@ -76,6 +89,8 @@ export async function createClient(
     return { error: "Selecione a agência parceira" };
   }
 
+  const stageId = data.stageId || (await defaultStageId());
+
   const client = await prisma.client.create({
     data: {
       nomeRazaoSocial: data.nomeRazaoSocial,
@@ -87,7 +102,7 @@ export async function createClient(
       partnerAgencyId:
         data.tipoRelacao === "PARCERIA" ? data.partnerAgencyId : null,
       responsavelId: data.responsavelId || null,
-      status: data.status,
+      stageId,
       categoria: data.categoria,
       dataInicioContrato: data.dataInicioContrato ?? null,
       dataFimContrato: data.dataFimContrato ?? null,
@@ -103,8 +118,8 @@ export async function createClient(
       contatos: { create: data.contatos },
       statusHistory: {
         create: {
-          statusAnterior: null,
-          statusNovo: data.status,
+          etapaAnterior: null,
+          etapaNova: await stageNome(stageId),
           alteradoPorId: session.user.id,
         },
       },
@@ -135,11 +150,13 @@ export async function updateClient(
 
   const existing = await prisma.client.findUnique({
     where: { id },
-    select: { status: true },
+    select: { stageId: true, stage: { select: { nome: true } } },
   });
   if (!existing) return { error: "Cliente não encontrado" };
 
-  const statusMudou = existing.status !== data.status;
+  // Etapa vazia no form = mantém a atual.
+  const novoStageId = data.stageId || existing.stageId;
+  const stageMudou = existing.stageId !== novoStageId;
 
   await prisma.$transaction(async (tx) => {
     await tx.clientService.deleteMany({ where: { clientId: id } });
@@ -157,7 +174,7 @@ export async function updateClient(
         partnerAgencyId:
           data.tipoRelacao === "PARCERIA" ? data.partnerAgencyId : null,
         responsavelId: data.responsavelId || null,
-        status: data.status,
+        stageId: novoStageId,
         categoria: data.categoria,
         dataInicioContrato: data.dataInicioContrato ?? null,
         dataFimContrato: data.dataFimContrato ?? null,
@@ -174,12 +191,18 @@ export async function updateClient(
       },
     });
 
-    if (statusMudou) {
+    if (stageMudou) {
+      const nova = novoStageId
+        ? (await tx.pipelineStage.findUnique({
+            where: { id: novoStageId },
+            select: { nome: true },
+          }))?.nome ?? "—"
+        : "—";
       await tx.clientStatusHistory.create({
         data: {
           clientId: id,
-          statusAnterior: existing.status,
-          statusNovo: data.status,
+          etapaAnterior: existing.stage?.nome ?? null,
+          etapaNova: nova,
           alteradoPorId: session.user.id,
         },
       });
@@ -191,61 +214,41 @@ export async function updateClient(
   redirect(`/clientes/${id}`);
 }
 
-export async function updateClientStatus(clientId: string, formData: FormData) {
-  const session = await auth();
-  if (!session?.user) return;
-
-  const novo = String(formData.get("status") ?? "") as ClientStatus;
-  const valid: ClientStatus[] = [
-    "LEAD",
-    "EM_NEGOCIACAO",
-    "ATIVO",
-    "PAUSADO",
-    "ENCERRADO",
-  ];
-  if (!valid.includes(novo)) return;
-
-  const existing = await prisma.client.findUnique({
-    where: { id: clientId },
-    select: { status: true },
-  });
-  if (!existing || existing.status === novo) return;
-
-  await prisma.$transaction([
-    prisma.client.update({ where: { id: clientId }, data: { status: novo } }),
-    prisma.clientStatusHistory.create({
-      data: {
-        clientId,
-        statusAnterior: existing.status,
-        statusNovo: novo,
-        alteradoPorId: session.user.id,
-      },
-    }),
-  ]);
-
-  revalidatePath(`/clientes/${clientId}`);
-  revalidatePath("/clientes");
+export async function updateClientStage(clientId: string, formData: FormData) {
+  await moverEtapa(clientId, String(formData.get("stageId") ?? ""));
 }
 
-// Move o cliente para outro status (usado pelo Kanban). Registra no histórico.
-export async function setClientStatus(clientId: string, status: ClientStatus) {
+// Move o cliente para outra etapa (usado pelo Kanban e pelo seletor no
+// detalhe). Registra a mudança no histórico com o nome da etapa.
+export async function setClientStage(clientId: string, stageId: string) {
+  await moverEtapa(clientId, stageId);
+}
+
+async function moverEtapa(clientId: string, stageId: string) {
   const session = await auth();
   if (!session?.user) return;
-  if (!STATUS_ORDER.includes(status)) return;
+  if (!stageId) return;
 
-  const existing = await prisma.client.findUnique({
-    where: { id: clientId },
-    select: { status: true },
-  });
-  if (!existing || existing.status === status) return;
+  const [existing, destino] = await Promise.all([
+    prisma.client.findUnique({
+      where: { id: clientId },
+      select: { stageId: true, stage: { select: { nome: true } } },
+    }),
+    prisma.pipelineStage.findUnique({
+      where: { id: stageId },
+      select: { nome: true },
+    }),
+  ]);
+  if (!existing || !destino) return;
+  if (existing.stageId === stageId) return;
 
   await prisma.$transaction([
-    prisma.client.update({ where: { id: clientId }, data: { status } }),
+    prisma.client.update({ where: { id: clientId }, data: { stageId } }),
     prisma.clientStatusHistory.create({
       data: {
         clientId,
-        statusAnterior: existing.status,
-        statusNovo: status,
+        etapaAnterior: existing.stage?.nome ?? null,
+        etapaNova: destino.nome,
         alteradoPorId: session.user.id,
       },
     }),
@@ -305,10 +308,13 @@ export async function bulkUpdateClients(
     if (!CATEGORIA_ORDER.includes(valor as Categoria))
       return { error: "Categoria inválida" };
     data.categoria = valor as Categoria;
-  } else if (campo === "status") {
-    if (!STATUS_ORDER.includes(valor as ClientStatus))
-      return { error: "Status inválido" };
-    data.status = valor as ClientStatus;
+  } else if (campo === "stage") {
+    const existe = await prisma.pipelineStage.findUnique({
+      where: { id: valor },
+      select: { id: true },
+    });
+    if (!existe) return { error: "Etapa inválida" };
+    data.stageId = valor;
   } else if (campo === "responsavel") {
     // valor "-" significa remover o responsável
     data.responsavelId = valor === "-" ? null : valor;

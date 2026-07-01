@@ -3,11 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { deleteAgency } from "@/lib/actions/agencies";
 import { DeleteButton } from "@/components/delete-button";
-import {
-  STATUS_BADGE,
-  STATUS_LABELS,
-  formatCurrency,
-} from "@/lib/labels";
+import { stageBadgeStyle, formatCurrency } from "@/lib/labels";
 
 export default async function AgenciaDetailPage({
   params,
@@ -23,7 +19,7 @@ export default async function AgenciaDetailPage({
           id: true,
           nomeRazaoSocial: true,
           nicho: true,
-          status: true,
+          stage: { select: { nome: true, cor: true } },
           valorMensal: true,
         },
       },
@@ -111,7 +107,7 @@ export default async function AgenciaDetailPage({
                 <th className="px-6 py-3">Cliente</th>
                 <th className="px-6 py-3">Nicho</th>
                 <th className="px-6 py-3">Valor mensal</th>
-                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3">Etapa</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
@@ -132,8 +128,8 @@ export default async function AgenciaDetailPage({
                     )}
                   </td>
                   <td className="px-6 py-3">
-                    <span className={`badge ${STATUS_BADGE[c.status]}`}>
-                      {STATUS_LABELS[c.status]}
+                    <span className="badge" style={stageBadgeStyle(c.stage?.cor)}>
+                      {c.stage?.nome ?? "—"}
                     </span>
                   </td>
                 </tr>

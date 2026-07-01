@@ -1,7 +1,7 @@
 // Cálculos financeiros reutilizados por Painel, Financeiro e Cobranças.
 // Funções puras (sem acesso a banco) — recebem os clientes já carregados.
-import type { Categoria, ClientStatus, TipoRelacao } from "@prisma/client";
-import { CATEGORIA_ORDER, STATUS_ORDER } from "@/lib/labels";
+import type { Categoria, TipoRelacao } from "@prisma/client";
+import { CATEGORIA_ORDER } from "@/lib/labels";
 
 // Converte Prisma.Decimal | number | null em número (ou null).
 export function num(v: unknown): number | null {
@@ -14,7 +14,9 @@ export type FinanceClient = {
   id: string;
   nomeRazaoSocial: string;
   categoria: Categoria;
-  status: ClientStatus;
+  // Etapa do funil e se ela conta como cliente ativo (receita).
+  stageId: string | null;
+  contaComoAtivo: boolean;
   tipoRelacao: TipoRelacao;
   valorMensal: unknown;
   custoMensal: unknown;
@@ -24,12 +26,11 @@ export type FinanceClient = {
 };
 
 export type FinanceSummary = {
-  faturamentoMensal: number; // soma de valorMensal dos clientes ATIVOS
-  custoMensal: number; // soma de custoMensal dos clientes ATIVOS
+  faturamentoMensal: number; // soma de valorMensal dos clientes ativos
+  custoMensal: number; // soma de custoMensal dos clientes ativos
   lucro: number; // faturamento - custo
   totalClientes: number;
   porCategoria: Record<Categoria, { count: number; faturamento: number }>;
-  porStatus: Record<ClientStatus, number>;
 };
 
 function emptyPorCategoria(): Record<Categoria, { count: number; faturamento: number }> {
@@ -42,16 +43,6 @@ function emptyPorCategoria(): Record<Categoria, { count: number; faturamento: nu
   );
 }
 
-function emptyPorStatus(): Record<ClientStatus, number> {
-  return STATUS_ORDER.reduce(
-    (acc, s) => {
-      acc[s] = 0;
-      return acc;
-    },
-    {} as Record<ClientStatus, number>
-  );
-}
-
 // Parcela mensal da hospedagem: a cobrança é anual, então rateia por 12.
 export function hospedagemMensal(c: FinanceClient): number {
   return (num(c.valorRenovacao) ?? 0) / 12;
@@ -59,15 +50,13 @@ export function hospedagemMensal(c: FinanceClient): number {
 
 export function summarize(clients: FinanceClient[]): FinanceSummary {
   const porCategoria = emptyPorCategoria();
-  const porStatus = emptyPorStatus();
   let faturamentoMensal = 0;
   let custoMensal = 0;
 
   for (const c of clients) {
-    porStatus[c.status]++;
     porCategoria[c.categoria].count++;
 
-    if (c.status === "ATIVO") {
+    if (c.contaComoAtivo) {
       const v = num(c.valorMensal) ?? 0;
       const hosp = hospedagemMensal(c);
       faturamentoMensal += v + hosp;
@@ -85,7 +74,6 @@ export function summarize(clients: FinanceClient[]): FinanceSummary {
     lucro: faturamentoMensal - custoMensal,
     totalClientes: clients.length,
     porCategoria,
-    porStatus,
   };
 }
 
@@ -140,7 +128,7 @@ export function proximosVencimentos(
 
   for (const c of clients) {
     // Pagamento recorrente mensal (apenas clientes ativos com dia definido)
-    if (c.status === "ATIVO" && c.diaVencimento) {
+    if (c.contaComoAtivo && c.diaVencimento) {
       const data = proximaDataDoDia(c.diaVencimento, hoje);
       const emDias = diffDias(hoje, data);
       if (emDias >= 0 && emDias <= dias) {

@@ -6,10 +6,9 @@ import { useFormState, useFormStatus } from "react-dom";
 import type { ActionState } from "@/lib/actions/clients";
 import { MetaAccountSelect } from "@/components/meta-account-select";
 import {
-  STATUS_LABELS,
-  STATUS_ORDER,
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
+  type StageLite,
 } from "@/lib/labels";
 
 export type ClientFormValues = {
@@ -21,7 +20,7 @@ export type ClientFormValues = {
   tipoRelacao?: "DIRETO" | "PARCERIA";
   partnerAgencyId?: string | null;
   responsavelId?: string | null;
-  status?: string;
+  stageId?: string | null;
   categoria?: string;
   dataInicioContrato?: string | null;
   dataFimContrato?: string | null;
@@ -51,6 +50,7 @@ export function ClientForm({
   agencies,
   users,
   services,
+  stages,
   metaAdAccounts,
   values,
   submitLabel,
@@ -60,6 +60,7 @@ export function ClientForm({
   agencies: { id: string; nome: string }[];
   users: { id: string; nome: string }[];
   services: { id: string; nome: string; parentId: string | null }[];
+  stages: StageLite[];
   metaAdAccounts?: { id: string; nome: string }[];
   values?: ClientFormValues;
   submitLabel: string;
@@ -193,15 +194,15 @@ export function ClientForm({
           )}
 
           <div>
-            <label className="label">Status *</label>
+            <label className="label">Etapa do funil *</label>
             <select
-              name="status"
-              defaultValue={values?.status ?? "LEAD"}
+              name="stageId"
+              defaultValue={values?.stageId ?? stages[0]?.id ?? ""}
               className="input"
             >
-              {STATUS_ORDER.map((s) => (
-                <option key={s} value={s}>
-                  {STATUS_LABELS[s]}
+              {stages.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.nome}
                 </option>
               ))}
             </select>

@@ -9,16 +9,15 @@ import {
   type BulkActionState,
 } from "@/lib/actions/clients";
 import {
-  STATUS_BADGE,
-  STATUS_LABELS,
-  STATUS_ORDER,
   TIPO_RELACAO_LABELS,
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
   CATEGORIA_BADGE,
+  stageBadgeStyle,
   formatCurrency,
+  type StageLite,
 } from "@/lib/labels";
-import type { Categoria, ClientStatus, TipoRelacao } from "@prisma/client";
+import type { Categoria, TipoRelacao } from "@prisma/client";
 
 export type ClientRow = {
   id: string;
@@ -30,15 +29,18 @@ export type ClientRow = {
   responsavelNome: string | null;
   partnerAgencyNome: string | null;
   valorMensal: number | null;
-  status: ClientStatus;
+  stageNome: string | null;
+  stageCor: string | null;
 };
 
 export function ClientBulkTable({
   clients,
   users,
+  stages,
 }: {
   clients: ClientRow[];
   users: { id: string; nome: string }[];
+  stages: StageLite[];
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [campo, setCampo] = useState("categoria");
@@ -85,7 +87,7 @@ export function ClientBulkTable({
               className="input w-auto"
             >
               <option value="categoria">Alterar categoria</option>
-              <option value="status">Alterar status</option>
+              <option value="stage">Alterar etapa</option>
               <option value="responsavel">Alterar responsável</option>
             </select>
 
@@ -99,10 +101,10 @@ export function ClientBulkTable({
                     {CATEGORIA_LABELS[c]}
                   </option>
                 ))}
-              {campo === "status" &&
-                STATUS_ORDER.map((s) => (
-                  <option key={s} value={s}>
-                    {STATUS_LABELS[s]}
+              {campo === "stage" &&
+                stages.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.nome}
                   </option>
                 ))}
               {campo === "responsavel" && (
@@ -172,7 +174,7 @@ export function ClientBulkTable({
               <th className="px-4 py-3">Serviços</th>
               <th className="px-4 py-3">Responsável</th>
               <th className="px-4 py-3">Valor mensal</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Etapa</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle">
@@ -224,8 +226,8 @@ export function ClientBulkTable({
                   {formatCurrency(c.valorMensal)}
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`badge ${STATUS_BADGE[c.status]}`}>
-                    {STATUS_LABELS[c.status]}
+                  <span className="badge" style={stageBadgeStyle(c.stageCor)}>
+                    {c.stageNome ?? "—"}
                   </span>
                 </td>
               </tr>

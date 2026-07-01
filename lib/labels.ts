@@ -1,6 +1,6 @@
 // Mapas de enums (banco) -> rótulos em português (UI)
+import type { CSSProperties } from "react";
 import type {
-  ClientStatus,
   TipoRelacao,
   TipoContato,
   Categoria,
@@ -8,29 +8,47 @@ import type {
   Recorrencia,
 } from "@prisma/client";
 
-export const STATUS_LABELS: Record<ClientStatus, string> = {
-  LEAD: "Lead",
-  EM_NEGOCIACAO: "Em Negociação",
-  ATIVO: "Ativo",
-  PAUSADO: "Pausado",
-  ENCERRADO: "Encerrado",
+// Etapa do funil (versão leve usada na UI).
+export type StageLite = {
+  id: string;
+  nome: string;
+  cor: string | null;
+  ordem?: number;
+  contaComoAtivo?: boolean;
 };
 
-export const STATUS_ORDER: ClientStatus[] = [
-  "LEAD",
-  "EM_NEGOCIACAO",
-  "ATIVO",
-  "PAUSADO",
-  "ENCERRADO",
+export const STAGE_DEFAULT_COLOR = "#6b7280";
+
+// Paleta de cores sugeridas ao criar/editar uma etapa.
+export const STAGE_PRESET_COLORS = [
+  "#9ca3af",
+  "#f59e0b",
+  "#10b981",
+  "#3b82f6",
+  "#ef4444",
+  "#a855f7",
+  "#14b8a6",
+  "#ec4899",
 ];
 
-export const STATUS_BADGE: Record<ClientStatus, string> = {
-  LEAD: "bg-surface-elevated text-text-secondary border-border-default",
-  EM_NEGOCIACAO: "bg-status-warning/10 text-status-warning border-status-warning/20",
-  ATIVO: "bg-status-success/10 text-status-success border-status-success/20",
-  PAUSADO: "bg-status-info/10 text-status-info border-status-info/20",
-  ENCERRADO: "bg-status-error/10 text-status-error border-status-error/20",
-};
+// #rrggbb + alpha (0..1) -> rgba(). Aceita cor nula (usa a padrão).
+function hexAlpha(hex: string | null | undefined, alpha: number): string {
+  const c = (hex || STAGE_DEFAULT_COLOR).replace("#", "");
+  const r = parseInt(c.slice(0, 2), 16);
+  const g = parseInt(c.slice(2, 4), 16);
+  const b = parseInt(c.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Estilo inline de um badge colorido pela cor da etapa (dinâmica).
+export function stageBadgeStyle(cor: string | null | undefined): CSSProperties {
+  const c = cor || STAGE_DEFAULT_COLOR;
+  return {
+    backgroundColor: hexAlpha(c, 0.12),
+    color: c,
+    borderColor: hexAlpha(c, 0.3),
+  };
+}
 
 export const TIPO_RELACAO_LABELS: Record<TipoRelacao, string> = {
   DIRETO: "Cliente Direto",
