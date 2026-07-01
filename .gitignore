@@ -30,3 +30,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# Migrações entregues manualmente (rodadas no Neon), fora do repo
+migracao-*-neon.sql
