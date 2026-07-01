@@ -60,19 +60,24 @@ export async function POST(req: Request) {
     .filter(Boolean)
     .join("\n");
 
-  // 6) Cria o cliente como LEAD direto, registrando o histórico de status.
+  // 6) Cria o cliente na primeira etapa do funil, registrando o histórico.
   try {
+    const etapa = await prisma.pipelineStage.findFirst({
+      orderBy: { ordem: "asc" },
+      select: { id: true, nome: true },
+    });
+
     const client = await prisma.client.create({
       data: {
         nomeRazaoSocial: data.nome,
         nicho: data.nicho,
         tipoRelacao: "DIRETO",
-        status: "LEAD",
+        stageId: etapa?.id ?? null,
         categoria: "RECORRENTE",
         observacoes,
         contatos: { create: contatos },
         statusHistory: {
-          create: { statusAnterior: null, statusNovo: "LEAD" },
+          create: { etapaAnterior: null, etapaNova: etapa?.nome ?? "Lead" },
         },
       },
       select: { id: true },

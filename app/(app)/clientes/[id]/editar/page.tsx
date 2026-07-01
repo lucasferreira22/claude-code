@@ -15,26 +15,31 @@ export default async function EditarClientePage({
 }: {
   params: { id: string };
 }) {
-  const [client, agencies, users, services, metaAdAccounts] = await Promise.all([
-    prisma.client.findUnique({
-      where: { id: params.id },
-      include: { servicos: true, contatos: true },
-    }),
-    prisma.partnerAgency.findMany({
-      select: { id: true, nome: true },
-      orderBy: { nome: "asc" },
-    }),
-    prisma.user.findMany({
-      select: { id: true, nome: true },
-      orderBy: { nome: "asc" },
-    }),
-    prisma.service.findMany({
-      where: { ativo: true },
-      select: { id: true, nome: true, parentId: true },
-      orderBy: [{ ordem: "asc" }, { nome: "asc" }],
-    }),
-    getMetaAdAccounts(),
-  ]);
+  const [client, agencies, users, services, stages, metaAdAccounts] =
+    await Promise.all([
+      prisma.client.findUnique({
+        where: { id: params.id },
+        include: { servicos: true, contatos: true },
+      }),
+      prisma.partnerAgency.findMany({
+        select: { id: true, nome: true },
+        orderBy: { nome: "asc" },
+      }),
+      prisma.user.findMany({
+        select: { id: true, nome: true },
+        orderBy: { nome: "asc" },
+      }),
+      prisma.service.findMany({
+        where: { ativo: true },
+        select: { id: true, nome: true, parentId: true },
+        orderBy: [{ ordem: "asc" }, { nome: "asc" }],
+      }),
+      prisma.pipelineStage.findMany({
+        orderBy: { ordem: "asc" },
+        select: { id: true, nome: true, cor: true },
+      }),
+      getMetaAdAccounts(),
+    ]);
 
   if (!client) notFound();
 
@@ -57,6 +62,7 @@ export default async function EditarClientePage({
         agencies={agencies}
         users={users}
         services={services}
+        stages={stages}
         metaAdAccounts={metaAdAccounts}
         submitLabel="Salvar alterações"
         cancelHref={`/clientes/${client.id}`}
@@ -69,7 +75,7 @@ export default async function EditarClientePage({
           tipoRelacao: client.tipoRelacao,
           partnerAgencyId: client.partnerAgencyId,
           responsavelId: client.responsavelId,
-          status: client.status,
+          stageId: client.stageId,
           categoria: client.categoria,
           dataInicioContrato: toDateInput(client.dataInicioContrato),
           dataFimContrato: toDateInput(client.dataFimContrato),

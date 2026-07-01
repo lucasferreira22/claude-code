@@ -22,7 +22,7 @@ export async function generateMonthlyPayments(competencia: string) {
 
   const clients = await prisma.client.findMany({
     where: {
-      status: "ATIVO",
+      stage: { contaComoAtivo: true },
       categoria: "RECORRENTE",
       valorMensal: { not: null },
     },

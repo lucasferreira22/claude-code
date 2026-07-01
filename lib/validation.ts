@@ -43,7 +43,8 @@ export const clientSchema = z.object({
   }),
   partnerAgencyId: optionalString,
   responsavelId: optionalString,
-  status: z.enum(["LEAD", "EM_NEGOCIACAO", "ATIVO", "PAUSADO", "ENCERRADO"]),
+  // Etapa do funil (id dinâmico). Vazio = ação resolve a etapa padrão.
+  stageId: optionalString,
   categoria: z
     .enum(["RECORRENTE", "PONTUAL", "HOSPEDAGEM"])
     .default("RECORRENTE"),

@@ -1,23 +1,13 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import type {
-  Categoria,
-  ClientStatus,
-  Prisma,
-  TipoRelacao,
-} from "@prisma/client";
-import {
-  STATUS_LABELS,
-  STATUS_ORDER,
-  CATEGORIA_LABELS,
-  CATEGORIA_ORDER,
-} from "@/lib/labels";
+import type { Categoria, Prisma, TipoRelacao } from "@prisma/client";
+import { CATEGORIA_LABELS, CATEGORIA_ORDER } from "@/lib/labels";
 import { ClientBulkTable } from "@/components/client-bulk-table";
 
 type SearchParams = {
   q?: string;
   tipo?: string;
-  status?: string;
+  stage?: string;
   categoria?: string;
   nicho?: string;
   responsavel?: string;
@@ -28,6 +18,12 @@ export default async function ClientesPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const stages = await prisma.pipelineStage.findMany({
+    orderBy: { ordem: "asc" },
+    select: { id: true, nome: true, cor: true, contaComoAtivo: true },
+  });
+  const stageIds = new Set(stages.map((s) => s.id));
+
   const where: Prisma.ClientWhereInput = {};
 
   if (searchParams.q) {
@@ -36,12 +32,13 @@ export default async function ClientesPage({
   if (searchParams.tipo === "DIRETO" || searchParams.tipo === "PARCERIA") {
     where.tipoRelacao = searchParams.tipo as TipoRelacao;
   }
-  // Status padrão = ATIVO quando a página abre sem filtro (status undefined).
-  // Selecionar "Todos" envia status="" (string vazia), o que remove o filtro.
-  const statusFiltro =
-    searchParams.status === undefined ? "ATIVO" : searchParams.status;
-  if (statusFiltro && STATUS_ORDER.includes(statusFiltro as ClientStatus)) {
-    where.status = statusFiltro as ClientStatus;
+  // Filtro padrão = primeira etapa "ativa" quando a página abre sem filtro.
+  // Selecionar "Todos" envia stage="" (string vazia), o que remove o filtro.
+  const stageAtivoPadrao = stages.find((s) => s.contaComoAtivo)?.id ?? "";
+  const stageFiltro =
+    searchParams.stage === undefined ? stageAtivoPadrao : searchParams.stage;
+  if (stageFiltro && stageIds.has(stageFiltro)) {
+    where.stageId = stageFiltro;
   }
   if (
     searchParams.categoria &&
@@ -60,6 +57,7 @@ export default async function ClientesPage({
     prisma.client.findMany({
       where,
       include: {
+        stage: { select: { id: true, nome: true, cor: true } },
         partnerAgency: { select: { nome: true } },
         responsavel: { select: { nome: true } },
         servicos: { include: { service: { select: { nome: true } } } },
@@ -118,12 +116,12 @@ export default async function ClientesPage({
           </select>
         </div>
         <div>
-          <label className="label">Status</label>
-          <select name="status" defaultValue={statusFiltro} className="input">
-            <option value="">Todos</option>
-            {STATUS_ORDER.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s]}
+          <label className="label">Etapa</label>
+          <select name="stage" defaultValue={stageFiltro} className="input">
+            <option value="">Todas</option>
+            {stages.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.nome}
               </option>
             ))}
           </select>
@@ -189,6 +187,7 @@ export default async function ClientesPage({
       ) : (
         <ClientBulkTable
           users={users}
+          stages={stages}
           clients={clients.map((c) => ({
             id: c.id,
             nomeRazaoSocial: c.nomeRazaoSocial,
@@ -199,7 +198,8 @@ export default async function ClientesPage({
             responsavelNome: c.responsavel?.nome ?? null,
             partnerAgencyNome: c.partnerAgency?.nome ?? null,
             valorMensal: c.valorMensal ? Number(c.valorMensal) : null,
-            status: c.status,
+            stageNome: c.stage?.nome ?? null,
+            stageCor: c.stage?.cor ?? null,
           }))}
         />
       )}

@@ -53,14 +53,6 @@ enum TipoRelacao {
   PARCERIA
 }
 
-enum ClientStatus {
-  LEAD
-  EM_NEGOCIACAO
-  ATIVO
-  PAUSADO
-  ENCERRADO
-}
-
 // Categoria do cliente: separa recorrentes, pontuais e hospedagem na base.
 enum Categoria {
   RECORRENTE
@@ -114,7 +106,10 @@ model Client {
   responsavel   User?   @relation("ResponsavelInterno", fields: [responsavelId], references: [id], onDelete: SetNull)
   responsavelId String?
 
-  status            ClientStatus @default(LEAD)
+  // Etapa do funil comercial (coluna do Kanban). Dinâmica: gerenciável pelo
+  // usuário via tabela pipeline_stages.
+  stage             PipelineStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  stageId           String?
   categoria         Categoria    @default(RECORRENTE)
   dataInicioContrato DateTime?
   dataFimContrato    DateTime?
@@ -149,11 +144,28 @@ model Client {
   cobrancasAvulsas CustomCharge[]
 
   @@index([tipoRelacao])
-  @@index([status])
+  @@index([stageId])
   @@index([categoria])
   @@index([nicho])
   @@index([responsavelId])
   @@map("clients")
+}
+
+// Etapas do funil comercial (colunas do Kanban), criáveis/editáveis pelo
+// usuário. `contaComoAtivo` marca quais etapas representam clientes ativos
+// para efeito de faturamento no Financeiro/Painel.
+model PipelineStage {
+  id            String   @id @default(cuid())
+  nome          String
+  ordem         Int      @default(0)
+  cor           String?  // hex (#rrggbb) para badges e gráfico
+  contaComoAtivo Boolean @default(false)
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
+
+  clientes Client[]
+
+  @@map("pipeline_stages")
 }
 
 // Cobrança mensal de um cliente. Uma linha por cliente por competência (mês).
@@ -280,14 +292,15 @@ model ClientContact {
 
 // Linha do tempo de mudanças de status
 model ClientStatusHistory {
-  id             String        @id @default(cuid())
-  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  client         Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId       String
-  statusAnterior ClientStatus?
-  statusNovo     ClientStatus
-  alteradoPor    User?         @relation(fields: [alteradoPorId], references: [id], onDelete: SetNull)
+  // Nome da etapa (texto), pois as etapas agora são dinâmicas.
+  etapaAnterior  String?
+  etapaNova      String
+  alteradoPor    User?    @relation(fields: [alteradoPorId], references: [id], onDelete: SetNull)
   alteradoPorId  String?
-  dataMudanca    DateTime      @default(now())
+  dataMudanca    DateTime @default(now())
 
   @@index([clientId])
   @@map("client_status_history")

@@ -18,7 +18,8 @@ const financeSelect = {
   id: true,
   nomeRazaoSocial: true,
   categoria: true,
-  status: true,
+  stageId: true,
+  stage: { select: { contaComoAtivo: true } },
   tipoRelacao: true,
   valorMensal: true,
   custoMensal: true,
@@ -44,7 +45,10 @@ export default async function FinanceiroPage() {
       },
     }),
   ]);
-  const clients = rows as unknown as FinanceClient[];
+  const clients: FinanceClient[] = rows.map((r) => ({
+    ...r,
+    contaComoAtivo: r.stage?.contaComoAtivo ?? false,
+  }));
 
   const resumo = summarize(clients);
   // Cobranças avulsas (pontuais + recorrentes) que vencem no mês atual entram
@@ -61,7 +65,7 @@ export default async function FinanceiroPage() {
       const custo = num(c.custoMensal) ?? 0;
       return { c, valor, custo, lucro: valor - custo };
     })
-    .filter((r) => r.c.status === "ATIVO" && r.valor > 0);
+    .filter((r) => r.c.contaComoAtivo && r.valor > 0);
 
   return (
     <div className="space-y-6">

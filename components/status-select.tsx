@@ -1,31 +1,33 @@
 "use client";
 
 import { useRef } from "react";
-import { updateClientStatus } from "@/lib/actions/clients";
-import { STATUS_LABELS, STATUS_ORDER } from "@/lib/labels";
-import type { ClientStatus } from "@prisma/client";
+import { updateClientStage } from "@/lib/actions/clients";
+import type { StageLite } from "@/lib/labels";
 
+// Seletor da etapa do funil no detalhe do cliente (salva ao trocar).
 export function StatusSelect({
   clientId,
   current,
+  stages,
 }: {
   clientId: string;
-  current: ClientStatus;
+  current: string | null;
+  stages: StageLite[];
 }) {
   const formRef = useRef<HTMLFormElement>(null);
-  const action = updateClientStatus.bind(null, clientId);
+  const action = updateClientStage.bind(null, clientId);
 
   return (
     <form ref={formRef} action={action}>
       <select
-        name="status"
-        defaultValue={current}
+        name="stageId"
+        defaultValue={current ?? ""}
         onChange={() => formRef.current?.requestSubmit()}
         className="input"
       >
-        {STATUS_ORDER.map((s) => (
-          <option key={s} value={s}>
-            {STATUS_LABELS[s]}
+        {stages.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.nome}
           </option>
         ))}
       </select>

@@ -10,12 +10,11 @@ import { NoteForm } from "@/components/note-form";
 import { DeleteButton } from "@/components/delete-button";
 import { StatusSelect } from "@/components/status-select";
 import {
-  STATUS_BADGE,
-  STATUS_LABELS,
   TIPO_CONTATO_LABELS,
   TIPO_RELACAO_LABELS,
   CATEGORIA_LABELS,
   CATEGORIA_BADGE,
+  stageBadgeStyle,
   formatCurrency,
   formatDate,
   formatDateTime,
@@ -41,23 +40,30 @@ export default async function ClienteDetailPage({
     searchParams.meta === "last_30d" || searchParams.meta === "last_7d"
       ? searchParams.meta
       : "this_month";
-  const client = await prisma.client.findUnique({
-    where: { id: params.id },
-    include: {
-      partnerAgency: true,
-      responsavel: { select: { nome: true } },
-      servicos: { include: { service: true } },
-      contatos: true,
-      notas: {
-        include: { autor: { select: { nome: true } } },
-        orderBy: { criadoEm: "desc" },
+  const [client, stages] = await Promise.all([
+    prisma.client.findUnique({
+      where: { id: params.id },
+      include: {
+        stage: true,
+        partnerAgency: true,
+        responsavel: { select: { nome: true } },
+        servicos: { include: { service: true } },
+        contatos: true,
+        notas: {
+          include: { autor: { select: { nome: true } } },
+          orderBy: { criadoEm: "desc" },
+        },
+        statusHistory: {
+          include: { alteradoPor: { select: { nome: true } } },
+          orderBy: { dataMudanca: "desc" },
+        },
       },
-      statusHistory: {
-        include: { alteradoPor: { select: { nome: true } } },
-        orderBy: { dataMudanca: "desc" },
-      },
-    },
-  });
+    }),
+    prisma.pipelineStage.findMany({
+      orderBy: { ordem: "asc" },
+      select: { id: true, nome: true, cor: true },
+    }),
+  ]);
 
   if (!client) notFound();
 
@@ -86,8 +92,8 @@ export default async function ClienteDetailPage({
           </Link>
           <h1 className="mt-1 flex items-center gap-3 text-2xl font-bold">
             {client.nomeRazaoSocial}
-            <span className={`badge ${STATUS_BADGE[client.status]}`}>
-              {STATUS_LABELS[client.status]}
+            <span className="badge" style={stageBadgeStyle(client.stage?.cor)}>
+              {client.stage?.nome ?? "—"}
             </span>
             <span className={`badge ${CATEGORIA_BADGE[client.categoria]}`}>
               {CATEGORIA_LABELS[client.categoria]}
@@ -302,9 +308,13 @@ export default async function ClienteDetailPage({
         <div className="space-y-6">
           <section className="card p-6">
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-text-secondary">
-              Status atual
+              Etapa do funil
             </h2>
-            <StatusSelect clientId={client.id} current={client.status} />
+            <StatusSelect
+              clientId={client.id}
+              current={client.stageId}
+              stages={stages}
+            />
           </section>
 
           {demandas !== null && (
@@ -356,7 +366,7 @@ export default async function ClienteDetailPage({
 
           <section className="card p-6">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-secondary">
-              Histórico de status
+              Histórico de etapas
             </h2>
             <ol className="space-y-4">
               {client.statusHistory.map((h) => (
@@ -364,19 +374,15 @@ export default async function ClienteDetailPage({
                   <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-accent-primary" />
                   <div>
                     <p className="text-sm text-text-primary">
-                      {h.statusAnterior ? (
+                      {h.etapaAnterior ? (
                         <>
-                          {STATUS_LABELS[h.statusAnterior]} →{" "}
-                          <span className="font-medium">
-                            {STATUS_LABELS[h.statusNovo]}
-                          </span>
+                          {h.etapaAnterior} →{" "}
+                          <span className="font-medium">{h.etapaNova}</span>
                         </>
                       ) : (
                         <>
                           Cadastrado como{" "}
-                          <span className="font-medium">
-                            {STATUS_LABELS[h.statusNovo]}
-                          </span>
+                          <span className="font-medium">{h.etapaNova}</span>
                         </>
                       )}
                     </p>

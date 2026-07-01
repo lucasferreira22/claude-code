@@ -3,12 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import type {
-  Categoria,
-  ClientStatus,
-  TipoContato,
-  TipoRelacao,
-} from "@prisma/client";
+import type { Categoria, TipoContato, TipoRelacao } from "@prisma/client";
 import type { ImportRow, ImportResult } from "@/lib/import-fields";
 
 function normalize(s: string | undefined): string {
@@ -25,14 +20,14 @@ function parseTipoRelacao(v: string | undefined): TipoRelacao {
   return "DIRETO";
 }
 
-function parseStatus(v: string | undefined): ClientStatus {
+// Texto do CSV -> nome canônico de etapa (para casar com pipeline_stages).
+function parseStatusNome(v: string | undefined): string {
   const n = normalize(v);
-  if (n.includes("ativ")) return "ATIVO";
-  if (n.includes("paus")) return "PAUSADO";
-  if (n.includes("encerr") || n.includes("cancel")) return "ENCERRADO";
-  if (n.includes("negoc")) return "EM_NEGOCIACAO";
-  if (n.includes("lead")) return "LEAD";
-  return "LEAD";
+  if (n.includes("ativ")) return "Ativo";
+  if (n.includes("paus")) return "Pausado";
+  if (n.includes("encerr") || n.includes("cancel")) return "Encerrado";
+  if (n.includes("negoc")) return "Em Negociação";
+  return "Lead";
 }
 
 function parseCategoria(v: string | undefined): Categoria {
@@ -116,6 +111,14 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
     services.map((s) => [normalize(s.nome), s.id])
   );
 
+  // etapas do funil por nome normalizado + etapa padrão (primeira por ordem)
+  const stages = await prisma.pipelineStage.findMany({
+    orderBy: { ordem: "asc" },
+    select: { id: true, nome: true },
+  });
+  const stageByName = new Map(stages.map((s) => [normalize(s.nome), s]));
+  const defaultStage = stages[0] ?? null;
+
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const linha = i + 2; // +2: cabeçalho + base 1
@@ -146,7 +149,8 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
         ? userByName.get(normalize(row.responsavelNome)) ?? null
         : null;
 
-      const status = parseStatus(row.status);
+      const etapa =
+        stageByName.get(normalize(parseStatusNome(row.status))) ?? defaultStage;
       const categoria = parseCategoria(row.categoria);
       // nomes reconhecidos -> ids do catálogo (ignora os que não existem)
       const serviceIds = parseServicos(row.servicos)
@@ -168,7 +172,7 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
           tipoRelacao,
           partnerAgencyId,
           responsavelId,
-          status,
+          stageId: etapa?.id ?? null,
           categoria,
           dataInicioContrato: parseDate(row.dataInicioContrato),
           valorMensal: parseDecimal(row.valorMensal),
@@ -185,8 +189,8 @@ export async function importClients(rows: ImportRow[]): Promise<ImportResult> {
           contatos: { create: contatos },
           statusHistory: {
             create: {
-              statusAnterior: null,
-              statusNovo: status,
+              etapaAnterior: null,
+              etapaNova: etapa?.nome ?? "Lead",
               alteradoPorId: session.user.id,
             },
           },

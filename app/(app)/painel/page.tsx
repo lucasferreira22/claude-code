@@ -9,8 +9,7 @@ import { faturamentoAvulsasDoMes } from "@/lib/custom-charges";
 import {
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
-  STATUS_LABELS,
-  STATUS_ORDER,
+  STAGE_DEFAULT_COLOR,
   formatCurrency,
   formatDate,
   currentCompetencia,
@@ -22,7 +21,8 @@ const financeSelect = {
   id: true,
   nomeRazaoSocial: true,
   categoria: true,
-  status: true,
+  stageId: true,
+  stage: { select: { contaComoAtivo: true } },
   tipoRelacao: true,
   valorMensal: true,
   custoMensal: true,
@@ -30,15 +30,6 @@ const financeSelect = {
   dataRenovacao: true,
   valorRenovacao: true,
 } as const;
-
-// Cores fixas por status para o gráfico de rosca (não usa variáveis CSS por ser SVG server)
-const STATUS_CHART_COLORS: Record<string, string> = {
-  LEAD: "#9ca3af",
-  EM_NEGOCIACAO: "#f59e0b",
-  ATIVO: "#10b981",
-  PAUSADO: "#3b82f6",
-  ENCERRADO: "#ef4444",
-};
 
 // -------------------------------------------------------------------
 // Componente: Stat Card com sparkline conceitual
@@ -205,7 +196,7 @@ function HorizontalBars({ data }: { data: { label: string; count: number; revenu
 export default async function PainelPage() {
   const competencia = currentCompetencia();
 
-  const [clients, pagamentos, avulsas] = await Promise.all([
+  const [rows, pagamentos, avulsas, stages] = await Promise.all([
     prisma.client.findMany({ select: financeSelect }),
     prisma.payment.findMany({
       where: { competencia },
@@ -221,17 +212,30 @@ export default async function PainelPage() {
         ativo: true,
       },
     }),
+    prisma.pipelineStage.findMany({
+      orderBy: { ordem: "asc" },
+      select: { id: true, nome: true, cor: true },
+    }),
   ]);
 
-  const resumo = summarize(clients as unknown as FinanceClient[]);
+  // Achata contaComoAtivo (vem aninhado em stage) para o formato do finance.
+  const clients: FinanceClient[] = rows.map((r) => ({
+    ...r,
+    contaComoAtivo: r.stage?.contaComoAtivo ?? false,
+  }));
+
+  const resumo = summarize(clients);
   // Cobranças avulsas do mês entram no faturamento (valor cheio).
   const avulsasMes = faturamentoAvulsasDoMes(avulsas, competencia);
   const faturamentoMensal = resumo.faturamentoMensal + avulsasMes;
   const lucro = faturamentoMensal - resumo.custoMensal;
-  const vencimentos = proximosVencimentos(
-    clients as unknown as FinanceClient[],
-    14
-  );
+  const vencimentos = proximosVencimentos(clients, 14);
+
+  // Contagem de clientes por etapa (para o gráfico de rosca).
+  const countByStage = new Map<string, number>();
+  for (const r of rows)
+    if (r.stageId)
+      countByStage.set(r.stageId, (countByStage.get(r.stageId) ?? 0) + 1);
 
   // Resumo das cobranças do mês corrente
   const recebido = pagamentos
@@ -243,11 +247,11 @@ export default async function PainelPage() {
   const totalCobranca = recebido + pendente;
   const pctRecebido = totalCobranca > 0 ? (recebido / totalCobranca) * 100 : 0;
 
-  // Dados para o donut chart de status
-  const donutData = STATUS_ORDER.map((s) => ({
-    label: STATUS_LABELS[s],
-    value: resumo.porStatus[s],
-    color: STATUS_CHART_COLORS[s] ?? "#6b7280",
+  // Dados para o donut chart por etapa do funil
+  const donutData = stages.map((s) => ({
+    label: s.nome,
+    value: countByStage.get(s.id) ?? 0,
+    color: s.cor ?? STAGE_DEFAULT_COLOR,
   }));
 
   // Dados para as barras horizontais de categoria
@@ -316,7 +320,7 @@ export default async function PainelPage() {
         <StatCard
           label="Total de clientes"
           value={String(resumo.totalClientes)}
-          hint={`${resumo.porStatus.ATIVO} ativos`}
+          hint={`${clients.filter((c) => c.contaComoAtivo).length} ativos`}
           icon={
             <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">
               <path d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.428a1.224 1.224 0 01-.569-1.175 6.002 6.002 0 0111.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 017 18a9.953 9.953 0 01-5.385-1.572zM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 00-1.588-3.755 4.502 4.502 0 015.874 2.636.818.818 0 01-.36.98A7.465 7.465 0 0114.5 16z" />
