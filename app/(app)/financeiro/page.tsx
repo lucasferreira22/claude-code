@@ -6,6 +6,7 @@ import {
   num,
   type FinanceClient,
 } from "@/lib/finance";
+import { faturamentoAvulsasDoMes } from "@/lib/custom-charges";
 import {
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
@@ -27,13 +28,30 @@ const financeSelect = {
 } as const;
 
 export default async function FinanceiroPage() {
-  const rows = await prisma.client.findMany({
-    select: financeSelect,
-    orderBy: { valorMensal: "desc" },
-  });
+  const [rows, avulsas] = await Promise.all([
+    prisma.client.findMany({
+      select: financeSelect,
+      orderBy: { valorMensal: "desc" },
+    }),
+    prisma.customCharge.findMany({
+      where: { ativo: true },
+      select: {
+        valor: true,
+        tipo: true,
+        recorrencia: true,
+        primeiroVencimento: true,
+        ativo: true,
+      },
+    }),
+  ]);
   const clients = rows as unknown as FinanceClient[];
 
   const resumo = summarize(clients);
+  // Cobranças avulsas (pontuais + recorrentes) que vencem no mês atual entram
+  // no faturamento pelo valor cheio.
+  const avulsasMes = faturamentoAvulsasDoMes(avulsas);
+  const faturamentoMensal = resumo.faturamentoMensal + avulsasMes;
+  const lucro = faturamentoMensal - resumo.custoMensal;
 
   // Detalhamento por cliente (ativos com algum faturamento mensal).
   // valor = mensalidade + hospedagem rateada (÷12).
@@ -61,10 +79,11 @@ export default async function FinanceiroPage() {
             Faturamento mensal
           </p>
           <p className="sensivel mt-1 text-2xl font-bold">
-            {formatCurrency(resumo.faturamentoMensal)}
+            {formatCurrency(faturamentoMensal)}
           </p>
           <p className="mt-1 text-xs text-text-muted">
-            Inclui hospedagem diluída (÷12)
+            Inclui hospedagem diluída (÷12) e cobranças avulsas do mês
+            {avulsasMes > 0 ? ` (${formatCurrency(avulsasMes)})` : ""}
           </p>
         </div>
         <div className="card p-5">
@@ -77,10 +96,10 @@ export default async function FinanceiroPage() {
           <p className="text-xs uppercase tracking-wide text-text-muted">Lucro</p>
           <p
             className={`sensivel mt-1 text-2xl font-bold ${
-              resumo.lucro >= 0 ? "text-status-success" : "text-status-error"
+              lucro >= 0 ? "text-status-success" : "text-status-error"
             }`}
           >
-            {formatCurrency(resumo.lucro)}
+            {formatCurrency(lucro)}
           </p>
         </div>
       </div>

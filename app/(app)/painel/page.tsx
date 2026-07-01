@@ -5,6 +5,7 @@ import {
   proximosVencimentos,
   type FinanceClient,
 } from "@/lib/finance";
+import { faturamentoAvulsasDoMes } from "@/lib/custom-charges";
 import {
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
@@ -204,15 +205,29 @@ function HorizontalBars({ data }: { data: { label: string; count: number; revenu
 export default async function PainelPage() {
   const competencia = currentCompetencia();
 
-  const [clients, pagamentos] = await Promise.all([
+  const [clients, pagamentos, avulsas] = await Promise.all([
     prisma.client.findMany({ select: financeSelect }),
     prisma.payment.findMany({
       where: { competencia },
       select: { valor: true, status: true },
     }),
+    prisma.customCharge.findMany({
+      where: { ativo: true },
+      select: {
+        valor: true,
+        tipo: true,
+        recorrencia: true,
+        primeiroVencimento: true,
+        ativo: true,
+      },
+    }),
   ]);
 
   const resumo = summarize(clients as unknown as FinanceClient[]);
+  // Cobranças avulsas do mês entram no faturamento (valor cheio).
+  const avulsasMes = faturamentoAvulsasDoMes(avulsas, competencia);
+  const faturamentoMensal = resumo.faturamentoMensal + avulsasMes;
+  const lucro = faturamentoMensal - resumo.custoMensal;
   const vencimentos = proximosVencimentos(
     clients as unknown as FinanceClient[],
     14
@@ -244,8 +259,8 @@ export default async function PainelPage() {
 
   // Margem de lucro
   const margemPct =
-    resumo.faturamentoMensal > 0
-      ? ((resumo.lucro / resumo.faturamentoMensal) * 100).toFixed(0)
+    faturamentoMensal > 0
+      ? ((lucro / faturamentoMensal) * 100).toFixed(0)
       : "0";
 
   return (
@@ -264,8 +279,8 @@ export default async function PainelPage() {
         {/* Stat: Faturamento */}
         <StatCard
           label="Faturamento mensal"
-          value={formatCurrency(resumo.faturamentoMensal)}
-          hint="Ativos · inclui hospedagem ÷12"
+          value={formatCurrency(faturamentoMensal)}
+          hint="Ativos · hospedagem ÷12 · avulsas do mês"
           icon={
             <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">
               <path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.404a.75.75 0 10-1.06-1.06l-1.061 1.06a.75.75 0 001.06 1.06l1.06-1.06zM6.464 14.596a.75.75 0 10-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zM5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 015 10zM14.596 15.657a.75.75 0 001.06-1.06l-1.06-1.061a.75.75 0 10-1.06 1.06l1.06 1.06zM5.404 6.464a.75.75 0 001.06-1.06l-1.06-1.06a.75.75 0 10-1.06 1.06l1.06 1.06z" />
@@ -287,8 +302,8 @@ export default async function PainelPage() {
         {/* Stat: Lucro */}
         <StatCard
           label="Lucro estimado"
-          value={formatCurrency(resumo.lucro)}
-          accent={resumo.lucro >= 0 ? "text-status-success" : "text-status-error"}
+          value={formatCurrency(lucro)}
+          accent={lucro >= 0 ? "text-status-success" : "text-status-error"}
           hint={`Margem ${margemPct}%`}
           icon={
             <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">

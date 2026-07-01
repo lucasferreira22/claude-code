@@ -45,6 +45,29 @@ export function cobrancaMessage(opts: {
   );
 }
 
+// Mensagem de lembrete de uma cobrança avulsa (serviço específico).
+export function cobrancaAvulsaMessage(opts: {
+  descricao: string;
+  valorLabel: string;
+  vencimentoLabel?: string | null;
+  atrasada?: boolean;
+}): string {
+  const venc = opts.vencimentoLabel
+    ? `, com vencimento em ${opts.vencimentoLabel}`
+    : "";
+  if (opts.atrasada) {
+    return (
+      `Olá! 😊 Passando pra lembrar que a cobrança de ${opts.descricao} ` +
+      `no valor de ${opts.valorLabel}${venc} consta em aberto por aqui. ` +
+      `Pode verificar pra mim? Qualquer dúvida, estou à disposição!`
+    );
+  }
+  return (
+    `Olá! 😊 Passando pra lembrar da cobrança de ${opts.descricao} ` +
+    `no valor de ${opts.valorLabel}${venc}. Qualquer dúvida, estou à disposição!`
+  );
+}
+
 // Mensagem padrão de lembrete de renovação de hospedagem/domínio (anual).
 export function hospedagemMessage(opts: {
   valorLabel?: string | null;

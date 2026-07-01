@@ -82,6 +82,61 @@ export const agencySchema = z.object({
 export type AgencyInput = z.infer<typeof agencySchema>;
 
 // ---------------------------------------------------------------------------
+// Cobranças avulsas (abas/categorias personalizadas em Financeiro)
+// ---------------------------------------------------------------------------
+
+// Valor obrigatório (aceita "1.234,56" ou "1234.56").
+const requiredDecimal = z
+  .string()
+  .min(1, "Valor é obrigatório")
+  .transform((v, ctx) => {
+    const normalized = v.replace(/\./g, "").replace(",", ".");
+    const n = Number(normalized);
+    if (Number.isNaN(n) || n <= 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Valor inválido" });
+      return z.NEVER;
+    }
+    return n;
+  });
+
+const requiredDate = z
+  .string()
+  .min(1, "Data é obrigatória")
+  .transform((v, ctx) => {
+    const d = new Date(v);
+    if (Number.isNaN(d.getTime())) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Data inválida" });
+      return z.NEVER;
+    }
+    return d;
+  });
+
+export const chargeCategorySchema = z.object({
+  nome: z.string().trim().min(1, "Nome é obrigatório"),
+});
+
+export const customChargeSchema = z
+  .object({
+    categoryId: z.string().min(1, "Categoria é obrigatória"),
+    clientId: z.string().min(1, "Cliente é obrigatório"),
+    descricao: optionalString,
+    valor: requiredDecimal,
+    tipo: z.enum(["PONTUAL", "RECORRENTE"]),
+    recorrencia: z
+      .enum(["MENSAL", "TRIMESTRAL", "SEMESTRAL", "ANUAL"])
+      .optional(),
+    primeiroVencimento: requiredDate,
+  })
+  .transform((d) => ({
+    ...d,
+    // Pontual não tem periodicidade.
+    recorrencia: d.tipo === "RECORRENTE" ? d.recorrencia ?? "MENSAL" : null,
+  }));
+
+export type ChargeCategoryInput = z.infer<typeof chargeCategorySchema>;
+export type CustomChargeInput = z.infer<typeof customChargeSchema>;
+
+// ---------------------------------------------------------------------------
 // Lead vindo da landing page (focus-digital-site) pelo endpoint público
 // /api/leads/intake. Captura o mínimo: quem é e como falar com a pessoa.
 // Exige pelo menos uma forma de contato (e-mail ou telefone).
