@@ -12,7 +12,9 @@ export default async function ComercialPage() {
       responsavel: { select: { nome: true } },
       partnerAgency: { select: { nome: true } },
     },
-    orderBy: { nomeRazaoSocial: "asc" },
+    // Mais recentes no topo: ao mover um card de etapa, ele sobe para a
+    // primeira posição da coluna e assim permanece após recarregar.
+    orderBy: { atualizadoEm: "desc" },
   });
 
   return (

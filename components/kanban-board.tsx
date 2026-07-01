@@ -62,18 +62,21 @@ export function KanbanBoard({ initial }: { initial: KanbanCard[] }) {
     const card = cards.find((c) => c.id === id);
     if (!card || card.status === status) return;
 
-    const anterior = card.status;
-    // Atualização otimista; reverte se a ação falhar.
-    setCards((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status } : c))
-    );
+    // Snapshot para reverter caso a ação falhe.
+    const snapshot = cards;
+    // Atualização otimista: muda o status e move o card para o TOPO da coluna
+    // (início do array), para ele aparecer na primeira posição ao ser solto.
+    setCards((prev) => {
+      const movido = prev.find((c) => c.id === id);
+      if (!movido) return prev;
+      const resto = prev.filter((c) => c.id !== id);
+      return [{ ...movido, status }, ...resto];
+    });
     startTransition(async () => {
       try {
         await setClientStatus(id, status);
       } catch {
-        setCards((prev) =>
-          prev.map((c) => (c.id === id ? { ...c, status: anterior } : c))
-        );
+        setCards(snapshot);
       }
     });
   }
