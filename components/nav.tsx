@@ -17,14 +17,14 @@ export function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1">
+    <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
       {links.map((link) => {
         const active = pathname.startsWith(link.href);
         return (
           <Link
             key={link.href}
             href={link.href}
-            className={`rounded-button px-3 py-2 text-sm font-medium transition-all duration-200 ${
+            className={`whitespace-nowrap rounded-button px-3 py-2 text-sm font-medium transition-all duration-200 md:w-full ${
               active
                 ? "bg-accent-subtle text-accent-primary"
                 : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
