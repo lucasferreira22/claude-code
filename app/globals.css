@@ -167,3 +167,41 @@ html.dados-ocultos .sensivel {
   background-image: radial-gradient(var(--border-default) 1px, transparent 1px);
   pointer-events: none;
 }
+
+/* ===== Barra lateral recolhível ===== */
+.app-sidebar {
+  transition: width 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  :root[data-sidebar="collapsed"] .app-sidebar {
+    width: 4.5rem;
+  }
+  :root[data-sidebar="collapsed"] .app-sidebar .sidebar-label {
+    display: none;
+  }
+  :root[data-sidebar="collapsed"] .app-sidebar .sidebar-logo-full {
+    display: none;
+  }
+  :root[data-sidebar="collapsed"] .app-sidebar .sidebar-logo-mark {
+    display: block;
+  }
+  :root[data-sidebar="collapsed"] .app-sidebar .sidebar-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  :root[data-sidebar="collapsed"] .app-sidebar .sidebar-scroll {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  :root[data-sidebar="collapsed"] .app-sidebar .nav-link {
+    justify-content: center;
+  }
+  :root[data-sidebar="collapsed"] .app-sidebar .sidebar-footer {
+    justify-content: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}

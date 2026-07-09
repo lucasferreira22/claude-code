@@ -26,7 +26,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var d=document.documentElement;if(localStorage.getItem('dadosOcultos')==='1')d.classList.add('dados-ocultos');if(localStorage.getItem('tema')==='dark')d.classList.add('dark')}catch(e){}",
+              "try{var d=document.documentElement;if(localStorage.getItem('dadosOcultos')==='1')d.classList.add('dados-ocultos');if(localStorage.getItem('tema')==='dark')d.classList.add('dark');if(localStorage.getItem('sidebarRecolhida')==='1')d.setAttribute('data-sidebar','collapsed')}catch(e){}",
           }}
         />
       </head>
