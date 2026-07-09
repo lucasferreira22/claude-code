@@ -26,12 +26,12 @@ export default async function AppLayout({
             <img
               src="/logo-focus.svg"
               alt="Focus Digital"
-              className="h-7 w-auto dark:hidden"
+              className="h-5 w-auto dark:hidden"
             />
             <img
               src="/logo-focus-branco.svg"
               alt="Focus Digital"
-              className="hidden h-7 w-auto dark:block"
+              className="hidden h-5 w-auto dark:block"
             />
           </Link>
         </div>
