@@ -5,6 +5,7 @@ import { setCustomChargeStatus } from "@/lib/actions/custom-charges";
 import { CustomChargeForm } from "@/components/custom-charge-form";
 import { ChargeCategoryActions } from "@/components/charge-category-actions";
 import { DeleteChargeButton } from "@/components/delete-charge-button";
+import { TableSearch } from "@/components/table-search";
 import { venceEm, diaVencimentoDe } from "@/lib/custom-charges";
 import { waLink, cobrancaAvulsaMessage } from "@/lib/whatsapp";
 import {
@@ -160,6 +161,7 @@ export default async function CategoriaAvulsaPage({
           adicionar, ou troque o mês.
         </div>
       ) : (
+        <TableSearch>
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-border-default bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-secondary">
@@ -195,7 +197,11 @@ export default async function CategoriaAvulsaPage({
                       )
                     : null;
                 return (
-                  <tr key={c.id} className="hover:bg-surface-elevated">
+                  <tr
+                    key={c.id}
+                    data-nome={c.client.nomeRazaoSocial}
+                    className="hover:bg-surface-elevated"
+                  >
                     <td className="px-4 py-3">
                       <Link
                         href={`/clientes/${c.client.id}`}
@@ -269,6 +275,7 @@ export default async function CategoriaAvulsaPage({
             </tbody>
           </table>
         </div>
+        </TableSearch>
       )}
     </div>
   );

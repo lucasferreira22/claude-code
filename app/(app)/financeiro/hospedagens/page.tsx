@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { markHostingRenewed } from "@/lib/actions/hosting";
 import { waLink, hospedagemMessage } from "@/lib/whatsapp";
+import { TableSearch } from "@/components/table-search";
 import {
   CATEGORIA_BADGE,
   CATEGORIA_LABELS,
@@ -89,6 +90,7 @@ export default async function HospedagensPage() {
           no cadastro para que ele apareça aqui.
         </div>
       ) : (
+        <TableSearch>
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-border-default bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-secondary">
@@ -114,7 +116,11 @@ export default async function HospedagensPage() {
                   })
                 );
                 return (
-                  <tr key={c.id} className="hover:bg-surface-elevated">
+                  <tr
+                    key={c.id}
+                    data-nome={c.nomeRazaoSocial}
+                    className="hover:bg-surface-elevated"
+                  >
                     <td className="px-4 py-3">
                       <Link
                         href={`/clientes/${c.id}`}
@@ -195,6 +201,7 @@ export default async function HospedagensPage() {
             </tbody>
           </table>
         </div>
+        </TableSearch>
       )}
     </div>
   );
