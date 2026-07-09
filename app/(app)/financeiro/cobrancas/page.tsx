@@ -1,14 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import {
-  generateMonthlyPayments,
-  setPaymentStatus,
-} from "@/lib/actions/payments";
+import { generateMonthlyPayments } from "@/lib/actions/payments";
 import { waLink, cobrancaMessage } from "@/lib/whatsapp";
+import { CobrancasTabela, type CobrancaRow } from "@/components/cobrancas-tabela";
 import {
-  PAYMENT_STATUS_BADGE,
-  PAYMENT_STATUS_LABELS,
-  PAYMENT_ATRASADO_BADGE,
   formatCurrency,
   currentCompetencia,
   formatCompetencia,
@@ -60,7 +55,12 @@ export default async function CobrancasPage({
         },
       },
     },
-    orderBy: { client: { nomeRazaoSocial: "asc" } },
+    // Ordena pela data de cobrança (dia de vencimento); sem dia definido vai
+    // para o fim (padrão do Postgres para ASC). Desempata por nome.
+    orderBy: [
+      { client: { diaVencimento: "asc" } },
+      { client: { nomeRazaoSocial: "asc" } },
+    ],
   });
 
   const recebido = pagamentos
@@ -226,121 +226,36 @@ export default async function CobrancasPage({
           <span className="font-medium">&quot;Gerar cobranças do mês&quot;</span>{" "}
           para criar as cobranças dos clientes recorrentes ativos.
         </div>
-      ) : visiveis.length === 0 ? (
-        <div className="card p-10 text-center text-text-secondary">
-          Nenhuma cobrança {filtro ? FILTRO_LABELS[filtro] : ""} em{" "}
-          {formatCompetencia(competencia)}.{" "}
-          <Link href={hrefFiltro(null)} className="text-accent-primary hover:underline">
-            Ver todas
-          </Link>
-        </div>
       ) : (
-        <div className="card overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b border-border-default bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-secondary">
-              <tr>
-                <th className="px-4 py-3">Cliente</th>
-                <th className="px-4 py-3">Vencimento</th>
-                <th className="px-4 py-3 text-right">Valor</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Ação</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-subtle">
-              {visiveis.map((p) => {
-                const atrasada =
-                  p.status === "PENDENTE" &&
-                  estaAtrasada(competencia, p.client.diaVencimento, hoje);
-                const marcar = setPaymentStatus.bind(
-                  null,
-                  p.id,
-                  p.status === "PAGO" ? "PENDENTE" : "PAGO"
-                );
-                // Link de WhatsApp com lembrete pronto (só para cobranças em aberto)
-                const whatsappHref =
-                  p.status === "PENDENTE"
-                    ? waLink(
-                        p.client.contatos[0]?.valor,
-                        cobrancaMessage({
-                          competenciaLabel: formatCompetencia(competencia),
-                          valorLabel: formatCurrency(Number(p.valor)),
-                          diaVencimento: p.client.diaVencimento,
-                          atrasada,
-                        })
-                      )
-                    : null;
-                return (
-                  <tr key={p.id} className="hover:bg-surface-elevated">
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/clientes/${p.client.id}`}
-                        className="font-medium text-accent-primary hover:underline"
-                      >
-                        {p.client.nomeRazaoSocial}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-text-secondary">
-                      {p.client.diaVencimento
-                        ? `Dia ${p.client.diaVencimento}`
-                        : "—"}
-                    </td>
-                    <td className="sensivel px-4 py-3 text-right text-text-primary">
-                      {formatCurrency(Number(p.valor))}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`badge ${
-                          atrasada
-                            ? PAYMENT_ATRASADO_BADGE
-                            : PAYMENT_STATUS_BADGE[p.status]
-                        }`}
-                      >
-                        {atrasada
-                          ? "Atrasado"
-                          : PAYMENT_STATUS_LABELS[p.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-2">
-                        {whatsappHref && (
-                          <a
-                            href={whatsappHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Enviar lembrete no WhatsApp"
-                            className="btn-whatsapp"
-                          >
-                            <svg
-                              viewBox="0 0 24 24"
-                              className="h-4 w-4 fill-current"
-                              aria-hidden="true"
-                            >
-                              <path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.4 0-.5 0-.1-.6-1.5-.9-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 5 4.3 1.9.7 2.6.8 3.5.7.6-.1 1.7-.7 1.9-1.4.2-.6.2-1.2.2-1.3-.1-.2-.3-.2-.6-.3z" />
-                              <path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.9.9-2.8-.2-.3A8 8 0 1 1 12 20z" />
-                            </svg>
-                            Lembrar
-                          </a>
-                        )}
-                        <form action={marcar}>
-                          <button
-                            type="submit"
-                            className={
-                              p.status === "PAGO"
-                                ? "btn-secondary"
-                                : "btn-primary"
-                            }
-                          >
-                            {p.status === "PAGO" ? "Desfazer" : "Marcar pago"}
-                          </button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <CobrancasTabela
+          rows={visiveis.map((p): CobrancaRow => {
+            const atrasada =
+              p.status === "PENDENTE" &&
+              estaAtrasada(competencia, p.client.diaVencimento, hoje);
+            return {
+              paymentId: p.id,
+              clienteId: p.client.id,
+              clienteNome: p.client.nomeRazaoSocial,
+              diaVencimento: p.client.diaVencimento,
+              valor: Number(p.valor),
+              status: p.status,
+              atrasada,
+              // Lembrete pronto no WhatsApp só para cobranças em aberto.
+              whatsappHref:
+                p.status === "PENDENTE"
+                  ? waLink(
+                      p.client.contatos[0]?.valor,
+                      cobrancaMessage({
+                        competenciaLabel: formatCompetencia(competencia),
+                        valorLabel: formatCurrency(Number(p.valor)),
+                        diaVencimento: p.client.diaVencimento,
+                        atrasada,
+                      })
+                    )
+                  : null,
+            };
+          })}
+        />
       )}
     </div>
   );
