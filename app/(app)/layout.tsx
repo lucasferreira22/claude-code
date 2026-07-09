@@ -5,6 +5,7 @@ import { Nav } from "@/components/nav";
 import { LogoutButton } from "@/components/logout-button";
 import { PrivacyToggle } from "@/components/privacy-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SidebarToggle } from "@/components/sidebar-toggle";
 
 // App autenticado: nada é pré-renderizado estaticamente (depende de sessão + DB).
 export const dynamic = "force-dynamic";
@@ -19,31 +20,37 @@ export default async function AppLayout({
 
   return (
     <div className="min-h-screen bg-surface-page text-text-primary md:flex">
-      {/* Barra lateral esquerda */}
-      <aside className="z-10 flex flex-col border-b border-border-default bg-surface-card md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
-        <div className="flex items-center px-5 py-4">
+      {/* Barra lateral esquerda (recolhível) */}
+      <aside className="app-sidebar z-10 flex flex-col border-b border-border-default bg-surface-card md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
+        <div className="sidebar-header flex items-center justify-between px-5 py-4">
           <Link href="/painel" className="shrink-0">
             <img
               src="/logo-focus.svg"
               alt="Focus Digital"
-              className="h-5 w-auto dark:hidden"
+              className="sidebar-logo-full h-5 w-auto dark:hidden"
             />
             <img
               src="/logo-focus-branco.svg"
               alt="Focus Digital"
-              className="hidden h-5 w-auto dark:block"
+              className="sidebar-logo-full hidden h-5 w-auto dark:block"
+            />
+            <img
+              src="/icone-focus.svg"
+              alt="Focus Digital"
+              className="sidebar-logo-mark hidden h-6 w-6"
             />
           </Link>
+          <SidebarToggle />
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-2">
+        <div className="sidebar-scroll flex-1 overflow-y-auto px-3 py-2">
           <Nav />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 border-t border-border-default px-4 py-3">
+        <div className="sidebar-footer flex flex-wrap items-center gap-3 border-t border-border-default px-4 py-3">
           <ThemeToggle />
           <PrivacyToggle />
-          <span className="hidden truncate text-sm text-text-secondary sm:inline">
+          <span className="sidebar-label hidden truncate text-sm text-text-secondary sm:inline">
             {session.user.name ?? session.user.email}
           </span>
           <LogoutButton />
