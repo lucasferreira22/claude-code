@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { setPaymentStatus } from "@/lib/actions/payments";
+import { setPaymentStatus, deletePayment } from "@/lib/actions/payments";
 import {
   PAYMENT_STATUS_BADGE,
   PAYMENT_STATUS_LABELS,
@@ -77,6 +77,7 @@ export function CobrancasTabela({ rows }: { rows: CobrancaRow[] }) {
                   r.paymentId,
                   r.status === "PAGO" ? "PENDENTE" : "PAGO"
                 );
+                const excluir = deletePayment.bind(null, r.paymentId);
                 return (
                   <tr key={r.paymentId} className="hover:bg-surface-elevated">
                     <td className="px-4 py-3">
@@ -135,6 +136,25 @@ export function CobrancasTabela({ rows }: { rows: CobrancaRow[] }) {
                             }
                           >
                             {r.status === "PAGO" ? "Desfazer" : "Marcar pago"}
+                          </button>
+                        </form>
+                        <form
+                          action={excluir}
+                          onSubmit={(e) => {
+                            if (
+                              !confirm(
+                                `Excluir a cobrança de ${r.clienteNome} deste mês? Ela some do controle (não será cobrada).`
+                              )
+                            )
+                              e.preventDefault();
+                          }}
+                        >
+                          <button
+                            type="submit"
+                            title="Excluir cobrança"
+                            className="btn-secondary text-status-error"
+                          >
+                            Excluir
                           </button>
                         </form>
                       </div>

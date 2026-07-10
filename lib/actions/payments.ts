@@ -55,3 +55,14 @@ export async function setPaymentStatus(
   });
   revalidateFinanceiro();
 }
+
+// Exclui uma cobrança do mês (ex.: cliente encerrou/pausou e não vai pagar
+// esta competência). Se o cliente ainda for recorrente ativo, ela pode voltar
+// ao clicar em "Gerar cobranças do mês".
+export async function deletePayment(paymentId: string) {
+  const session = await auth();
+  if (!session?.user) return;
+
+  await prisma.payment.delete({ where: { id: paymentId } });
+  revalidateFinanceiro();
+}
