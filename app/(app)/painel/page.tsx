@@ -6,6 +6,7 @@ import {
   type FinanceClient,
 } from "@/lib/finance";
 import { faturamentoAvulsasDoMes } from "@/lib/custom-charges";
+import { getTarefasOperacional, todoistConfigurado } from "@/lib/todoist";
 import {
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
@@ -231,6 +232,50 @@ export default async function PainelPage() {
   const lucro = faturamentoMensal - resumo.custoMensal;
   const vencimentos = proximosVencimentos(clients, 14);
 
+  // Pagamentos em atraso: cobranças ainda pendentes de competências <= atual
+  // (mês anterior, ou o mês corrente com o dia de vencimento já passado).
+  const atrasadosRows = await prisma.payment.findMany({
+    where: { status: "PENDENTE", competencia: { lte: competencia } },
+    select: {
+      id: true,
+      valor: true,
+      competencia: true,
+      client: {
+        select: { id: true, nomeRazaoSocial: true, diaVencimento: true },
+      },
+    },
+    orderBy: { competencia: "asc" },
+  });
+  const hojeDia = new Date().getDate();
+  const atrasados = atrasadosRows.filter(
+    (p) =>
+      p.competencia < competencia ||
+      (p.competencia === competencia &&
+        p.client.diaVencimento != null &&
+        hojeDia > p.client.diaVencimento)
+  );
+
+  // Tarefas pendentes (com prazo) do Todoist — atrasadas primeiro.
+  let tarefas: {
+    id: string;
+    titulo: string;
+    url: string;
+    vencimentoLabel: string | null;
+    emDias: number | null;
+    clienteNome: string | null;
+  }[] = [];
+  if (todoistConfigurado()) {
+    try {
+      const data = await getTarefasOperacional();
+      tarefas = data.comVencimento
+        .map((x) => ({ ...x.demanda, clienteNome: x.clienteNome }))
+        .sort((a, b) => (a.emDias ?? 9999) - (b.emDias ?? 9999))
+        .slice(0, 14);
+    } catch {
+      /* integração indisponível: mantém lista vazia */
+    }
+  }
+
   // Contagem de clientes por etapa (para o gráfico de rosca).
   const countByStage = new Map<string, number>();
   for (const r of rows)
@@ -431,70 +476,171 @@ export default async function PainelPage() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          Próximos vencimentos
+          Vencimentos/atrasados (esquerda) · Tarefas Todoist (direita)
           ═══════════════════════════════════════════════════════════════ */}
-      <section className="card p-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-muted">
-          Próximos vencimentos (14 dias)
-        </h2>
-        {vencimentos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            {/* Empty state SVG: prancheta vazia */}
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="mb-3 text-text-muted opacity-30">
-              <rect x="16" y="8" width="32" height="48" rx="4" stroke="currentColor" strokeWidth="2" />
-              <rect x="22" y="4" width="20" height="8" rx="2" stroke="currentColor" strokeWidth="2" fill="var(--surface-card)" />
-              <line x1="24" y1="24" x2="40" y2="24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 3" />
-              <line x1="24" y1="32" x2="36" y2="32" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 3" />
-              <line x1="24" y1="40" x2="32" y2="40" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 3" />
-            </svg>
-            <p className="text-sm text-text-muted">
-              Nenhum vencimento ou renovação nos próximos 14 dias.
-            </p>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Coluna esquerda: atrasados + próximos vencimentos */}
+        <section className="card p-6">
+          {atrasados.length > 0 && (
+            <div className="mb-6">
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-status-error">
+                Pagamentos atrasados
+                <span className="badge badge-danger">{atrasados.length}</span>
+              </h2>
+              <ul className="divide-y divide-border-subtle">
+                {atrasados.map((p) => (
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between gap-4 py-2.5 text-sm"
+                  >
+                    <div className="min-w-0">
+                      <Link
+                        href={`/clientes/${p.client.id}`}
+                        className="font-medium text-accent-primary hover:underline"
+                      >
+                        {p.client.nomeRazaoSocial}
+                      </Link>
+                      <span className="ml-2 text-xs text-text-muted">
+                        {formatCompetencia(p.competencia)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 whitespace-nowrap">
+                      <span className="sensivel nums text-text-secondary">
+                        {formatCurrency(Number(p.valor))}
+                      </span>
+                      <span className="text-xs font-medium text-status-error">
+                        {p.client.diaVencimento
+                          ? `venceu dia ${p.client.diaVencimento}`
+                          : "em atraso"}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-muted">
+            Próximos vencimentos (14 dias)
+          </h2>
+          {vencimentos.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="mb-3 text-text-muted opacity-30">
+                <rect x="16" y="8" width="32" height="48" rx="4" stroke="currentColor" strokeWidth="2" />
+                <rect x="22" y="4" width="20" height="8" rx="2" stroke="currentColor" strokeWidth="2" fill="var(--surface-card)" />
+                <line x1="24" y1="24" x2="40" y2="24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 3" />
+                <line x1="24" y1="32" x2="36" y2="32" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 3" />
+                <line x1="24" y1="40" x2="32" y2="40" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 3" />
+              </svg>
+              <p className="text-sm text-text-muted">
+                Nenhum vencimento ou renovação nos próximos 14 dias.
+              </p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-border-subtle">
+              {vencimentos.map((v) => (
+                <li
+                  key={`${v.clientId}-${v.tipo}`}
+                  className="flex items-center justify-between gap-4 py-2.5 text-sm"
+                >
+                  <div className="min-w-0">
+                    <Link
+                      href={`/clientes/${v.clientId}`}
+                      className="font-medium text-accent-primary hover:underline"
+                    >
+                      {v.nome}
+                    </Link>
+                    <span className="ml-2 text-xs text-text-muted">
+                      {v.tipo === "MENSAL" ? "Mensalidade" : "Renovação"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 whitespace-nowrap">
+                    <span className="sensivel nums text-text-secondary">
+                      {formatCurrency(v.valor)}
+                    </span>
+                    <span
+                      className={`text-xs ${
+                        v.emDias < 0
+                          ? "font-medium text-status-error"
+                          : v.emDias <= 3
+                            ? "font-medium text-status-warning"
+                            : "text-text-muted"
+                      }`}
+                    >
+                      {v.emDias < 0
+                        ? `venceu há ${Math.abs(v.emDias)}d`
+                        : v.emDias === 0
+                          ? "hoje"
+                          : `em ${v.emDias}d`}{" "}
+                      · {formatDate(v.data)}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Coluna direita: tarefas pendentes do Todoist */}
+        <section className="card p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
+              Tarefas pendentes (Todoist)
+            </h2>
+            <Link
+              href="/tarefas"
+              className="text-xs text-accent-primary hover:underline"
+            >
+              Ver todas →
+            </Link>
           </div>
-        ) : (
-          <ul className="divide-y divide-border-subtle">
-            {vencimentos.map((v) => (
-              <li
-                key={`${v.clientId}-${v.tipo}`}
-                className="flex items-center justify-between gap-4 py-2.5 text-sm"
-              >
-                <div className="min-w-0">
-                  <Link
-                    href={`/clientes/${v.clientId}`}
-                    className="font-medium text-accent-primary hover:underline"
-                  >
-                    {v.nome}
-                  </Link>
-                  <span className="ml-2 text-xs text-text-muted">
-                    {v.tipo === "MENSAL" ? "Mensalidade" : "Renovação"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 whitespace-nowrap">
-                  <span className="sensivel nums text-text-secondary">
-                    {formatCurrency(v.valor)}
-                  </span>
-                  <span
-                    className={`text-xs ${
-                      v.emDias < 0
-                        ? "font-medium text-status-error"
-                        : v.emDias <= 3
-                          ? "font-medium text-status-warning"
-                          : "text-text-muted"
-                    }`}
-                  >
-                    {v.emDias < 0
-                      ? `venceu há ${Math.abs(v.emDias)}d`
-                      : v.emDias === 0
-                        ? "hoje"
-                        : `em ${v.emDias}d`}{" "}
-                    · {formatDate(v.data)}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          {!todoistConfigurado() ? (
+            <p className="py-8 text-center text-sm text-text-muted">
+              Integração com o Todoist não configurada.
+            </p>
+          ) : tarefas.length === 0 ? (
+            <p className="py-8 text-center text-sm text-text-muted">
+              Nenhuma tarefa com prazo pendente.
+            </p>
+          ) : (
+            <ul className="divide-y divide-border-subtle">
+              {tarefas.map((t) => (
+                <li key={t.id} className="flex items-start gap-2 py-2.5 text-sm">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-primary" />
+                  <div className="min-w-0 flex-1">
+                    <a
+                      href={t.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-text-primary hover:underline"
+                    >
+                      {t.titulo}
+                    </a>
+                    {t.clienteNome && (
+                      <span className="ml-2 text-xs text-text-muted">
+                        {t.clienteNome}
+                      </span>
+                    )}
+                  </div>
+                  {t.vencimentoLabel && (
+                    <span
+                      className={`whitespace-nowrap text-xs ${
+                        t.emDias !== null && t.emDias < 0
+                          ? "font-medium text-status-error"
+                          : t.emDias === 0
+                            ? "font-medium text-status-warning"
+                            : "text-text-muted"
+                      }`}
+                    >
+                      {t.vencimentoLabel}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
