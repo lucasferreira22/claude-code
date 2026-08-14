@@ -13,6 +13,7 @@ export type ChargeToEdit = {
   descricao: string | null;
   // Já formatado em pt-BR ("700,00") para casar com o parser do formulário.
   valor: string;
+  custo: string;
   tipo: TipoCobranca;
   recorrencia: Recorrencia | null;
   // "AAAA-MM-DD"
@@ -90,6 +91,18 @@ export function EditChargeButton({ charge }: { charge: ChargeToEdit }) {
                     required
                     inputMode="decimal"
                     defaultValue={charge.valor}
+                    className="input"
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Custo (R$) — opcional</label>
+                  <input
+                    type="text"
+                    name="custo"
+                    inputMode="decimal"
+                    placeholder="0,00"
+                    defaultValue={charge.custo}
                     className="input"
                   />
                 </div>

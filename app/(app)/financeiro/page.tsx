@@ -6,7 +6,11 @@ import {
   num,
   type FinanceClient,
 } from "@/lib/finance";
-import { faturamentoAvulsasDoMes, venceEm } from "@/lib/custom-charges";
+import {
+  faturamentoAvulsasDoMes,
+  custoAvulsasDoMes,
+  venceEm,
+} from "@/lib/custom-charges";
 import {
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
@@ -42,6 +46,7 @@ export default async function FinanceiroPage() {
       where: { ativo: true },
       select: {
         valor: true,
+        custo: true,
         tipo: true,
         recorrencia: true,
         primeiroVencimento: true,
@@ -64,8 +69,10 @@ export default async function FinanceiroPage() {
   // Cobranças avulsas (pontuais + recorrentes) que vencem no mês atual entram
   // no faturamento pelo valor cheio.
   const avulsasMes = faturamentoAvulsasDoMes(avulsas);
+  const custoAvulsas = custoAvulsasDoMes(avulsas);
   const faturamentoMensal = resumo.faturamentoMensal + avulsasMes;
-  const lucro = faturamentoMensal - resumo.custoMensal;
+  const custoMensal = resumo.custoMensal + custoAvulsas;
+  const lucro = faturamentoMensal - custoMensal;
 
   // Recebido x pendente do mês, somando TODAS as categorias: cobranças
   // recorrentes mensais + cobranças avulsas que vencem nesta competência.
@@ -120,8 +127,13 @@ export default async function FinanceiroPage() {
         <div className="card p-5">
           <p className="text-xs uppercase tracking-wide text-text-muted">Custo</p>
           <p className="sensivel mt-1 text-2xl font-bold">
-            {formatCurrency(resumo.custoMensal)}
+            {formatCurrency(custoMensal)}
           </p>
+          {custoAvulsas > 0 && (
+            <p className="mt-1 text-xs text-text-muted">
+              Inclui custo de cobranças avulsas ({formatCurrency(custoAvulsas)})
+            </p>
+          )}
         </div>
         <div className="card p-5">
           <p className="text-xs uppercase tracking-wide text-text-muted">Lucro</p>

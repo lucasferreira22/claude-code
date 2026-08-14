@@ -69,3 +69,16 @@ export function faturamentoAvulsasDoMes(
   }
   return total;
 }
+
+// Custo das cobranças avulsas que vencem numa competência (espelha o cálculo
+// do faturamento, para o lucro sair coerente).
+export function custoAvulsasDoMes(
+  charges: (ChargeOccurrenceInput & { custo?: unknown })[],
+  competencia: string = currentCompetencia()
+): number {
+  let total = 0;
+  for (const c of charges) {
+    if (venceEm(c, competencia)) total += num(c.custo) ?? 0;
+  }
+  return total;
+}
