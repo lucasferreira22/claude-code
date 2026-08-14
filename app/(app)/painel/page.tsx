@@ -209,7 +209,7 @@ export default async function PainelPage() {
     prisma.client.findMany({ select: financeSelect }),
     prisma.payment.findMany({
       where: { competencia },
-      select: { valor: true, status: true },
+      select: { valor: true, valorPago: true, status: true },
     }),
     prisma.customCharge.findMany({
       where: { ativo: true },
@@ -260,6 +260,7 @@ export default async function PainelPage() {
       select: {
         id: true,
         valor: true,
+        valorPago: true,
         competencia: true,
         client: {
           select: { id: true, nomeRazaoSocial: true, diaVencimento: true },
@@ -278,7 +279,9 @@ export default async function PainelPage() {
         ativo: true,
         category: { select: { nome: true } },
         client: { select: { id: true, nomeRazaoSocial: true } },
-        pagamentos: { select: { competencia: true, status: true } },
+        pagamentos: {
+          select: { competencia: true, status: true, valorPago: true },
+        },
       },
     }),
   ]);
@@ -302,11 +305,12 @@ export default async function PainelPage() {
         p.client.diaVencimento != null &&
         hojeDia > p.client.diaVencimento);
     if (!vencido) continue;
+    const jaPago = p.valorPago == null ? 0 : Number(p.valorPago);
     atrasados.push({
       key: `m-${p.id}`,
       clienteId: p.client.id,
       clienteNome: p.client.nomeRazaoSocial,
-      valor: Number(p.valor),
+      valor: Number(p.valor) - jaPago,
       competencia: p.competencia,
       label: "Mensalidade",
       dia: p.client.diaVencimento,
@@ -325,15 +329,14 @@ export default async function PainelPage() {
       const vencido =
         comp < competencia || (comp === competencia && hojeDia > dia);
       if (!vencido) continue;
-      const pago = c.pagamentos.some(
-        (p) => p.competencia === comp && p.status === "PAGO"
-      );
-      if (pago) continue;
+      const reg = c.pagamentos.find((p) => p.competencia === comp);
+      if (reg?.status === "PAGO") continue;
+      const jaPago = reg?.valorPago == null ? 0 : Number(reg.valorPago);
       atrasados.push({
         key: `c-${c.id}-${comp}`,
         clienteId: c.client.id,
         clienteNome: c.client.nomeRazaoSocial,
-        valor: Number(c.valor),
+        valor: Number(c.valor) - jaPago,
         competencia: comp,
         label: c.descricao ?? c.category.nome,
         dia,
@@ -371,13 +374,15 @@ export default async function PainelPage() {
     if (r.stageId)
       countByStage.set(r.stageId, (countByStage.get(r.stageId) ?? 0) + 1);
 
-  // Resumo das cobranças do mês corrente
-  const recebido = pagamentos
-    .filter((p) => p.status === "PAGO")
-    .reduce((s, p) => s + Number(p.valor), 0);
-  const pendente = pagamentos
-    .filter((p) => p.status === "PENDENTE")
-    .reduce((s, p) => s + Number(p.valor), 0);
+  // Resumo das cobranças do mês corrente (parciais contam pelo valor recebido).
+  const recebido = pagamentos.reduce(
+    (s, p) => s + (p.valorPago == null ? 0 : Number(p.valorPago)),
+    0
+  );
+  const pendente = pagamentos.reduce(
+    (s, p) => s + Number(p.valor) - (p.valorPago == null ? 0 : Number(p.valorPago)),
+    0
+  );
   const totalCobranca = recebido + pendente;
   const pctRecebido = totalCobranca > 0 ? (recebido / totalCobranca) * 100 : 0;
 

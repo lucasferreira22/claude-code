@@ -3,6 +3,14 @@
 import type { Categoria, TipoRelacao } from "@prisma/client";
 import { CATEGORIA_ORDER } from "@/lib/labels";
 
+// "1.234,56" ou "1234.56" -> number. null quando vazio/inválido.
+export function parseValorBR(v: unknown): number | null {
+  const raw = String(v ?? "").trim();
+  if (!raw) return null;
+  const n = Number(raw.replace(/\./g, "").replace(",", "."));
+  return Number.isNaN(n) ? null : n;
+}
+
 // Converte Prisma.Decimal | number | null em número (ou null).
 export function num(v: unknown): number | null {
   if (v == null) return null;

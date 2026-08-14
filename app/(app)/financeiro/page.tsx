@@ -53,12 +53,15 @@ export default async function FinanceiroPage() {
         primeiroVencimento: true,
         ativo: true,
         // Só o status desta competência (para saber se já foi paga).
-        pagamentos: { where: { competencia }, select: { status: true } },
+        pagamentos: {
+          where: { competencia },
+          select: { status: true, valorPago: true },
+        },
       },
     }),
     prisma.payment.findMany({
       where: { competencia },
-      select: { valor: true, status: true },
+      select: { valor: true, valorPago: true, status: true },
     }),
   ]);
   const clients: FinanceClient[] = rows.map((r) => ({
@@ -87,17 +90,20 @@ export default async function FinanceiroPage() {
 
   // Recebido x pendente do mês, somando TODAS as categorias: cobranças
   // recorrentes mensais + cobranças avulsas que vencem nesta competência.
+  // Pagamentos parciais contam pelo valor já recebido; o resto fica pendente.
   let recebido = 0;
   let pendente = 0;
   for (const p of pagamentos) {
-    if (p.status === "PAGO") recebido += Number(p.valor);
-    else pendente += Number(p.valor);
+    const pago = p.valorPago == null ? 0 : Number(p.valorPago);
+    recebido += pago;
+    pendente += Number(p.valor) - pago;
   }
   for (const c of avulsas) {
     if (!venceEm(c, competencia)) continue;
-    const pago = c.pagamentos.some((p) => p.status === "PAGO");
-    if (pago) recebido += Number(c.valor);
-    else pendente += Number(c.valor);
+    const raw = c.pagamentos[0]?.valorPago;
+    const pago = raw == null ? 0 : Number(raw);
+    recebido += pago;
+    pendente += Number(c.valor) - pago;
   }
   const totalCobrado = recebido + pendente;
   const pctRecebido = totalCobrado > 0 ? (recebido / totalCobrado) * 100 : 0;

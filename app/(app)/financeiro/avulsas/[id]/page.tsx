@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { setCustomChargeStatus } from "@/lib/actions/custom-charges";
+import {
+  setCustomChargeStatus,
+  setCustomChargePartial,
+} from "@/lib/actions/custom-charges";
+import { PartialPaymentButton } from "@/components/partial-payment-button";
 import { CustomChargeForm } from "@/components/custom-charge-form";
 import { ChargeCategoryActions } from "@/components/charge-category-actions";
 import { DeleteChargeButton } from "@/components/delete-charge-button";
@@ -84,16 +88,18 @@ export default async function CategoriaAvulsaPage({
     .filter((c) => venceEm(c, competencia))
     .map((c) => {
       const status = c.pagamentos[0]?.status ?? "PENDENTE";
+      const pagoRaw = c.pagamentos[0]?.valorPago;
+      const valorPago = pagoRaw == null ? 0 : Number(pagoRaw);
+      const parcial = status !== "PAGO" && valorPago > 0;
       const dia = diaVencimentoDe(c);
       const atrasada =
         status === "PENDENTE" && estaAtrasada(competencia, dia, hoje);
-      return { c, status, dia, atrasada };
+      return { c, status, dia, atrasada, valorPago, parcial };
     });
 
   const total = doMes.reduce((s, r) => s + Number(r.c.valor), 0);
-  const recebido = doMes
-    .filter((r) => r.status === "PAGO")
-    .reduce((s, r) => s + Number(r.c.valor), 0);
+  // Recebido considera pagamentos parciais; pendente é o saldo restante.
+  const recebido = doMes.reduce((s, r) => s + r.valorPago, 0);
   const pendente = total - recebido;
   const custoTotal = doMes.reduce(
     (s, r) => s + (r.c.custo == null ? 0 : Number(r.c.custo)),
@@ -193,7 +199,7 @@ export default async function CategoriaAvulsaPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
-              {doMes.map(({ c, status, dia, atrasada }) => {
+              {doMes.map(({ c, status, dia, atrasada, valorPago, parcial }) => {
                 const marcar = setCustomChargeStatus.bind(
                   null,
                   c.id,
@@ -240,6 +246,12 @@ export default async function CategoriaAvulsaPage({
                     </td>
                     <td className="sensivel px-4 py-3 text-right text-text-primary">
                       {formatCurrency(Number(c.valor))}
+                      {parcial && (
+                        <span className="block text-xs text-text-muted">
+                          {formatCurrency(valorPago)} pago · falta{" "}
+                          {formatCurrency(Number(c.valor) - valorPago)}
+                        </span>
+                      )}
                     </td>
                     <td className="sensivel px-4 py-3 text-right text-text-secondary">
                       {c.custo == null ? "—" : formatCurrency(Number(c.custo))}
@@ -252,7 +264,11 @@ export default async function CategoriaAvulsaPage({
                             : PAYMENT_STATUS_BADGE[status]
                         }`}
                       >
-                        {atrasada ? "Atrasado" : PAYMENT_STATUS_LABELS[status]}
+                        {parcial
+                          ? "Parcial"
+                          : atrasada
+                            ? "Atrasado"
+                            : PAYMENT_STATUS_LABELS[status]}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -286,6 +302,24 @@ export default async function CategoriaAvulsaPage({
                             {status === "PAGO" ? "Desfazer" : "Marcar pago"}
                           </button>
                         </form>
+                        {status !== "PAGO" && (
+                          <PartialPaymentButton
+                            action={setCustomChargePartial.bind(
+                              null,
+                              c.id,
+                              competencia
+                            )}
+                            clienteNome={c.client.nomeRazaoSocial}
+                            valorTotal={Number(c.valor)
+                              .toFixed(2)
+                              .replace(".", ",")}
+                            valorPago={
+                              valorPago > 0
+                                ? valorPago.toFixed(2).replace(".", ",")
+                                : ""
+                            }
+                          />
+                        )}
                         <EditChargeButton
                           charge={{
                             id: c.id,

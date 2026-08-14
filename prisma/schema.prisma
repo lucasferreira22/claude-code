@@ -175,6 +175,8 @@ model Payment {
   clientId     String
   competencia  String        // "AAAA-MM" (ex: "2026-06")
   valor        Decimal       @db.Decimal(12, 2)
+  // Quanto já foi recebido. Menor que `valor` = pagamento parcial.
+  valorPago    Decimal?      @db.Decimal(12, 2)
   status       PaymentStatus @default(PENDENTE)
   pagoEm       DateTime?
   criadoEm     DateTime      @default(now())
@@ -240,6 +242,8 @@ model CustomChargePayment {
   charge       CustomCharge  @relation(fields: [chargeId], references: [id], onDelete: Cascade)
   chargeId     String
   competencia  String        // "AAAA-MM"
+  // Quanto já foi recebido. Menor que o valor da cobrança = parcial.
+  valorPago    Decimal?      @db.Decimal(12, 2)
   status       PaymentStatus @default(PENDENTE)
   pagoEm       DateTime?
   criadoEm     DateTime      @default(now())
