@@ -8,6 +8,7 @@ import {
 } from "@/lib/finance";
 import {
   faturamentoAvulsasDoMes,
+  faturamentoAvulsasPorTipo,
   custoAvulsasDoMes,
   venceEm,
 } from "@/lib/custom-charges";
@@ -70,6 +71,16 @@ export default async function FinanceiroPage() {
   // no faturamento pelo valor cheio.
   const avulsasMes = faturamentoAvulsasDoMes(avulsas);
   const custoAvulsas = custoAvulsasDoMes(avulsas);
+  // Avulsas do mês entram na quebra por categoria conforme o tipo, para a
+  // soma das linhas bater com o faturamento total.
+  const avulsasPorTipo = faturamentoAvulsasPorTipo(avulsas, competencia);
+  const faturamentoDaCategoria = (cat: (typeof CATEGORIA_ORDER)[number]) =>
+    resumo.porCategoria[cat].faturamento +
+    (cat === "PONTUAL"
+      ? avulsasPorTipo.PONTUAL
+      : cat === "RECORRENTE"
+        ? avulsasPorTipo.RECORRENTE
+        : 0);
   const faturamentoMensal = resumo.faturamentoMensal + avulsasMes;
   const custoMensal = resumo.custoMensal + custoAvulsas;
   const lucro = faturamentoMensal - custoMensal;
@@ -199,7 +210,7 @@ export default async function FinanceiroPage() {
                 </span>
               </span>
               <span className="sensivel font-medium text-text-primary">
-                {formatCurrency(resumo.porCategoria[cat].faturamento)}
+                {formatCurrency(faturamentoDaCategoria(cat))}
               </span>
             </li>
           ))}
