@@ -8,6 +8,7 @@ import {
   chargeCategorySchema,
   customChargeSchema,
 } from "@/lib/validation";
+import { parseValorBR } from "@/lib/finance";
 import type { PaymentStatus } from "@prisma/client";
 
 function revalidateFinanceiro() {
@@ -144,11 +145,52 @@ export async function setCustomChargeStatus(
   if (!session?.user) return;
   if (!/^\d{4}-\d{2}$/.test(competencia)) return;
 
+  const charge = await prisma.customCharge.findUnique({
+    where: { id: chargeId },
+    select: { valor: true },
+  });
+  if (!charge) return;
+
   const pagoEm = status === "PAGO" ? new Date() : null;
+  const valorPago = status === "PAGO" ? charge.valor : null;
   await prisma.customChargePayment.upsert({
     where: { chargeId_competencia: { chargeId, competencia } },
-    create: { chargeId, competencia, status, pagoEm },
-    update: { status, pagoEm },
+    create: { chargeId, competencia, status, pagoEm, valorPago },
+    update: { status, pagoEm, valorPago },
+  });
+  revalidateFinanceiro();
+}
+
+// Registra um pagamento parcial de uma cobrança avulsa na competência.
+export async function setCustomChargePartial(
+  chargeId: string,
+  competencia: string,
+  formData: FormData
+) {
+  const session = await auth();
+  if (!session?.user) return;
+  if (!/^\d{4}-\d{2}$/.test(competencia)) return;
+
+  const charge = await prisma.customCharge.findUnique({
+    where: { id: chargeId },
+    select: { valor: true },
+  });
+  if (!charge) return;
+
+  const recebido = parseValorBR(formData.get("valorPago"));
+  if (recebido == null) return;
+
+  const total = Number(charge.valor);
+  const valor = Math.min(Math.max(recebido, 0), total);
+  const quitado = valor >= total;
+  const status: PaymentStatus = quitado ? "PAGO" : "PENDENTE";
+  const pagoEm = quitado ? new Date() : null;
+  const valorPago = valor > 0 ? valor : null;
+
+  await prisma.customChargePayment.upsert({
+    where: { chargeId_competencia: { chargeId, competencia } },
+    create: { chargeId, competencia, status, pagoEm, valorPago },
+    update: { status, pagoEm, valorPago },
   });
   revalidateFinanceiro();
 }

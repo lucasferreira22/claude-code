@@ -2,7 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { setPaymentStatus, deletePayment } from "@/lib/actions/payments";
+import {
+  setPaymentStatus,
+  setPaymentPartial,
+  deletePayment,
+} from "@/lib/actions/payments";
+import { PartialPaymentButton } from "@/components/partial-payment-button";
 import {
   PAYMENT_STATUS_BADGE,
   PAYMENT_STATUS_LABELS,
@@ -16,6 +21,7 @@ export type CobrancaRow = {
   clienteNome: string;
   diaVencimento: number | null;
   valor: number;
+  valorPago: number;
   status: "PAGO" | "PENDENTE";
   atrasada: boolean;
   whatsappHref: string | null;
@@ -78,6 +84,9 @@ export function CobrancasTabela({ rows }: { rows: CobrancaRow[] }) {
                   r.status === "PAGO" ? "PENDENTE" : "PAGO"
                 );
                 const excluir = deletePayment.bind(null, r.paymentId);
+                const parcialAction = setPaymentPartial.bind(null, r.paymentId);
+                // Pagou algo, mas ainda não o total.
+                const parcial = r.status !== "PAGO" && r.valorPago > 0;
                 return (
                   <tr key={r.paymentId} className="hover:bg-surface-elevated">
                     <td className="px-4 py-3">
@@ -93,6 +102,12 @@ export function CobrancasTabela({ rows }: { rows: CobrancaRow[] }) {
                     </td>
                     <td className="sensivel px-4 py-3 text-right text-text-primary">
                       {formatCurrency(r.valor)}
+                      {parcial && (
+                        <span className="block text-xs text-text-muted">
+                          {formatCurrency(r.valorPago)} pago · falta{" "}
+                          {formatCurrency(r.valor - r.valorPago)}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -102,9 +117,11 @@ export function CobrancasTabela({ rows }: { rows: CobrancaRow[] }) {
                             : PAYMENT_STATUS_BADGE[r.status]
                         }`}
                       >
-                        {r.atrasada
-                          ? "Atrasado"
-                          : PAYMENT_STATUS_LABELS[r.status]}
+                        {parcial
+                          ? "Parcial"
+                          : r.atrasada
+                            ? "Atrasado"
+                            : PAYMENT_STATUS_LABELS[r.status]}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -138,6 +155,18 @@ export function CobrancasTabela({ rows }: { rows: CobrancaRow[] }) {
                             {r.status === "PAGO" ? "Desfazer" : "Marcar pago"}
                           </button>
                         </form>
+                        {r.status !== "PAGO" && (
+                          <PartialPaymentButton
+                            action={parcialAction}
+                            clienteNome={r.clienteNome}
+                            valorTotal={r.valor.toFixed(2).replace(".", ",")}
+                            valorPago={
+                              r.valorPago > 0
+                                ? r.valorPago.toFixed(2).replace(".", ",")
+                                : ""
+                            }
+                          />
+                        )}
                         <form
                           action={excluir}
                           onSubmit={(e) => {

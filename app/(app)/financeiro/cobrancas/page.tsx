@@ -63,13 +63,13 @@ export default async function CobrancasPage({
     ],
   });
 
-  const recebido = pagamentos
-    .filter((p) => p.status === "PAGO")
-    .reduce((s, p) => s + Number(p.valor), 0);
-  const pendente = pagamentos
-    .filter((p) => p.status === "PENDENTE")
-    .reduce((s, p) => s + Number(p.valor), 0);
-  const total = recebido + pendente;
+  // Recebido considera pagamentos parciais; pendente é o saldo que falta.
+  const total = pagamentos.reduce((s, p) => s + Number(p.valor), 0);
+  const recebido = pagamentos.reduce(
+    (s, p) => s + (p.valorPago == null ? 0 : Number(p.valorPago)),
+    0
+  );
+  const pendente = total - recebido;
   const atrasados = pagamentos.filter(
     (p) =>
       p.status === "PENDENTE" &&
@@ -238,6 +238,7 @@ export default async function CobrancasPage({
               clienteNome: p.client.nomeRazaoSocial,
               diaVencimento: p.client.diaVencimento,
               valor: Number(p.valor),
+              valorPago: p.valorPago == null ? 0 : Number(p.valorPago),
               status: p.status,
               atrasada,
               // Lembrete pronto no WhatsApp só para cobranças em aberto.
