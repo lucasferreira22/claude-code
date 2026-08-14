@@ -73,6 +73,17 @@ export function CustomChargeForm({
         </div>
 
         <div>
+          <label className="label">Custo (R$) — opcional</label>
+          <input
+            type="text"
+            name="custo"
+            inputMode="decimal"
+            placeholder="0,00"
+            className="input"
+          />
+        </div>
+
+        <div>
           <label className="label">1º vencimento</label>
           <input type="date" name="primeiroVencimento" required className="input" />
         </div>

@@ -7,6 +7,7 @@ import {
 } from "@/lib/finance";
 import {
   faturamentoAvulsasDoMes,
+  custoAvulsasDoMes,
   venceEm,
   diaVencimentoDe,
   competenciaDe,
@@ -213,6 +214,7 @@ export default async function PainelPage() {
       where: { ativo: true },
       select: {
         valor: true,
+        custo: true,
         tipo: true,
         recorrencia: true,
         primeiroVencimento: true,
@@ -235,7 +237,8 @@ export default async function PainelPage() {
   // Cobranças avulsas do mês entram no faturamento (valor cheio).
   const avulsasMes = faturamentoAvulsasDoMes(avulsas, competencia);
   const faturamentoMensal = resumo.faturamentoMensal + avulsasMes;
-  const lucro = faturamentoMensal - resumo.custoMensal;
+  const custoMensal = resumo.custoMensal + custoAvulsasDoMes(avulsas, competencia);
+  const lucro = faturamentoMensal - custoMensal;
   const vencimentos = proximosVencimentos(clients, 14);
 
   // Pagamentos em atraso de TODAS as categorias: cobranças recorrentes mensais
@@ -425,7 +428,7 @@ export default async function PainelPage() {
         {/* Stat: Custo */}
         <StatCard
           label="Custo mensal"
-          value={formatCurrency(resumo.custoMensal)}
+          value={formatCurrency(custoMensal)}
           icon={
             <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">
               <path fillRule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l6.5 6.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-6.5-6.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />

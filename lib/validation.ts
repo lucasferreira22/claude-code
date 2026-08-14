@@ -122,6 +122,8 @@ export const customChargeSchema = z
     clientId: z.string().min(1, "Cliente é obrigatório"),
     descricao: optionalString,
     valor: requiredDecimal,
+    // Custo opcional associado à cobrança (entra no lucro).
+    custo: optionalDecimal,
     tipo: z.enum(["PONTUAL", "RECORRENTE"]),
     recorrencia: z
       .enum(["MENSAL", "TRIMESTRAL", "SEMESTRAL", "ANUAL"])

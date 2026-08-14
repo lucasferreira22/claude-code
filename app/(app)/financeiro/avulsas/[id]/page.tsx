@@ -95,6 +95,10 @@ export default async function CategoriaAvulsaPage({
     .filter((r) => r.status === "PAGO")
     .reduce((s, r) => s + Number(r.c.valor), 0);
   const pendente = total - recebido;
+  const custoTotal = doMes.reduce(
+    (s, r) => s + (r.c.custo == null ? 0 : Number(r.c.custo)),
+    0
+  );
 
   return (
     <div className="space-y-6">
@@ -126,7 +130,7 @@ export default async function CategoriaAvulsaPage({
       </div>
 
       {/* Resumo do mês */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card p-5">
           <p className="text-xs uppercase tracking-wide text-text-muted">
             A receber (mês)
@@ -151,6 +155,17 @@ export default async function CategoriaAvulsaPage({
             {formatCurrency(pendente)}
           </p>
         </div>
+        <div className="card p-5">
+          <p className="text-xs uppercase tracking-wide text-text-muted">
+            Custo
+          </p>
+          <p className="sensivel mt-1 text-2xl font-bold">
+            {formatCurrency(custoTotal)}
+          </p>
+          <p className="mt-1 text-xs text-text-muted">
+            Lucro {formatCurrency(total - custoTotal)}
+          </p>
+        </div>
       </div>
 
       <CustomChargeForm categoryId={categoria.id} clientes={clientes} />
@@ -172,6 +187,7 @@ export default async function CategoriaAvulsaPage({
                 <th className="px-4 py-3">Tipo</th>
                 <th className="px-4 py-3">Vencimento</th>
                 <th className="px-4 py-3 text-right">Valor</th>
+                <th className="px-4 py-3 text-right">Custo</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Ações</th>
               </tr>
@@ -225,6 +241,9 @@ export default async function CategoriaAvulsaPage({
                     <td className="sensivel px-4 py-3 text-right text-text-primary">
                       {formatCurrency(Number(c.valor))}
                     </td>
+                    <td className="sensivel px-4 py-3 text-right text-text-secondary">
+                      {c.custo == null ? "—" : formatCurrency(Number(c.custo))}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={`badge ${
@@ -276,6 +295,10 @@ export default async function CategoriaAvulsaPage({
                             descricao: c.descricao,
                             // pt-BR ("700,00") para casar com o parser do form.
                             valor: Number(c.valor).toFixed(2).replace(".", ","),
+                            custo:
+                              c.custo == null
+                                ? ""
+                                : Number(c.custo).toFixed(2).replace(".", ","),
                             tipo: c.tipo,
                             recorrencia: c.recorrencia,
                             primeiroVencimento: c.primeiroVencimento
