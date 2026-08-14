@@ -5,6 +5,7 @@ import { setCustomChargeStatus } from "@/lib/actions/custom-charges";
 import { CustomChargeForm } from "@/components/custom-charge-form";
 import { ChargeCategoryActions } from "@/components/charge-category-actions";
 import { DeleteChargeButton } from "@/components/delete-charge-button";
+import { EditChargeButton } from "@/components/edit-charge-button";
 import { TableSearch } from "@/components/table-search";
 import { venceEm, diaVencimentoDe } from "@/lib/custom-charges";
 import { waLink, cobrancaAvulsaMessage } from "@/lib/whatsapp";
@@ -266,6 +267,22 @@ export default async function CategoriaAvulsaPage({
                             {status === "PAGO" ? "Desfazer" : "Marcar pago"}
                           </button>
                         </form>
+                        <EditChargeButton
+                          charge={{
+                            id: c.id,
+                            categoryId: categoria.id,
+                            clientId: c.client.id,
+                            clienteNome: c.client.nomeRazaoSocial,
+                            descricao: c.descricao,
+                            // pt-BR ("700,00") para casar com o parser do form.
+                            valor: Number(c.valor).toFixed(2).replace(".", ","),
+                            tipo: c.tipo,
+                            recorrencia: c.recorrencia,
+                            primeiroVencimento: c.primeiroVencimento
+                              .toISOString()
+                              .slice(0, 10),
+                          }}
+                        />
                         <DeleteChargeButton id={c.id} />
                       </div>
                     </td>
