@@ -5,7 +5,13 @@ import {
   proximosVencimentos,
   type FinanceClient,
 } from "@/lib/finance";
-import { faturamentoAvulsasDoMes } from "@/lib/custom-charges";
+import {
+  faturamentoAvulsasDoMes,
+  venceEm,
+  diaVencimentoDe,
+  competenciaDe,
+  mesesEntre,
+} from "@/lib/custom-charges";
 import { getTarefasOperacional, todoistConfigurado } from "@/lib/todoist";
 import {
   CATEGORIA_LABELS,
@@ -232,28 +238,107 @@ export default async function PainelPage() {
   const lucro = faturamentoMensal - resumo.custoMensal;
   const vencimentos = proximosVencimentos(clients, 14);
 
-  // Pagamentos em atraso: cobranças ainda pendentes de competências <= atual
-  // (mês anterior, ou o mês corrente com o dia de vencimento já passado).
-  const atrasadosRows = await prisma.payment.findMany({
-    where: { status: "PENDENTE", competencia: { lte: competencia } },
-    select: {
-      id: true,
-      valor: true,
-      competencia: true,
-      client: {
-        select: { id: true, nomeRazaoSocial: true, diaVencimento: true },
+  // Pagamentos em atraso de TODAS as categorias: cobranças recorrentes mensais
+  // + cobranças avulsas (todas as abas) que já venceram e não foram pagas.
+  type Atraso = {
+    key: string;
+    clienteId: string;
+    clienteNome: string;
+    valor: number;
+    competencia: string;
+    label: string;
+    dia: number | null;
+  };
+
+  const [atrasadosRows, chargesAtraso] = await Promise.all([
+    prisma.payment.findMany({
+      where: { status: "PENDENTE", competencia: { lte: competencia } },
+      select: {
+        id: true,
+        valor: true,
+        competencia: true,
+        client: {
+          select: { id: true, nomeRazaoSocial: true, diaVencimento: true },
+        },
       },
-    },
-    orderBy: { competencia: "asc" },
-  });
+    }),
+    prisma.customCharge.findMany({
+      where: { ativo: true },
+      select: {
+        id: true,
+        valor: true,
+        tipo: true,
+        recorrencia: true,
+        primeiroVencimento: true,
+        descricao: true,
+        ativo: true,
+        category: { select: { nome: true } },
+        client: { select: { id: true, nomeRazaoSocial: true } },
+        pagamentos: { select: { competencia: true, status: true } },
+      },
+    }),
+  ]);
+
   const hojeDia = new Date().getDate();
-  const atrasados = atrasadosRows.filter(
-    (p) =>
+
+  // Soma n meses a uma competência "AAAA-MM".
+  const addComp = (comp: string, n: number) => {
+    const [y, m] = comp.split("-").map(Number);
+    const d = new Date(y, m - 1 + n, 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  };
+
+  const atrasados: Atraso[] = [];
+
+  // Recorrentes mensais
+  for (const p of atrasadosRows) {
+    const vencido =
       p.competencia < competencia ||
       (p.competencia === competencia &&
         p.client.diaVencimento != null &&
-        hojeDia > p.client.diaVencimento)
-  );
+        hojeDia > p.client.diaVencimento);
+    if (!vencido) continue;
+    atrasados.push({
+      key: `m-${p.id}`,
+      clienteId: p.client.id,
+      clienteNome: p.client.nomeRazaoSocial,
+      valor: Number(p.valor),
+      competencia: p.competencia,
+      label: "Mensalidade",
+      dia: p.client.diaVencimento,
+    });
+  }
+
+  // Cobranças avulsas: percorre as competências vencidas de cada cobrança.
+  for (const c of chargesAtraso) {
+    const inicio = competenciaDe(c.primeiroVencimento);
+    const total = mesesEntre(inicio, competencia);
+    if (total < 0) continue;
+    const dia = diaVencimentoDe(c);
+    for (let k = 0; k <= total; k++) {
+      const comp = addComp(inicio, k);
+      if (!venceEm(c, comp)) continue;
+      const vencido =
+        comp < competencia || (comp === competencia && hojeDia > dia);
+      if (!vencido) continue;
+      const pago = c.pagamentos.some(
+        (p) => p.competencia === comp && p.status === "PAGO"
+      );
+      if (pago) continue;
+      atrasados.push({
+        key: `c-${c.id}-${comp}`,
+        clienteId: c.client.id,
+        clienteNome: c.client.nomeRazaoSocial,
+        valor: Number(c.valor),
+        competencia: comp,
+        label: c.descricao ?? c.category.nome,
+        dia,
+      });
+    }
+  }
+
+  // Mais antigos primeiro.
+  atrasados.sort((a, b) => a.competencia.localeCompare(b.competencia));
 
   // Tarefas pendentes (com prazo) do Todoist — atrasadas primeiro.
   let tarefas: {
@@ -490,28 +575,26 @@ export default async function PainelPage() {
               <ul className="divide-y divide-border-subtle">
                 {atrasados.map((p) => (
                   <li
-                    key={p.id}
+                    key={p.key}
                     className="flex items-center justify-between gap-4 py-2.5 text-sm"
                   >
                     <div className="min-w-0">
                       <Link
-                        href={`/clientes/${p.client.id}`}
+                        href={`/clientes/${p.clienteId}`}
                         className="font-medium text-accent-primary hover:underline"
                       >
-                        {p.client.nomeRazaoSocial}
+                        {p.clienteNome}
                       </Link>
                       <span className="ml-2 text-xs text-text-muted">
-                        {formatCompetencia(p.competencia)}
+                        {p.label} · {formatCompetencia(p.competencia)}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 whitespace-nowrap">
                       <span className="sensivel nums text-text-secondary">
-                        {formatCurrency(Number(p.valor))}
+                        {formatCurrency(p.valor)}
                       </span>
                       <span className="text-xs font-medium text-status-error">
-                        {p.client.diaVencimento
-                          ? `venceu dia ${p.client.diaVencimento}`
-                          : "em atraso"}
+                        {p.dia ? `venceu dia ${p.dia}` : "em atraso"}
                       </span>
                     </div>
                   </li>
