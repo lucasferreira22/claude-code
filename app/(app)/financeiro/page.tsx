@@ -6,12 +6,14 @@ import {
   num,
   type FinanceClient,
 } from "@/lib/finance";
-import { faturamentoAvulsasDoMes } from "@/lib/custom-charges";
+import { faturamentoAvulsasDoMes, venceEm } from "@/lib/custom-charges";
 import {
   CATEGORIA_LABELS,
   CATEGORIA_ORDER,
   CATEGORIA_BADGE,
   formatCurrency,
+  currentCompetencia,
+  formatCompetencia,
 } from "@/lib/labels";
 
 const financeSelect = {
@@ -29,7 +31,9 @@ const financeSelect = {
 } as const;
 
 export default async function FinanceiroPage() {
-  const [rows, avulsas] = await Promise.all([
+  const competencia = currentCompetencia();
+
+  const [rows, avulsas, pagamentos] = await Promise.all([
     prisma.client.findMany({
       select: financeSelect,
       orderBy: { valorMensal: "desc" },
@@ -42,7 +46,13 @@ export default async function FinanceiroPage() {
         recorrencia: true,
         primeiroVencimento: true,
         ativo: true,
+        // Só o status desta competência (para saber se já foi paga).
+        pagamentos: { where: { competencia }, select: { status: true } },
       },
+    }),
+    prisma.payment.findMany({
+      where: { competencia },
+      select: { valor: true, status: true },
     }),
   ]);
   const clients: FinanceClient[] = rows.map((r) => ({
@@ -56,6 +66,23 @@ export default async function FinanceiroPage() {
   const avulsasMes = faturamentoAvulsasDoMes(avulsas);
   const faturamentoMensal = resumo.faturamentoMensal + avulsasMes;
   const lucro = faturamentoMensal - resumo.custoMensal;
+
+  // Recebido x pendente do mês, somando TODAS as categorias: cobranças
+  // recorrentes mensais + cobranças avulsas que vencem nesta competência.
+  let recebido = 0;
+  let pendente = 0;
+  for (const p of pagamentos) {
+    if (p.status === "PAGO") recebido += Number(p.valor);
+    else pendente += Number(p.valor);
+  }
+  for (const c of avulsas) {
+    if (!venceEm(c, competencia)) continue;
+    const pago = c.pagamentos.some((p) => p.status === "PAGO");
+    if (pago) recebido += Number(c.valor);
+    else pendente += Number(c.valor);
+  }
+  const totalCobrado = recebido + pendente;
+  const pctRecebido = totalCobrado > 0 ? (recebido / totalCobrado) * 100 : 0;
 
   // Detalhamento por cliente (ativos com algum faturamento mensal).
   // valor = mensalidade + hospedagem rateada (÷12).
@@ -106,6 +133,40 @@ export default async function FinanceiroPage() {
             {formatCurrency(lucro)}
           </p>
         </div>
+      </div>
+
+      {/* Caixa do mês: quanto já entrou e quanto falta receber */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Link
+          href="/financeiro/cobrancas?filtro=pago"
+          className="card p-5 transition hover:border-accent-subtle-border"
+        >
+          <p className="text-xs uppercase tracking-wide text-text-muted">
+            Recebido
+          </p>
+          <p className="sensivel mt-1 text-2xl font-bold text-status-success">
+            {formatCurrency(recebido)}
+          </p>
+          <p className="mt-1 text-xs text-text-muted">
+            {formatCompetencia(competencia)} · {pctRecebido.toFixed(0)}% do
+            total cobrado ({formatCurrency(totalCobrado)})
+          </p>
+        </Link>
+        <Link
+          href="/financeiro/cobrancas?filtro=pendente"
+          className="card p-5 transition hover:border-accent-subtle-border"
+        >
+          <p className="text-xs uppercase tracking-wide text-text-muted">
+            Pendente
+          </p>
+          <p className="sensivel mt-1 text-2xl font-bold text-status-warning">
+            {formatCurrency(pendente)}
+          </p>
+          <p className="mt-1 text-xs text-text-muted">
+            {formatCompetencia(competencia)} · inclui cobranças recorrentes e
+            avulsas
+          </p>
+        </Link>
       </div>
 
       {/* Por categoria */}
