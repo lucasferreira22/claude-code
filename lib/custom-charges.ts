@@ -70,6 +70,21 @@ export function faturamentoAvulsasDoMes(
   return total;
 }
 
+// Faturamento das cobranças avulsas do mês separado por tipo, para somar na
+// quebra por categoria (pontuais na linha "Pontual", recorrentes na
+// "Recorrente") — assim o gráfico bate com o faturamento total.
+export function faturamentoAvulsasPorTipo(
+  charges: (ChargeOccurrenceInput & { valor: unknown })[],
+  competencia: string = currentCompetencia()
+): { PONTUAL: number; RECORRENTE: number } {
+  const out = { PONTUAL: 0, RECORRENTE: 0 };
+  for (const c of charges) {
+    if (!venceEm(c, competencia)) continue;
+    out[c.tipo] += num(c.valor) ?? 0;
+  }
+  return out;
+}
+
 // Custo das cobranças avulsas que vencem numa competência (espelha o cálculo
 // do faturamento, para o lucro sair coerente).
 export function custoAvulsasDoMes(

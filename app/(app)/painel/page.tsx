@@ -7,6 +7,7 @@ import {
 } from "@/lib/finance";
 import {
   faturamentoAvulsasDoMes,
+  faturamentoAvulsasPorTipo,
   custoAvulsasDoMes,
   venceEm,
   diaVencimentoDe,
@@ -387,11 +388,20 @@ export default async function PainelPage() {
     color: s.cor ?? STAGE_DEFAULT_COLOR,
   }));
 
-  // Dados para as barras horizontais de categoria
+  // Dados para as barras horizontais de categoria. As cobranças avulsas do mês
+  // entram na linha correspondente ao seu tipo (pontual/recorrente), para a
+  // quebra bater com o faturamento total.
+  const avulsasPorTipo = faturamentoAvulsasPorTipo(avulsas, competencia);
   const barData = CATEGORIA_ORDER.map((c) => ({
     label: CATEGORIA_LABELS[c],
     count: resumo.porCategoria[c].count,
-    revenue: resumo.porCategoria[c].faturamento,
+    revenue:
+      resumo.porCategoria[c].faturamento +
+      (c === "PONTUAL"
+        ? avulsasPorTipo.PONTUAL
+        : c === "RECORRENTE"
+          ? avulsasPorTipo.RECORRENTE
+          : 0),
   }));
 
   // Margem de lucro
