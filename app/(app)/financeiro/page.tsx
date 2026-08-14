@@ -19,7 +19,10 @@ import {
   formatCurrency,
   currentCompetencia,
   formatCompetencia,
+  competenciaOptions,
 } from "@/lib/labels";
+
+type SearchParams = { mes?: string };
 
 const financeSelect = {
   id: true,
@@ -35,8 +38,17 @@ const financeSelect = {
   valorRenovacao: true,
 } as const;
 
-export default async function FinanceiroPage() {
-  const competencia = currentCompetencia();
+export default async function FinanceiroPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  // Mês selecionado no filtro (default: mês atual).
+  const competencia =
+    searchParams.mes && /^\d{4}-\d{2}$/.test(searchParams.mes)
+      ? searchParams.mes
+      : currentCompetencia();
+  const opcoes = competenciaOptions();
 
   const [rows, avulsas, pagamentos] = await Promise.all([
     prisma.client.findMany({
@@ -72,8 +84,8 @@ export default async function FinanceiroPage() {
   const resumo = summarize(clients);
   // Cobranças avulsas (pontuais + recorrentes) que vencem no mês atual entram
   // no faturamento pelo valor cheio.
-  const avulsasMes = faturamentoAvulsasDoMes(avulsas);
-  const custoAvulsas = custoAvulsasDoMes(avulsas);
+  const avulsasMes = faturamentoAvulsasDoMes(avulsas, competencia);
+  const custoAvulsas = custoAvulsasDoMes(avulsas, competencia);
   // Avulsas do mês entram na quebra por categoria conforme o tipo, para a
   // soma das linhas bater com o faturamento total.
   const avulsasPorTipo = faturamentoAvulsasPorTipo(avulsas, competencia);
@@ -120,11 +132,28 @@ export default async function FinanceiroPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Financeiro</h1>
-        <p className="text-sm text-text-secondary">
-          Faturamento, custos e lucro dos clientes ativos.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Financeiro</h1>
+          <p className="text-sm text-text-secondary">
+            Faturamento, custos e lucro · {formatCompetencia(competencia)}
+          </p>
+        </div>
+        <form method="GET" className="flex items-end gap-2">
+          <div>
+            <label className="label">Mês (competência)</label>
+            <select name="mes" defaultValue={competencia} className="input">
+              {opcoes.map((c) => (
+                <option key={c} value={c}>
+                  {formatCompetencia(c)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button type="submit" className="btn-secondary">
+            Ver
+          </button>
+        </form>
       </div>
 
       {/* Totais */}
@@ -140,6 +169,11 @@ export default async function FinanceiroPage() {
             Inclui hospedagem diluída (÷12) e cobranças avulsas do mês
             {avulsasMes > 0 ? ` (${formatCurrency(avulsasMes)})` : ""}
           </p>
+          {competencia !== currentCompetencia() && (
+            <p className="mt-1 text-xs text-text-muted">
+              Mensalidades e hospedagem refletem o cadastro atual dos clientes.
+            </p>
+          )}
         </div>
         <div className="card p-5">
           <p className="text-xs uppercase tracking-wide text-text-muted">Custo</p>
@@ -167,7 +201,7 @@ export default async function FinanceiroPage() {
       {/* Caixa do mês: quanto já entrou e quanto falta receber */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Link
-          href="/financeiro/cobrancas?filtro=pago"
+          href={`/financeiro/cobrancas?mes=${competencia}&filtro=pago`}
           className="card p-5 transition hover:border-accent-subtle-border"
         >
           <p className="text-xs uppercase tracking-wide text-text-muted">
@@ -182,7 +216,7 @@ export default async function FinanceiroPage() {
           </p>
         </Link>
         <Link
-          href="/financeiro/cobrancas?filtro=pendente"
+          href={`/financeiro/cobrancas?mes=${competencia}&filtro=pendente`}
           className="card p-5 transition hover:border-accent-subtle-border"
         >
           <p className="text-xs uppercase tracking-wide text-text-muted">
