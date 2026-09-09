@@ -4,6 +4,13 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "CRM Focus Digital",
   description: "Gestão de clientes — Focus Digital",
+  // Ao adicionar à tela de início no iPhone: nome curto embaixo do ícone e
+  // abertura em tela cheia (sem a barra do navegador).
+  appleWebApp: {
+    capable: true,
+    title: "Focus CRM",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({
