@@ -25,16 +25,11 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png",
         purpose: "any",
       },
-      // Versões "maskable": o Android recorta o ícone em círculo/squircle,
-      // por isso a arte é gerada com margem de sobra.
+      // Versão "maskable": o Android recorta o ícone (círculo/squircle) e
+      // recomenda manter a arte dentro de um círculo de 80% do lado — por
+      // isso este arquivo usa a arte menor que os de cima.
       {
-        src: "/icon-192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "maskable",
-      },
-      {
-        src: "/icon-512.png",
+        src: "/icon-maskable-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
