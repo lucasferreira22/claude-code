@@ -209,7 +209,12 @@ export default async function PainelPage() {
     prisma.client.findMany({ select: financeSelect }),
     prisma.payment.findMany({
       where: { competencia },
-      select: { valor: true, valorPago: true, status: true },
+      select: {
+        clientId: true,
+        valor: true,
+        valorPago: true,
+        status: true,
+      },
     }),
     prisma.customCharge.findMany({
       where: { ativo: true },
@@ -234,7 +239,12 @@ export default async function PainelPage() {
     contaComoAtivo: r.stage?.contaComoAtivo ?? false,
   }));
 
-  const resumo = summarize(clients);
+  // Quanto foi lançado para cada cliente neste mês (conta mesmo que o cliente
+  // tenha sido pausado depois).
+  const cobrancasPorCliente = new Map(
+    pagamentos.map((p) => [p.clientId, Number(p.valor)])
+  );
+  const resumo = summarize(clients, cobrancasPorCliente);
   // Cobranças avulsas do mês entram no faturamento (valor cheio).
   const avulsasMes = faturamentoAvulsasDoMes(avulsas, competencia);
   const faturamentoMensal = resumo.faturamentoMensal + avulsasMes;
@@ -432,7 +442,7 @@ export default async function PainelPage() {
         <StatCard
           label="Faturamento mensal"
           value={formatCurrency(faturamentoMensal)}
-          hint="Ativos · hospedagem ÷12 · avulsas do mês"
+          hint="Cobranças do mês · hospedagem ÷12 · avulsas"
           icon={
             <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">
               <path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.404a.75.75 0 10-1.06-1.06l-1.061 1.06a.75.75 0 001.06 1.06l1.06-1.06zM6.464 14.596a.75.75 0 10-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zM5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 015 10zM14.596 15.657a.75.75 0 001.06-1.06l-1.06-1.061a.75.75 0 10-1.06 1.06l1.06 1.06zM5.404 6.464a.75.75 0 001.06-1.06l-1.06-1.06a.75.75 0 10-1.06 1.06l1.06 1.06z" />

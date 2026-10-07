@@ -73,7 +73,12 @@ export default async function FinanceiroPage({
     }),
     prisma.payment.findMany({
       where: { competencia },
-      select: { valor: true, valorPago: true, status: true },
+      select: {
+        clientId: true,
+        valor: true,
+        valorPago: true,
+        status: true,
+      },
     }),
   ]);
   const clients: FinanceClient[] = rows.map((r) => ({
@@ -81,7 +86,12 @@ export default async function FinanceiroPage({
     contaComoAtivo: r.stage?.contaComoAtivo ?? false,
   }));
 
-  const resumo = summarize(clients);
+  // Quanto foi lançado para cada cliente neste mês (conta mesmo que o cliente
+  // tenha sido pausado depois).
+  const cobrancasPorCliente = new Map(
+    pagamentos.map((p) => [p.clientId, Number(p.valor)])
+  );
+  const resumo = summarize(clients, cobrancasPorCliente);
   // Cobranças avulsas (pontuais + recorrentes) que vencem no mês atual entram
   // no faturamento pelo valor cheio.
   const avulsasMes = faturamentoAvulsasDoMes(avulsas, competencia);
@@ -120,15 +130,17 @@ export default async function FinanceiroPage({
   const totalCobrado = recebido + pendente;
   const pctRecebido = totalCobrado > 0 ? (recebido / totalCobrado) * 100 : 0;
 
-  // Detalhamento por cliente (ativos com algum faturamento mensal).
-  // valor = mensalidade + hospedagem rateada (÷12).
+  // Detalhamento por cliente. Mesma regra do total: quem teve cobrança
+  // lançada no mês entra pelo valor cobrado, mesmo que hoje esteja pausado.
+  // valor = mensalidade (ou cobrança do mês) + hospedagem rateada (÷12).
   const ativos = clients
     .map((c) => {
-      const valor = (num(c.valorMensal) ?? 0) + hospedagemMensal(c);
+      const cobrado = cobrancasPorCliente.get(c.id);
+      const valor = (cobrado ?? num(c.valorMensal) ?? 0) + hospedagemMensal(c);
       const custo = num(c.custoMensal) ?? 0;
-      return { c, valor, custo, lucro: valor - custo };
+      return { c, valor, custo, lucro: valor - custo, cobrado };
     })
-    .filter((r) => r.c.contaComoAtivo && r.valor > 0);
+    .filter((r) => (r.cobrado != null || r.c.contaComoAtivo) && r.valor > 0);
 
   return (
     <div className="space-y-6">
@@ -166,7 +178,7 @@ export default async function FinanceiroPage({
             {formatCurrency(faturamentoMensal)}
           </p>
           <p className="mt-1 text-xs text-text-muted">
-            Inclui hospedagem diluída (÷12) e cobranças avulsas do mês
+            Cobranças lançadas no mês + hospedagem diluída (÷12) + avulsas
             {avulsasMes > 0 ? ` (${formatCurrency(avulsasMes)})` : ""}
           </p>
           {competencia !== currentCompetencia() && (
@@ -260,7 +272,7 @@ export default async function FinanceiroPage({
       {/* Por cliente */}
       <section className="card overflow-x-auto">
         <h2 className="px-6 pt-6 text-sm font-semibold uppercase tracking-wide text-text-secondary">
-          Detalhamento por cliente (ativos)
+          Detalhamento por cliente (faturamento do mês)
         </h2>
         <table className="mt-4 w-full text-sm">
           <thead className="border-b border-border-default bg-surface-elevated text-left text-xs uppercase tracking-wide text-text-secondary">
