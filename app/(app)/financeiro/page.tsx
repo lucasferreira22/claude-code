@@ -140,7 +140,10 @@ export default async function FinanceiroPage({
       const custo = num(c.custoMensal) ?? 0;
       return { c, valor, custo, lucro: valor - custo, cobrado };
     })
-    .filter((r) => (r.cobrado != null || r.c.contaComoAtivo) && r.valor > 0);
+    .filter((r) => (r.cobrado != null || r.c.contaComoAtivo) && r.valor > 0)
+    // Maior faturamento primeiro. A ordenação é aqui (e não no banco) porque
+    // o valor final junta a cobrança do mês com a hospedagem rateada.
+    .sort((a, b) => b.valor - a.valor);
 
   return (
     <div className="space-y-6">
