@@ -56,7 +56,16 @@ export function hospedagemMensal(c: FinanceClient): number {
   return (num(c.valorRenovacao) ?? 0) / 12;
 }
 
-export function summarize(clients: FinanceClient[]): FinanceSummary {
+// Resumo financeiro do mês.
+//
+// `cobrancasPorCliente` (clienteId -> valor cobrado na competência) faz o
+// cálculo olhar para o que foi REALMENTE lançado no mês, e não só para o
+// cadastro de hoje. Sem isso, um cliente que pagou e depois foi pausado
+// sumiria do faturamento daquele mês.
+export function summarize(
+  clients: FinanceClient[],
+  cobrancasPorCliente?: Map<string, number>
+): FinanceSummary {
   const porCategoria = emptyPorCategoria();
   let faturamentoMensal = 0;
   let custoMensal = 0;
@@ -64,16 +73,19 @@ export function summarize(clients: FinanceClient[]): FinanceSummary {
   for (const c of clients) {
     porCategoria[c.categoria].count++;
 
-    if (c.contaComoAtivo) {
-      const v = num(c.valorMensal) ?? 0;
-      const hosp = hospedagemMensal(c);
-      faturamentoMensal += v + hosp;
-      // Mensalidade entra na categoria do cliente; a hospedagem rateada entra
-      // sempre na linha "Hospedagem" (é receita de hospedagem).
-      porCategoria[c.categoria].faturamento += v;
-      porCategoria.HOSPEDAGEM.faturamento += hosp;
-      custoMensal += num(c.custoMensal) ?? 0;
-    }
+    // Teve cobrança lançada neste mês? Então conta, mesmo que hoje esteja
+    // pausado/encerrado. Senão, cai no valor do cadastro (clientes ativos).
+    const cobrado = cobrancasPorCliente?.get(c.id);
+    if (cobrado == null && !c.contaComoAtivo) continue;
+
+    const v = cobrado ?? num(c.valorMensal) ?? 0;
+    const hosp = hospedagemMensal(c);
+    faturamentoMensal += v + hosp;
+    // Mensalidade entra na categoria do cliente; a hospedagem rateada entra
+    // sempre na linha "Hospedagem" (é receita de hospedagem).
+    porCategoria[c.categoria].faturamento += v;
+    porCategoria.HOSPEDAGEM.faturamento += hosp;
+    custoMensal += num(c.custoMensal) ?? 0;
   }
 
   return {
