@@ -29,3 +29,26 @@ export async function markHostingRenewed(clientId: string) {
   revalidatePath("/painel");
   revalidatePath(`/clientes/${clientId}`);
 }
+
+// Remove a cobrança de hospedagem do cliente (ex.: ele não renovou mais).
+// Limpa também data e valor da renovação: o faturamento e os próximos
+// vencimentos leem esses campos direto, então deixá-los preenchidos manteria
+// uma receita fantasma mesmo com a hospedagem desmarcada.
+export async function removeHosting(clientId: string) {
+  const session = await auth();
+  if (!session?.user) return;
+
+  await prisma.client.update({
+    where: { id: clientId },
+    data: {
+      possuiHospedagem: false,
+      dataRenovacao: null,
+      valorRenovacao: null,
+    },
+  });
+
+  revalidatePath("/financeiro/hospedagens");
+  revalidatePath("/financeiro");
+  revalidatePath("/painel");
+  revalidatePath(`/clientes/${clientId}`);
+}

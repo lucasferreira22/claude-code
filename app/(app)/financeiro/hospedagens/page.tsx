@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { markHostingRenewed } from "@/lib/actions/hosting";
 import { waLink, hospedagemMessage } from "@/lib/whatsapp";
 import { TableSearch } from "@/components/table-search";
+import { DeleteHostingButton } from "@/components/delete-hosting-button";
 import {
   CATEGORIA_BADGE,
   CATEGORIA_LABELS,
@@ -193,6 +194,10 @@ export default async function HospedagensPage() {
                             Marcar renovado
                           </button>
                         </form>
+                        <DeleteHostingButton
+                          clientId={c.id}
+                          clienteNome={c.nomeRazaoSocial}
+                        />
                       </div>
                     </td>
                   </tr>
